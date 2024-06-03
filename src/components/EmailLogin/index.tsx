@@ -21,13 +21,16 @@ const EmailLogin = ({ prevStep, handleStepper }: EmailLoginProps) => {
         setEmail(e.target.value)
     }
 
+
     const handleEmailSubmit = () => {
         if (!email) {
             setError('Email Field Cannot Be Empty')
         } else if (!emailRegex.test(email)) {
             setError('Inval Email! Please Enter a Valid Email')
-        } else {
+        } else if (prevStep === 'register') {
             handleStepper('otp')
+        } else {
+            handleStepper('socialConnect')
         }
     }
 
@@ -39,13 +42,10 @@ const EmailLogin = ({ prevStep, handleStepper }: EmailLoginProps) => {
                 value={email}
                 handleChange={handleChange}
             />
-            <p style={{
-                margin: '0',
-                color: 'red'
-            }}>{error}</p>
+            <p className="error">{error}</p>
             <CustomButtom
                 text="Submit"
-                handleClick={prevStep === 'register' ? handleEmailSubmit : () => handleStepper('socialConnect')}
+                handleClick={handleEmailSubmit}
             />
         </div>
 
