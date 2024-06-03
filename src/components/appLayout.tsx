@@ -2,19 +2,28 @@ import { ReactNode } from 'react';
 import footerLogo from '../assets/images/footer-logo.png'
 import HeaderLogo from '../assets/svgIcons/fw-logo.svg';
 import classNames from 'classnames';
+import WidgetHeader from './WidgetHeader';
 
 interface WidgetLayoutProps {
     children: ReactNode,
-    handleBack: () => void,
+    title: string,
+    currentStep: boolean,
+    description?: string,
     showBackButton: boolean
+    handleBack: () => void,
 }
 
-const WidgetLayout = ({ children, handleBack, showBackButton }: WidgetLayoutProps) => {
+const defaultProps = {
+    description: ''
+};
+
+const WidgetLayout = ({ children, showBackButton, title, currentStep, description, handleBack }: WidgetLayoutProps) => {
     return (
         <div className="wrapper">
             <div className="widget">
                 <div className='widget-content'>
                     <img className="mvfw-logo" src={HeaderLogo} alt='' />
+                    <WidgetHeader title={title} description={description} currentStep={currentStep} />
                     {children}
                 </div>
                 <div
@@ -31,4 +40,5 @@ const WidgetLayout = ({ children, handleBack, showBackButton }: WidgetLayoutProp
     );
 };
 
+WidgetLayout.defaultProps = defaultProps;
 export default WidgetLayout;

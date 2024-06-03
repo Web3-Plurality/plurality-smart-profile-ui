@@ -1,0 +1,48 @@
+/* inputStyle={{
+    width: "3rem",
+    height: "2.7rem",
+    background: "#000000",
+    color: "#ffffff",
+    padding: "0.3rem 0.6rem",
+    fontSize: "2.3rem",
+    fontWeight: "500",
+    borderRadius: "10px",
+    border: "none",
+    marginLeft: "1.22rem",
+    boxShadow:
+        "2px 2px 5px rgba(128, 128, 128, 1), 4px 4px 10px rgba(128, 128, 128, 0.4), 6px 6px 15px rgba(128, 128, 128, 0.2)",
+}} */
+
+.otp-field>input {
+    width: 3rem;
+    height: 2.7rem;
+    background: #000000;
+    color: #ffffff;
+    padding: 0.3rem 0.6rem;
+    font-size: 2.3rem;
+    font-weight: 500;
+    border-radius: 10px;
+    border: none;
+    margin-left: 1rem;
+    box-shadow:
+        2px 2px 5px rgba(128, 128, 128, 1),
+        4px 4px 10px rgba(128, 128, 128, 0.4),
+        6px 6px 15px rgba(128, 128, 128, 0.2)
+}
+
+.otp-field>input:first-child {
+    margin-left: 0;
+}
+
+.code-resend {
+    font-size: 12px;
+}
+
+.code-resend span {
+    color: #177EF8;
+}
+
+.code-resend span:hover {
+    cursor: pointer;
+    color: #177EF8
+}

@@ -1,31 +1,19 @@
 .custom-btn {
-    min-width: 350px;
-    height: auto;
-    padding: 0 20px;
+    min-width: 392px;
+    height: 20px;
+    padding: 23px 0;
     border-radius: 10px;
     border: none;
-    background-color: #ffffff;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.09);
+    background-color: #565656;
+    color: #ffffff;
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: space-between;
-}
-
-.smallBtn {
-    min-width: 20px;
-}
-
-.button-content-left {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.button-content-left p {
-    padding: 0 !important;
+    margin-top: 1rem;
 }
 
 .custom-btn:hover {
     border: none;
-    color: black !important;
+    color: #ffffff !important;
+    background-color: #000000 !important;
 }

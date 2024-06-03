@@ -1,0 +1,32 @@
+.login-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-footer {
+    margin-top: 0.5rem;
+    max-width: 80%;
+}
+
+
+.auth-footer span {
+    font-size: 12px;
+}
+
+.auth-footer a {
+    text-decoration: none;
+    color: #177EF8;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.auth-footer>span>span {
+    color: #177EF8;
+    cursor: pointer;
+}
+
+.auth-footer>span>span:hover {
+    text-decoration: underline;
+}

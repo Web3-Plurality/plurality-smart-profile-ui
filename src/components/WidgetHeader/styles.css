@@ -1,0 +1,30 @@
+.widget-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.widget-header h1 {
+    font-size: 30px;
+    text-align: center;
+}
+
+.widget-header .success {
+    max-width: 80%;
+}
+
+.isdescription {
+    margin: 0;
+}
+
+.widget-header p {
+    font-size: 18px;
+    margin: 0.3rem 0 1.5rem 0;
+    text-align: center;
+}
+
+.successDescription {
+    max-width: 80% !important;
+    margin-top: 3rem !important;
+}

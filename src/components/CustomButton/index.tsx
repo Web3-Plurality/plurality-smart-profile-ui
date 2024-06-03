@@ -1,37 +1,30 @@
 import { Button } from "antd"
-import CustomIcon from "../CustomIcon";
-import forwardIcon from './../../assets/svgIcons/forward-icon.svg'
 
 import './styles.css'
 import classNames from "classnames";
 
 interface CustomButtomProps {
     text: string,
-    icon?: string,
-    showIcon?: boolean,
+    isDisable?: boolean,
     handleClick?: () => void
 }
 
 const defaultProps = {
-    icon: '',
-    showIcon: true,
+    isDisable: false,
     handleClick: () => { }
 };
 
-const CustomButtom = ({ text, icon, showIcon, handleClick }: CustomButtomProps) => {
+const CustomButtom = ({ text, isDisable, handleClick }: CustomButtomProps) => {
     return (
         <Button
-            className={classNames("custom-btn", { smallBtn: !showIcon })}
+            className={classNames("custom-btn")}
             type="default"
-            icon={showIcon ? <CustomIcon path={forwardIcon} /> : ''}
             iconPosition="end"
+            disabled={isDisable}
             onClick={handleClick}
         >
-            <div className="button-content-left">
-                {showIcon && icon && <CustomIcon path={icon} />}
-                <p>{text}</p>
-            </div>
 
+            {text}
         </Button >
     )
 }
