@@ -1,0 +1,35 @@
+.circle {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 375px;
+    /* Adjust size of circle */
+    height: 375px;
+    /* Adjust size of circle */
+    border-radius: 50%;
+    /* Make it a circle */
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+    background: url("/src/assets/images/circle.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.small-circle {
+    position: relative;
+    /* box-shadow: 0 0 30px rgba(0, 0, 0, 1); */
+    border-radius: 50%;
+    background-color: #ffffff;
+}
+
+.icon {
+    position: absolute;
+    width: 55px;
+    /* Adjust icon size */
+    height: 55px;
+    /* Adjust icon size */
+    border-radius: 50%;
+    background-color: red;
+    /* Background color of icons */
+}

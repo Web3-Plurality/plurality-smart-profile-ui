@@ -10,6 +10,7 @@ interface OTPVerificationProps {
 
 const OTPVerification = ({ handleStepper }: OTPVerificationProps) => {
     const [otp, setOtp] = useState("");
+    const [error, setError] = useState(false)
 
     // Function to handle key press events
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -19,7 +20,11 @@ const OTPVerification = ({ handleStepper }: OTPVerificationProps) => {
     };
 
     const handleOTPVerification = () => {
-        handleStepper('verification')
+        if (otp !== '123456') {
+            setError(true)
+        } else {
+            handleStepper('verification')
+        }
     }
 
     return (
@@ -27,7 +32,7 @@ const OTPVerification = ({ handleStepper }: OTPVerificationProps) => {
             <OtpInput
                 value={otp}
                 onChange={setOtp}
-                numInputs={5}
+                numInputs={6}
                 containerStyle="otp-field"
                 renderInput={(props) => (
                     <input
@@ -36,7 +41,8 @@ const OTPVerification = ({ handleStepper }: OTPVerificationProps) => {
                     />
                 )}
             />
-            <CustomButtom text="Verify" handleClick={handleOTPVerification} />
+            {error && <span className="error">Invalid OTP</span>}
+            <CustomButtom text="Verify" handleClick={handleOTPVerification} isDisable={otp.length < 5} />
             <p className="code-resend">Didn't get the code? <span>Try again</span></p>
         </>
     );

@@ -124,3 +124,9 @@ p {
   justify-content: center;
   align-items: center;
 }
+
+.error {
+  margin: 1rem 0 0;
+  color: red;
+  font-size: 12px;
+}
