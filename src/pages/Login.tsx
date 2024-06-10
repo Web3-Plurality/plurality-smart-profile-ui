@@ -45,6 +45,7 @@ const Login = () => {
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
+            showHeaderLogo={currentStep !== 'socialConnect'}
         >
             {conditionalRendrer()}
         </WidgetLayout>

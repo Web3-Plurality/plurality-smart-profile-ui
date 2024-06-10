@@ -10,6 +10,7 @@ interface WidgetLayoutProps {
     currentStep: boolean,
     description?: string,
     showBackButton: boolean
+    showHeaderLogo: boolean,
     handleBack: () => void,
 }
 
@@ -17,12 +18,13 @@ const defaultProps = {
     description: ''
 };
 
-const WidgetLayout = ({ children, showBackButton, title, currentStep, description, handleBack }: WidgetLayoutProps) => {
+const WidgetLayout = ({ children, showBackButton, title, currentStep, description, showHeaderLogo, handleBack }: WidgetLayoutProps) => {
     return (
         <div className="wrapper">
             <div className="widget">
                 <div className='widget-content'>
-                    <img className="mvfw-logo" src={HeaderLogo} alt='' />
+                    {!showHeaderLogo && <h1>Connect Your Platforms</h1>}
+                    {showHeaderLogo && <img className="mvfw-logo" src={HeaderLogo} alt='' />}
                     <WidgetHeader title={title} description={description} currentStep={currentStep} />
                     {children}
                 </div>
@@ -31,6 +33,12 @@ const WidgetLayout = ({ children, showBackButton, title, currentStep, descriptio
                     className={classNames('back-btn', { hideBtn: !showBackButton })}>
                     Back
                 </div>
+                {!showHeaderLogo && <div
+                    // onClick={handleBack}
+                    className='back-btn'
+                >
+                    Skip for now
+                </div>}
             </div>
             <div className='footer'>
                 <span>Powered By</span>

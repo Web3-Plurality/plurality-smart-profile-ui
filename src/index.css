@@ -85,6 +85,10 @@ p {
   align-items: center;
 }
 
+.widget-content h1 {
+  margin-top: 0;
+}
+
 .mvfw-logo {
   position: absolute;
   bottom: 100%;
