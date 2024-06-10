@@ -12,7 +12,7 @@ import journeyIcon from './../assets/images/journey-icon.png'
 
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
 import instaIconColored from './../assets/images/insta-icon-colored.png'
-import snapchatIconColored from './../assets/images/s-icon-colored.png'
+import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
 import cubeIconColored from './../assets/images/cube-icon-colored.png'
 import fIconColored from './../assets/images/f-icon-colored.png'
 import SIconColored from './../assets/images/s-icon-colored.png'

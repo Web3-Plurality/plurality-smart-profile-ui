@@ -28,6 +28,13 @@
     width: 55px;
     height: 55px;
     border-radius: 50%;
+    transition: transform 0.3s ease-in-out;
+    /* Smooth transition for scaling */
+}
+
+.icon:hover {
+    transform: scale(1.2);
+    /* Scale up the icon on hover */
 }
 
 .mid-icon {
