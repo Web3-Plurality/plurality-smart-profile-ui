@@ -11,7 +11,6 @@ import SocialConnect from '../components/SocailConnect';
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
 
-
     const currentStep = stepHistory[stepHistory.length - 1];
     const previousStep = stepHistory[stepHistory.length - 2];
     const showBackButton = stepHistory.length > 1 && currentStep !== 'success' && currentStep !== 'socialConnect';
@@ -46,6 +45,7 @@ const Login = () => {
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
             showHeaderLogo={currentStep !== 'socialConnect'}
+        // chanegSkip={ }
         >
             {conditionalRendrer()}
         </WidgetLayout>

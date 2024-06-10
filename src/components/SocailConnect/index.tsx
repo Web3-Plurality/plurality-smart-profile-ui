@@ -6,7 +6,7 @@ import HeaderLogo from './../../assets/svgIcons/fw-logo.svg'
 
 const SocialConnect = () => {
     const numIcons = 10;
-    const circleRadius = 153; // Radius of the main circle
+    const circleRadius = 153;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
@@ -39,7 +39,7 @@ const SocialConnect = () => {
                             position: "absolute",
                             left: `calc(50% + ${x}px - 27px)`, // Adjusted for icon size
                             top: `calc(50% + ${y}px - 25px)`,
-                            cursor: 'pointer' // Adjusted for icon size
+                            cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(index)}
                     >
