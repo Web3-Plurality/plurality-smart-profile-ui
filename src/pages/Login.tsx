@@ -3,17 +3,39 @@ import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
 import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
-import { getDescription, getTitleText } from '../common/utils';
+import { getDescription, getTitleText, socialConnectButtons } from '../common/utils';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
+import { useState } from 'react';
+import SocialConfirmation from '../components/SocialConfirmation';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
 
+    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
+    const [selectedSocial, setSelectedSocial] = useState('')
+
+    const handleIconClick = (index: number) => {
+        if (activeStates[index]) {
+            setSelectedSocial(socialConnectButtons[index].displayName)
+            handleStepper('socialConfirmation')
+        } else {
+            const newActiveStates = [...activeStates];
+            newActiveStates[index] = !newActiveStates[index];
+            setActiveStates(newActiveStates);
+        }
+    };
+
+    const allowContinue = (activeStates.filter((item) => item)).length > 0
+
+
     const currentStep = stepHistory[stepHistory.length - 1];
     const previousStep = stepHistory[stepHistory.length - 2];
-    const showBackButton = stepHistory.length > 1 && currentStep !== 'success' && currentStep !== 'socialConnect';
+    const showBackButton = stepHistory.length > 1
+        && currentStep !== 'success'
+        && currentStep !== 'socialConnect'
+    // && currentStep !== 'socialConfirmation';
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
@@ -31,7 +53,9 @@ const Login = () => {
             case 'success':
                 return <AuthSuccess handleStepper={handleStepper} />
             case 'socialConnect':
-                return <SocialConnect />
+                return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
+            case 'socialConfirmation':
+                return <SocialConfirmation selectedSocial={selectedSocial} />
             default:
                 return <div>Test div</div>;
         }
@@ -45,7 +69,10 @@ const Login = () => {
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
             showHeaderLogo={currentStep !== 'socialConnect'}
-        // chanegSkip={ }
+            showBackgroundImage={currentStep === 'socialConfirmation'}
+            socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
+
+
         >
             {conditionalRendrer()}
         </WidgetLayout>

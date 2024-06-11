@@ -77,6 +77,13 @@ p {
 
 }
 
+.widgetbg {
+  background-image: url('./assets/images/bacgroundImg.png');
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 .widget-content {
   display: flex;
   flex-direction: column;

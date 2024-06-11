@@ -7,21 +7,29 @@ import WidgetHeader from './WidgetHeader';
 interface WidgetLayoutProps {
     children: ReactNode,
     title: string,
+    socialsFooter: string
     currentStep: boolean,
-    description?: string,
+    showBackgroundImage: boolean,
+    description: string,
     showBackButton: boolean
     showHeaderLogo: boolean,
     handleBack: () => void,
 }
 
-const defaultProps = {
-    description: ''
-};
-
-const WidgetLayout = ({ children, showBackButton, title, currentStep, description, showHeaderLogo, handleBack }: WidgetLayoutProps) => {
+const WidgetLayout = ({
+    children,
+    title,
+    socialsFooter,
+    currentStep,
+    showBackgroundImage,
+    description,
+    showBackButton,
+    showHeaderLogo,
+    handleBack
+}: WidgetLayoutProps) => {
     return (
         <div className="wrapper">
-            <div className="widget">
+            <div className={classNames('widget', { widgetbg: showBackgroundImage })}>
                 <div className='widget-content'>
                     {!showHeaderLogo && <h1>Connect Your Platforms</h1>}
                     {showHeaderLogo && <img className="mvfw-logo" src={HeaderLogo} alt='' />}
@@ -34,10 +42,9 @@ const WidgetLayout = ({ children, showBackButton, title, currentStep, descriptio
                     Back
                 </div>
                 {!showHeaderLogo && <div
-                    // onClick={handleBack}
                     className='back-btn'
                 >
-                    Skip for now
+                    {socialsFooter}
                 </div>}
             </div>
             <div className='footer'>
@@ -48,5 +55,4 @@ const WidgetLayout = ({ children, showBackButton, title, currentStep, descriptio
     );
 };
 
-WidgetLayout.defaultProps = defaultProps;
 export default WidgetLayout;

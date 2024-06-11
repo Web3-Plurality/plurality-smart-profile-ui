@@ -1,25 +1,19 @@
-import { useState } from 'react';
 import './styles.css';
 import { socialConnectButtons } from '../../common/utils';
 import CustomIcon from '../CustomIcon';
 import HeaderLogo from './../../assets/svgIcons/fw-logo.svg'
 
-const SocialConnect = () => {
+interface SocialConnectProps {
+    activeStates: boolean[],
+    handleIconClick: (idx: number) => void
+}
+
+const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     const numIcons = 10;
     const circleRadius = 153;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
-
-    // Initialize state with the active status of each button
-    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
-
-    // Handle icon click
-    const handleIconClick = (index: number) => {
-        const newActiveStates = [...activeStates];
-        newActiveStates[index] = !newActiveStates[index];
-        setActiveStates(newActiveStates);
-    };
 
     return (
         <div className="circle">

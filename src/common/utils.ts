@@ -67,15 +67,15 @@ export const getDescription = (prevSteps: string[]) => {
 };
 
 export const socialConnectButtons = [
-    {id: 1, iconName:"tiktok", icon: tiktokIcon, active: false, activeIcon: tiktokIconColored},
-    {id: 2, iconName:"insta", icon: instaIcon, active: false, activeIcon: instaIconColored },
-    {id: 3, iconName:"snapchat", icon: snapchatIcon, active: false, activeIcon: snapchatIconColored },
-    {id: 4, iconName:"cubeIcon", icon: cubeIcon, active: false, activeIcon: cubeIconColored },
-    {id: 5, iconName:"fIcon", icon: fIcon, active: false, activeIcon: fIconColored },
-    {id: 6, iconName:"sIcon", icon: SIcon, active: false, activeIcon: SIconColored },
-    {id: 7, iconName:"opensea", icon: openseaIcon, active: false, activeIcon: openseaIconColored },
-    {id: 8, iconName:"oIcon", icon: oIcon, active: false, activeIcon: oIconColored },
-    {id: 9, iconName:"meta", icon: metaIcon, active: false, activeIcon: metaIconColored},
-    {id: 10, iconName:"apple", icon: appleIcon, active: false, activeIcon: appleIconColored },
-    {id: 11, iconName:"midJourney", icon: journeyIcon, active: false, activeIcon: journeyIconColored },
+    {id: 1, iconName:"tiktok", displayName: 'Tiktok', icon: tiktokIcon, active: false, activeIcon: tiktokIconColored},
+    {id: 2, iconName:"insta", displayName: 'Instagram', icon: instaIcon, active: false, activeIcon: instaIconColored },
+    {id: 3, iconName:"snapchat",displayName: 'SnapChat',  icon: snapchatIcon, active: false, activeIcon: snapchatIconColored },
+    {id: 4, iconName:"cubeIcon",displayName: 'Cube',  icon: cubeIcon, active: false, activeIcon: cubeIconColored },
+    {id: 5, iconName:"fIcon", displayName: 'F', icon: fIcon, active: false, activeIcon: fIconColored },
+    {id: 6, iconName:"sIcon", displayName: 'S',  icon: SIcon, active: false, activeIcon: SIconColored },
+    {id: 7, iconName:"opensea", displayName: 'Opensea',  icon: openseaIcon, active: false, activeIcon: openseaIconColored },
+    {id: 8, iconName:"oIcon", displayName: 'O', icon: oIcon, active: false, activeIcon: oIconColored },
+    {id: 9, iconName:"meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored},
+    {id: 10, iconName:"apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
+    {id: 11, iconName:"midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
 ]
