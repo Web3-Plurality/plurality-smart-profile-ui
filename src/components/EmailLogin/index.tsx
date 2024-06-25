@@ -6,13 +6,12 @@ import './styles.css'
 
 
 interface EmailLoginProps {
-    prevStep: string
     handleStepper: (step: string) => void
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const EmailLogin = ({ prevStep, handleStepper }: EmailLoginProps) => {
+const EmailLogin = ({ handleStepper }: EmailLoginProps) => {
     const [email, setEmail] = useState('')
     const [error, setError] = useState('')
 
@@ -27,11 +26,16 @@ const EmailLogin = ({ prevStep, handleStepper }: EmailLoginProps) => {
             setError('Email Field Cannot Be Empty')
         } else if (!emailRegex.test(email)) {
             setError('Inval Email! Please Enter a Valid Email')
-        } else if (prevStep === 'register') {
-            handleStepper('otp')
         } else {
-            handleStepper('socialConnect')
+            handleStepper('otp')
         }
+
+
+        // else if (prevStep === 'register') {
+        //     handleStepper('otp')
+        // } else {
+        //     handleStepper('socialConnect')
+        // }
     }
 
 

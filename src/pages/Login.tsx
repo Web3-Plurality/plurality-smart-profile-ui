@@ -31,7 +31,7 @@ const Login = () => {
 
 
     const currentStep = stepHistory[stepHistory.length - 1];
-    const previousStep = stepHistory[stepHistory.length - 2];
+    // const previousStep = stepHistory[stepHistory.length - 2];
     const showBackButton = stepHistory.length > 1
         && currentStep !== 'success'
         && currentStep !== 'socialConnect'
@@ -43,7 +43,7 @@ const Login = () => {
             case 'initial':
                 return <AuthFlow handleStepper={handleStepper} auth={'login'} />;
             case 'login':
-                return <EmailLogin handleStepper={handleStepper} prevStep={previousStep} />;
+                return <EmailLogin handleStepper={handleStepper} />;
             case 'register':
                 return <AuthFlow handleStepper={handleStepper} auth={'register'} />;
             case 'otp':
