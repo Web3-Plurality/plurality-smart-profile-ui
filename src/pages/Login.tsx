@@ -1,4 +1,4 @@
-import { useStep } from '../context/StepContext'; // Adjust the import path accordingly
+import { useStep } from '../context/StepContext';
 import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
 import OTPVerification from '../components/OTPVerification';
@@ -9,12 +9,15 @@ import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
 import { useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
+import DigitalWardrobe from '../components/DigitaWardrobe';
+import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
 
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
+    const [selectedNFT, setSelectedNFT] = useState('')
 
     const handleIconClick = (index: number) => {
         if (activeStates[index]) {
@@ -26,6 +29,10 @@ const Login = () => {
             setActiveStates(newActiveStates);
         }
     };
+
+    const handleSelectedNFT = (nft: string) => {
+        setSelectedNFT(nft)
+    }
 
     const allowContinue = (activeStates.filter((item) => item)).length > 0
 
@@ -56,6 +63,10 @@ const Login = () => {
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'socialConfirmation':
                 return <SocialConfirmation selectedSocial={selectedSocial} />
+            case 'digitalWardrobe':
+                return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
+            case 'digitalWardrobeConnect':
+                return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
             default:
                 return <div>Test div</div>;
         }
@@ -71,8 +82,6 @@ const Login = () => {
             showHeaderLogo={currentStep !== 'socialConnect'}
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
-
-
         >
             {conditionalRendrer()}
         </WidgetLayout>

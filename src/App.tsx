@@ -4,12 +4,14 @@ import NotFound from './pages/NotFound';
 
 import { AuthProvider } from './context/AuthContext';
 import { StepProvider } from './context/StepContext';
+import Header from './components/Header';
 
 function App() {
   return (
     // it's just a dummy provider, will update it later as per our requiremnet
     <AuthProvider>
       <StepProvider>
+        <Header />
         <Router>
           <Routes>
             <Route path="/" element={<Login />} />

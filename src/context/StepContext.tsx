@@ -20,7 +20,13 @@ const StepProvider = ({ children }: { children: ReactNode }) => {
     }, [stepHistory]);
 
     const handleStepper = (val: string) => {
-        setStepHistory((prev) => [...prev, val]);
+        setStepHistory((prevStepHistory) => {
+            const stepSet = new Set(prevStepHistory);
+            stepSet.delete(val);
+            stepSet.add(val);
+
+            return Array.from(stepSet);
+        });
     };
 
     const handleBack = () => {

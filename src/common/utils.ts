@@ -1,3 +1,4 @@
+// Non connected Socail icons
 import tiktokIcon from './../assets//images/tiktok-icon.png'
 import instaIcon from './../assets/images/insta-icon.png'
 import snapchatIcon from './../assets/images/snapchat-icon.png'
@@ -10,6 +11,7 @@ import metaIcon from './../assets/images/meta-icon.png'
 import appleIcon from './../assets/images/apple-icon.png'
 import journeyIcon from './../assets/images/journey-icon.png'
 
+// Connected Socail icons
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
 import instaIconColored from './../assets/images/insta-icon-colored.png'
 import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
@@ -21,6 +23,18 @@ import oIconColored from './../assets/images/o-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
 import appleIconColored from './../assets/images/apple-icon-colored.png'
 import journeyIconColored from './../assets/images/journey-icon-colored.png'
+
+// Digital Wardrobe Images
+import firstImage from './../assets/images/wardrobe/first.png'
+import secondImage from './../assets/images/wardrobe/second.png'
+import thirdImage from './../assets/images/wardrobe/third.png'
+import fourthImage from './../assets/images/wardrobe/fourth.png'
+import fifthImage from './../assets/images/wardrobe/fifth.png'
+import sixthImage from './../assets/images/wardrobe/sixth.png'
+import seventhImage from './../assets/images/wardrobe/seventh.png'
+import eightImage from './../assets/images/wardrobe/eight.png'
+import ninthImage from './../assets/images/wardrobe/ninth.png'
+
 
 export const getTitleText = (prevSteps: string[]) => {
     const currentStep = prevSteps[prevSteps.length - 1];
@@ -41,6 +55,12 @@ export const getTitleText = (prevSteps: string[]) => {
             return 'Register Your Account';
         case 'success':
             return 'Welcome to Your Metaverse Profile!';
+        case 'socialConnect':
+                return 'Connect Your Platforms';
+        case 'digitalWardrobe':
+                return 'Digital Wardrobe';
+        case 'digitalWardrobeConnect':
+                    return 'Digital Wardrobe';
         default:
             return '';
     }
@@ -61,6 +81,10 @@ export const getDescription = (prevSteps: string[]) => {
             return 'Enter the 5 digit code sent to your email';
         case 'success':
             return 'Earn points by connecting your social profiles and metaverse platforms.';
+        case 'digitalWardrobe':
+                return 'Collection';
+        case 'digitalWardrobeConnect':
+                    return 'Title of NFT';
         default:
             return '';
     }
@@ -78,4 +102,16 @@ export const socialConnectButtons = [
     {id: 9, iconName:"meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored},
     {id: 10, iconName:"apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
     {id: 11, iconName:"midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
+]
+
+export const digitalWardrobeImages = [
+    firstImage,
+    secondImage,
+    thirdImage,
+    fourthImage,
+    fifthImage,
+    sixthImage,
+    seventhImage,
+    eightImage,
+    ninthImage
 ]
