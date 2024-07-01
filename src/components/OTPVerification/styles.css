@@ -1,18 +1,3 @@
-/* inputStyle={{
-    width: "3rem",
-    height: "2.7rem",
-    background: "#000000",
-    color: "#ffffff",
-    padding: "0.3rem 0.6rem",
-    fontSize: "2.3rem",
-    fontWeight: "500",
-    borderRadius: "10px",
-    border: "none",
-    marginLeft: "1.22rem",
-    boxShadow:
-        "2px 2px 5px rgba(128, 128, 128, 1), 4px 4px 10px rgba(128, 128, 128, 0.4), 6px 6px 15px rgba(128, 128, 128, 0.2)",
-}} */
-
 .otp-field>input {
     width: 3rem;
     height: 2.7rem;

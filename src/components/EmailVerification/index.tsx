@@ -1,35 +1,56 @@
 import { useEffect, useState } from "react"
+import axios from "axios"
 // import CustomButtom from "../CustomButton"
 // import CustomInputField from "../CustomInputField"
 
 import './styles.css'
 import { Spin } from "antd"
+import { PayloadDataType } from "../../globalTypes"
 
 
 interface EmailLoginProps {
+    finalPayload: PayloadDataType
     handleStepper: (step: string) => void
 }
 
-const EmailVerification = ({ handleStepper }: EmailLoginProps) => {
-    const [isLoading, setIsLoading] = useState(true)
+const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => {
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState('')
 
     useEffect(() => {
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 1000)
+        const registerInBackend = () => {
+            const apiUrl = `${import.meta.env.VITE_APP_API_BASE_URL}/stytch`
+
+            setLoading(true)
+
+            axios.post(apiUrl, {
+                data: finalPayload
+            })
+                .then(function (response) {
+                    if (response.status === 200) {
+                        setLoading(false)
+                        handleStepper('success')
+                    }
+                })
+                .catch((err: Error) => {
+                    setLoading(false)
+                    console.log("Error:", err)
+                    setError('Something goes wrong, please try again!')
+                })
+        }
+        registerInBackend()
     }, [])
 
-    useEffect(() => {
-        if (!isLoading) {
-            handleStepper('success')
-        }
-    }, [isLoading, handleStepper])
 
     return (
-        <div className="email-verification">
-            {isLoading ? <h1>Verifiying Your Eamil</h1> : <h1>EmailVerified</h1>}
-            {isLoading && <Spin />}
-        </div>
+        <>
+            {!error && (
+                <div className="email-verification">
+                    {loading ? <h1>Verifiying Your Eamil</h1> : <h1>EmailVerified</h1>}
+                    {loading && <Spin />}
+                </div>
+            )}
+        </>
     )
 }
 
