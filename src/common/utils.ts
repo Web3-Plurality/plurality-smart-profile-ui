@@ -78,7 +78,7 @@ export const getDescription = (prevSteps: string[]) => {
                 return '';
             }
         case 'otp':
-            return 'Enter the 5 digit code sent to your email';
+            return 'Enter the 6 digit code sent to your email';
         case 'success':
             return 'Earn points by connecting your social profiles and metaverse platforms.';
         case 'digitalWardrobe':
