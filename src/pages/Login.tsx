@@ -11,6 +11,7 @@ import { useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
+import { PayloadDataType } from '../globalTypes';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -18,6 +19,13 @@ const Login = () => {
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
+    const [methodId, setMethodId] = useState<string>('')
+    const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
+        email: '',
+        address: '',
+        subscribe: false
+    });
+
 
     const handleIconClick = (index: number) => {
         if (activeStates[index]) {
@@ -34,6 +42,14 @@ const Login = () => {
         setSelectedNFT(nft)
     }
 
+    const handleMethodId = (id: string) => {
+        setMethodId(id)
+    }
+
+    const handleFinalPayload = (data: PayloadDataType) => {
+        setFinalPayload(data)
+    }
+
     const allowContinue = (activeStates.filter((item) => item)).length > 0
 
 
@@ -44,19 +60,25 @@ const Login = () => {
         && currentStep !== 'socialConnect'
     // && currentStep !== 'socialConfirmation';
 
+
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
                 return <AuthFlow handleStepper={handleStepper} auth={'login'} />;
             case 'login':
-                return <EmailLogin handleStepper={handleStepper} />;
+                return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
             case 'register':
                 return <AuthFlow handleStepper={handleStepper} auth={'register'} />;
             case 'otp':
-                return <OTPVerification handleStepper={handleStepper} />;
+                return <OTPVerification
+                    address='0x29839afghgrkmfvllkajfjoiweqryewurfvbsvaqdwre' // TO DO (metamask connection)
+                    methodId={methodId}
+                    handleStepper={handleStepper}
+                    handleFinalPayload={handleFinalPayload}
+                />;
             case 'verification':
-                return <EmailVerification handleStepper={handleStepper} />
+                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} />
             case 'success':
                 return <AuthSuccess handleStepper={handleStepper} />
             case 'socialConnect':
@@ -79,12 +101,13 @@ const Login = () => {
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
-            showHeaderLogo={currentStep !== 'socialConnect'}
+            showHeaderLogo={currentStep !== 'socialConnect'
+            }
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
         >
             {conditionalRendrer()}
-        </WidgetLayout>
+        </WidgetLayout >
     );
 };
 

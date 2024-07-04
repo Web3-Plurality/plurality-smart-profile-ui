@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@stytch/react": "^18.1.0",
+    "@stytch/vanilla-js": "^4.13.0",
     "antd": "^5.17.4",
     "axios": "^1.6.8",
     "classnames": "^2.5.1",
@@ -26,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
+    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
