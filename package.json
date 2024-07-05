@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@lit-protocol/lit-auth-client": "^6.0.5",
     "@stytch/react": "^18.1.0",
     "@stytch/vanilla-js": "^4.13.0",
     "antd": "^5.17.4",
@@ -20,7 +21,8 @@
     "react-dom": "^18.2.0",
     "react-otp-input": "^3.1.1",
     "react-router-dom": "^6.23.0",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "wagmi": "^2.10.9"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
