@@ -21,9 +21,9 @@ const Login = () => {
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
-        email: '',
-        address: '',
-        subscribe: false
+        session: '',
+        userId: '',
+        method: 'email'
     });
 
 
@@ -72,7 +72,6 @@ const Login = () => {
                 return <AuthFlow handleStepper={handleStepper} auth={'register'} />;
             case 'otp':
                 return <OTPVerification
-                    address='0x29839afghgrkmfvllkajfjoiweqryewurfvbsvaqdwre' // TO DO (metamask connection)
                     methodId={methodId}
                     handleStepper={handleStepper}
                     handleFinalPayload={handleFinalPayload}

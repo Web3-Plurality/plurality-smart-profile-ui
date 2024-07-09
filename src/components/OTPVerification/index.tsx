@@ -7,14 +7,12 @@ import { useStytch } from "@stytch/react";
 import { PayloadDataType } from "../../globalTypes";
 
 interface OTPVerificationProps {
-    address: string
     methodId: string
     handleStepper: (step: string) => void
     handleFinalPayload: (data: PayloadDataType) => void
 }
 
 const OTPVerification = ({
-    address,
     methodId,
     handleStepper,
     handleFinalPayload
@@ -42,7 +40,7 @@ const OTPVerification = ({
             console.log(response);
 
             if (response.status_code == 200 && response.session_jwt) {
-                handleFinalPayload({ email: response?.user?.emails[0].email, address: address, subscribe: true })
+                handleFinalPayload({ session: response.session_jwt, userId: response.user_id, method: 'email' })
                 handleStepper('verification')
             }
         } catch (err: unknown) {

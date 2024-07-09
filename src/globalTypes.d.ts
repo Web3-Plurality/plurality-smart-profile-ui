@@ -1,5 +1,5 @@
 export interface PayloadDataType {
-    email: string,
-    address: string,
-    subscribe: boolean
+    userId: string,
+    session: string,
+    method: string
 }
