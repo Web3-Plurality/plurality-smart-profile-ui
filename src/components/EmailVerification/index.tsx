@@ -11,6 +11,9 @@ import Loading from "../Loading"
 import useAccounts from "../../hooks/useAccount"
 import { useNavigate } from "react-router-dom"
 import CreateAccount from "../CreateAccount"
+import useSession from "../../hooks/useSession"
+import Dashboard from "../Dashboard"
+import AccountSelection from "../AccountSelection"
 
 
 interface EmailLoginProps {
@@ -37,7 +40,14 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         error: accountsError,
     } = useAccounts();
 
-    const error = authError || accountsError;
+    const {
+        initSession,
+        sessionSigs,
+        loading: sessionLoading,
+        error: sessionError,
+    } = useSession();
+
+    const error = authError || accountsError || sessionError;
 
     useEffect(() => {
         const registerInBackend = async () => {
@@ -78,6 +88,13 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         }
     }, [authMethod, fetchAccounts, navigate])
 
+    useEffect(() => {
+        // If user is authenticated and has selected an account, initialize session
+        if (authMethod && currentAccount) {
+            initSession(authMethod, currentAccount);
+        }
+    }, [authMethod, currentAccount, initSession])
+
     if (authLoading) {
         return (
             <Loading copy={'Authenticating your credentials...'} error={error} />
@@ -88,8 +105,30 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         return <Loading copy={'Looking up your accounts...'} error={error} />;
     }
 
+    if (sessionLoading) {
+        return <Loading copy={'Securing your session...'} error={error} />;
+    }
+
+    if (authMethod && accounts.length > 0) {
+        return (
+            <AccountSelection
+                accounts={accounts}
+                setCurrentAccount={setCurrentAccount}
+                error={error}
+            />
+        );
+    }
+
     if (authMethod && accounts.length === 0) {
         return <CreateAccount signUp={goToSignUp} error={error} />;
+    }
+
+    console.log(currentAccount, sessionSigs)
+
+    if (currentAccount && sessionSigs) {
+        return (
+            <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
+        );
     }
 
     return (

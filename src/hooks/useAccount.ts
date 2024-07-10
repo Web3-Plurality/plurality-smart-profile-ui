@@ -23,6 +23,7 @@ export default function useAccounts() {
         setAccounts(myPKPs);
         // If only one PKP, set as current account
         if (myPKPs.length === 1) {
+          console.log("here")
           setCurrentAccount(myPKPs[0]);
         }
       } catch (err) {
