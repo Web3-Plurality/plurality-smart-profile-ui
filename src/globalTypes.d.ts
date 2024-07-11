@@ -1,7 +1,7 @@
 export interface PayloadDataType {
-    userId: string,
-    session: string,
-    method: string
+    email: string,
+    address: string,
+    subscribe: boolean
 }
 
 // Snap Types

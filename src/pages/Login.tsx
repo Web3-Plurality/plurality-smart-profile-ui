@@ -7,7 +7,7 @@ import { getDescription, getTitleText, socialConnectButtons } from '../common/ut
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
@@ -25,13 +25,21 @@ const Login = () => {
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         email: '',
         address: '',
-        subscribe: false
+        subscribe: true
     });
     const [, setUser] = useState<string>('')
 
     const [, dispatch] = useContext(MetaMaskContext);
     const { address, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
+
+    useEffect(() => {
+        if (address) {
+            handleStepper("success")
+        } else {
+            handleStepper('initial')
+        }
+    }, [address])
 
 
     const handleIconClick = (index: number) => {
@@ -120,7 +128,7 @@ const Login = () => {
                 return <AuthFlow handleStepper={handleStepper} auth={'register'} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'otp':
                 return <OTPVerification
-                    address='0x29839afghgrkmfvllkajfjoiweqryewurfvbsvaqdwre' // TO DO (metamask connection)
+                    address={(address as string)}
                     methodId={methodId}
                     handleStepper={handleStepper}
                     handleFinalPayload={handleFinalPayload}
