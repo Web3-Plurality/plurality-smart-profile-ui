@@ -7,11 +7,13 @@ import { getDescription, getTitleText, socialConnectButtons } from '../common/ut
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import { PayloadDataType } from '../globalTypes';
+import { useAccount, useConnect } from 'wagmi';
+import { MetamaskActions, MetaMaskContext } from '../context/MetamaskContext';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -25,6 +27,11 @@ const Login = () => {
         address: '',
         subscribe: false
     });
+    const [, setUser] = useState<string>('')
+
+    const [, dispatch] = useContext(MetaMaskContext);
+    const { address, isConnected } = useAccount();
+    const { connect, connectors } = useConnect();
 
 
     const handleIconClick = (index: number) => {
@@ -58,18 +65,59 @@ const Login = () => {
     const showBackButton = stepHistory.length > 1
         && currentStep !== 'success'
         && currentStep !== 'socialConnect'
+        && currentStep !== 'initial'
     // && currentStep !== 'socialConfirmation';
+
+    const ensureMetamaskConnection = async (): Promise<boolean> => {
+        console.log("Ensure MetaMask connection called");
+
+        // Check if MetaMask is installed
+        if (typeof window.ethereum !== 'undefined') {
+            console.log("MetaMask is installed");
+
+            // Check if MetaMask is connected
+            if (!address || !isConnected) {
+                // for (let i = 0; i < connectors.length; i++) {
+                //     const connector = connectors[i];
+                //     console.log("Trying to connect with connector: " + connectors[i].name);
+                //     connect({ connector });
+                // }
+                const metamskConnector = connectors[0] //Metamask
+                // const coinbaseWalletconnector = connectors[1] // Coinbase wallet
+                connect({ connector: metamskConnector });
+            }
+            return true; // MetaMask is installed
+        } else {
+            alert("MetaMask is not installed");
+            const params = new URLSearchParams(window.location.search)
+            const origin = params.get('origin')!;
+            window.parent.postMessage({ eventName: 'errorMessage', data: "Please install metamask" }, origin);
+            return false; // MetaMask is not installed
+        }
+    };
+
+
+    const handleMetamaskConnect = async () => {
+        try {
+            if (setUser) setUser("user");
+            //TODO need to find a way of how to selectivly connect
+            await ensureMetamaskConnection();
+        } catch (e) {
+            console.error(e);
+            dispatch({ type: MetamaskActions.SetError, payload: e });
+        }
+    };
 
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} auth={'login'} />;
+                return <AuthFlow handleStepper={handleStepper} auth={'login'} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'login':
                 return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
             case 'register':
-                return <AuthFlow handleStepper={handleStepper} auth={'register'} />;
+                return <AuthFlow handleStepper={handleStepper} auth={'register'} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'otp':
                 return <OTPVerification
                     address='0x29839afghgrkmfvllkajfjoiweqryewurfvbsvaqdwre' // TO DO (metamask connection)

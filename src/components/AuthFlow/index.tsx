@@ -5,17 +5,18 @@ import metamaskIcon from './../../assets/svgIcons/metamask-icon.svg'
 import './styles.css'
 
 interface AuthFlowProps {
-    handleStepper: (step: string) => void
     auth: string
+    handleStepper: (step: string) => void
+    handleMetamaskConnect: () => void
 }
 
-const AuthFlow = ({ handleStepper, auth }: AuthFlowProps) => {
+const AuthFlow = ({ auth, handleStepper, handleMetamaskConnect }: AuthFlowProps) => {
     const isRegister = auth === 'register'
     return (
         <>
             <div className='login-buttons'>
                 <SocialButton text={`${isRegister ? 'Register' : 'Login'} with Email`} icon={mailIcon} handleClick={() => handleStepper('login')} />
-                <SocialButton text={`${isRegister ? 'Register' : 'Login'} with Metamask`} icon={metamaskIcon} />
+                <SocialButton text={`${isRegister ? 'Register' : 'Login'} with Metamask`} icon={metamaskIcon} handleClick={handleMetamaskConnect} />
             </div>
             <div className="auth-footer">
                 {isRegister ? (

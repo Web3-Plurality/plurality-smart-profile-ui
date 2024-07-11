@@ -11,8 +11,19 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@lit-protocol/auth-helpers": "5.0.0",
+    "@lit-protocol/constants": "5.0.0",
+    "@lit-protocol/lit-auth-client": "5.0.0",
+    "@lit-protocol/pkp-ethers": "5.0.0",
+    "@lit-protocol/types": "5.0.0",
+    "@radix-ui/react-radio-group": "^1.1.3",
+    "@semaphore-protocol/data": "^4.0.0-beta.16",
+    "@semaphore-protocol/group": "^4.0.0-beta.16",
+    "@semaphore-protocol/proof": "^4.0.0-beta.16",
+    "@simplewebauthn/browser": "^10.0.0",
     "@stytch/react": "^18.1.0",
     "@stytch/vanilla-js": "^4.13.0",
+    "@tanstack/react-query": "^5.50.1",
     "antd": "^5.17.4",
     "axios": "^1.6.8",
     "classnames": "^2.5.1",
@@ -20,7 +31,11 @@
     "react-dom": "^18.2.0",
     "react-otp-input": "^3.1.1",
     "react-router-dom": "^6.23.0",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "viem": "^2.17.3",
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "wagmi": "^2.10.10",
+    "web3": "^4.10.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
