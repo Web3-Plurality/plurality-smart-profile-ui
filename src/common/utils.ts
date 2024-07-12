@@ -115,3 +115,28 @@ export const digitalWardrobeImages = [
     eightImage,
     ninthImage
 ]
+
+
+export const showHeader = (currentStep: string) => {
+    if (
+        currentStep !== 'success'
+        && currentStep !== 'socialConnect'
+        && currentStep !== 'socialConfirmation'
+        && currentStep !== 'digitalWardrobe'
+        && currentStep !== 'digitalWardrobeConnect'
+    ) return false
+
+    return true
+}
+
+console.log("Temp")
+
+export const showBackButton = (currentStep: string) => {
+    if( 
+        currentStep !== 'success'
+        && currentStep !== 'socialConnect'
+        && currentStep !== 'initial'
+        && currentStep !== 'verification'
+    ) return true
+    return false
+}

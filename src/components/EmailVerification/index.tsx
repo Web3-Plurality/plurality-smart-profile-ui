@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
-// import CustomButtom from "../CustomButton"
-// import CustomInputField from "../CustomInputField"
+import { useEffect } from "react"
 
-import './styles.css'
-import { Spin } from "antd"
 import { PayloadDataType } from "../../globalTypes"
 import useAuthenticate from "../../hooks/useAuthenticate"
-import Loading from "../Loading"
+import Loading from "../LitComponents/Loading"
 import useAccounts from "../../hooks/useAccount"
 import { useNavigate } from "react-router-dom"
-import CreateAccount from "../CreateAccount"
+import CreateAccount from "../LitComponents/CreateAccount"
 import useSession from "../../hooks/useSession"
-import Dashboard from "../Dashboard"
-import AccountSelection from "../AccountSelection"
+import Dashboard from "../LitComponents/Dashboard"
+import AccountSelection from "../LitComponents/AccountSelection"
+
+import './styles.css'
 
 
 interface EmailLoginProps {
@@ -51,25 +48,6 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     useEffect(() => {
         const registerInBackend = async () => {
-            // const apiUrl = `${import.meta.env.VITE_APP_API_BASE_URL}/stytch`
-
-            // setLoading(true)
-
-            // axios.post(apiUrl, {
-            //     data: finalPayload
-            // })
-            //     .then(function (response) {
-            //         if (response.status === 200) {
-            //             setLoading(false)
-            //             handleStepper('success')
-            //         }
-            //     })
-            //     .catch((err: Error) => {
-            //         setLoading(false)
-            //         console.log("Error:", err)
-            //         setError('Something goes wrong, please try again!')
-            //     })
-
             await authWithStytch(finalPayload.session, finalPayload.session, finalPayload.method);
         }
         registerInBackend()
@@ -77,7 +55,7 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     const goToSignUp = () => {
         navigate(window.location.pathname, { replace: true });
-        createAccount(authMethod);
+        createAccount(authMethod!);
     }
 
     useEffect(() => {
@@ -108,7 +86,11 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     if (sessionLoading) {
         return <Loading copy={'Securing your session...'} error={error} />;
     }
-
+    if (currentAccount && sessionSigs) {
+        return (
+            <Dashboard currentAccount={currentAccount} handleStepper={handleStepper} />
+        );
+    }
     if (authMethod && accounts.length > 0) {
         return (
             <AccountSelection
@@ -122,26 +104,6 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     if (authMethod && accounts.length === 0) {
         return <CreateAccount signUp={goToSignUp} error={error} />;
     }
-
-    console.log(currentAccount, sessionSigs)
-
-    if (currentAccount && sessionSigs) {
-        return (
-            <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
-        );
-    }
-
-    return (
-        <>
-            Hello
-            {/* {!error && (
-                <div className="email-verification">
-                    {authLoading ? <h1>Verifiying Your Eamil</h1> : <h1>EmailVerified</h1>}
-                    {authLoading && <Spin />}
-                </div>
-            )} */}
-        </>
-    )
 }
 
 export default EmailVerification

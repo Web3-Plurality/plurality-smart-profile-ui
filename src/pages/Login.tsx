@@ -3,7 +3,7 @@ import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
 import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
-import { getDescription, getTitleText, socialConnectButtons } from '../common/utils';
+import { getDescription, getTitleText, showBackButton, socialConnectButtons } from '../common/utils';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
@@ -55,10 +55,8 @@ const Login = () => {
 
     const currentStep = stepHistory[stepHistory.length - 1];
     // const previousStep = stepHistory[stepHistory.length - 2];
-    const showBackButton = stepHistory.length > 1
-        && currentStep !== 'success'
-        && currentStep !== 'socialConnect'
-    // && currentStep !== 'socialConfirmation';
+    const isBackButton = showBackButton(currentStep)
+
 
 
     const conditionalRendrer = () => {
@@ -96,7 +94,7 @@ const Login = () => {
     return (
         <WidgetLayout
             currentStep={currentStep === 'success'}
-            showBackButton={showBackButton}
+            showBackButton={isBackButton}
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}

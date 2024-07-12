@@ -1,20 +1,32 @@
+import { useDisconnect } from 'wagmi';
+import { showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
 import CustomIcon from '../CustomIcon'
+import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
     const { stepHistory, handleStepper } = useStep();
     const currentStep = stepHistory[stepHistory.length - 1];
-    console.log("Current Step: ", currentStep)
+    const isHeaderVisible = showHeader(currentStep)
 
-    if (
-        currentStep !== 'success'
-        && currentStep !== 'socialConnect'
-        && currentStep !== 'socialConfirmation'
-        && currentStep !== 'digitalWardrobe'
-        && currentStep !== 'digitalWardrobeConnect'
-    ) return
+    const navigate = useNavigate()
+    const { disconnectAsync } = useDisconnect();
+
+    if (!isHeaderVisible) return
+
+    async function handleLogout() {
+        try {
+            await disconnectAsync();
+        } catch (err) {
+            console.error(err);
+        }
+        localStorage.clear();
+        handleStepper("initial")
+        navigate('/', { replace: true });
+    }
 
     return (
         <div className='header-wrapper'>
@@ -23,13 +35,10 @@ const Header = () => {
                     <span>John Doe</span>
                     <div className='icon-box'>
                         <CustomIcon path={BadgeIcon} />
+                        {/* <Drawer /> */}
                     </div>
                 </div>
-                <div className="avatar" role="button"
-                    tabIndex={0}
-                    onClick={() => handleStepper('digitalWardrobe')}>
-
-                </div>
+                <Drawer handleLogout={handleLogout} handleStepper={handleStepper} />
             </div>
         </div>
     )

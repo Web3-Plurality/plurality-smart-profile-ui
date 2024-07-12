@@ -1,5 +1,5 @@
 interface CreateAccountProp {
-    signUp: any;
+    signUp: () => void;
     error?: Error;
 }
 

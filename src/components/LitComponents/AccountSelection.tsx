@@ -1,11 +1,11 @@
 import * as RadioGroup from '@radix-ui/react-radio-group';
 
 import { IRelayPKP } from '@lit-protocol/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 interface AccountSelectionProp {
     accounts: IRelayPKP[];
-    setCurrentAccount: any;
+    setCurrentAccount: (val: IRelayPKP) => void;
     error?: Error;
 }
 
@@ -16,7 +16,7 @@ export default function AccountSelection({
 }: AccountSelectionProp) {
     const [selectedValue, setSelectedValue] = useState<string>('0');
 
-    async function handleSubmit(event: any) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const account = accounts[parseInt(selectedValue)];
         return setCurrentAccount(account);
@@ -51,7 +51,6 @@ export default function AccountSelection({
                                     value={index.toString()}
                                     id={account.ethAddress}
                                 >
-                                    {' '}
                                     <RadioGroup.Indicator className="account-item__indicator" />
                                 </RadioGroup.Item>
                                 <label
