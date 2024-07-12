@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useStep } from '../context/StepContext';
 import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
@@ -7,13 +8,12 @@ import { getDescription, getTitleText, socialConnectButtons } from '../common/ut
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import { PayloadDataType } from '../globalTypes';
 import { useAccount, useConnect } from 'wagmi';
-import { MetamaskActions, MetaMaskContext } from '../context/MetamaskContext';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -27,9 +27,8 @@ const Login = () => {
         address: '',
         subscribe: true
     });
-    const [, setUser] = useState<string>('')
 
-    const [, dispatch] = useContext(MetaMaskContext);
+    const [, setUser] = useState<string>('')
     const { address, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
 
@@ -39,6 +38,7 @@ const Login = () => {
         } else {
             handleStepper('initial')
         }
+        console.log("Address: ", address)
     }, [address])
 
 
@@ -85,13 +85,7 @@ const Login = () => {
 
             // Check if MetaMask is connected
             if (!address || !isConnected) {
-                // for (let i = 0; i < connectors.length; i++) {
-                //     const connector = connectors[i];
-                //     console.log("Trying to connect with connector: " + connectors[i].name);
-                //     connect({ connector });
-                // }
                 const metamskConnector = connectors[0] //Metamask
-                // const coinbaseWalletconnector = connectors[1] // Coinbase wallet
                 connect({ connector: metamskConnector });
             }
             return true; // MetaMask is installed
@@ -108,11 +102,9 @@ const Login = () => {
     const handleMetamaskConnect = async () => {
         try {
             if (setUser) setUser("user");
-            //TODO need to find a way of how to selectivly connect
             await ensureMetamaskConnection();
         } catch (e) {
             console.error(e);
-            dispatch({ type: MetamaskActions.SetError, payload: e });
         }
     };
 
