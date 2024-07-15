@@ -17,7 +17,7 @@ const AuthFlow = ({ handleStepper, auth }: AuthFlowProps) => {
                 <SocialButton text={`${isRegister ? 'Register' : 'Login'} with Email`} icon={mailIcon} handleClick={() => handleStepper('login')} />
                 <SocialButton text={`${isRegister ? 'Register' : 'Login'} with Metamask`} icon={metamaskIcon} />
             </div>
-            <div className="auth-footer">
+            {/* <div className="auth-footer">
                 {isRegister ? (
                     <span>By proceeding I accept the <a href="#">terms of use</a>,
                         the creation of your <a href="#">metaverse profile</a> and subscribe to receive
@@ -25,7 +25,7 @@ const AuthFlow = ({ handleStepper, auth }: AuthFlowProps) => {
                     <span className="login">Don't have an account?
                         <span onClick={() => handleStepper('register')}> Register</span></span>
                 )}
-            </div >
+            </div > */}
         </>
     )
 }
