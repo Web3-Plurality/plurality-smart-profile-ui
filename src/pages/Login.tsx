@@ -110,7 +110,7 @@ const Login = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} auth={'login'} handleMetamaskConnect={handleMetamaskConnect} />;
+                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'login':
                 return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
             case 'otp':
