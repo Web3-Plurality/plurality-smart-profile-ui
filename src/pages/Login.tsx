@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useStep } from '../context/StepContext';
 import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
@@ -7,11 +8,12 @@ import { getDescription, getTitleText, showBackButton, socialConnectButtons } fr
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import { PayloadDataType } from '../globalTypes';
+import { useAccount, useConnect } from 'wagmi';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -25,6 +27,19 @@ const Login = () => {
         userId: '',
         method: 'email'
     });
+
+    const [, setUser] = useState<string>('')
+    const { address, isConnected } = useAccount();
+    const { connect, connectors } = useConnect();
+
+    useEffect(() => {
+        if (address) {
+            handleStepper("success")
+        } else {
+            handleStepper('initial')
+        }
+        console.log("Address: ", address)
+    }, [address])
 
 
     const handleIconClick = (index: number) => {
@@ -58,12 +73,44 @@ const Login = () => {
     const isBackButton = showBackButton(currentStep)
 
 
+    const ensureMetamaskConnection = async (): Promise<boolean> => {
+        console.log("Ensure MetaMask connection called");
+
+        // Check if MetaMask is installed
+        if (typeof window.ethereum !== 'undefined') {
+            console.log("MetaMask is installed");
+
+            // Check if MetaMask is connected
+            if (!address || !isConnected) {
+                const metamskConnector = connectors[0] //Metamask
+                connect({ connector: metamskConnector });
+            }
+            return true; // MetaMask is installed
+        } else {
+            alert("MetaMask is not installed");
+            const params = new URLSearchParams(window.location.search)
+            const origin = params.get('origin')!;
+            window.parent.postMessage({ eventName: 'errorMessage', data: "Please install metamask" }, origin);
+            return false; // MetaMask is not installed
+        }
+    };
+
+
+    const handleMetamaskConnect = async () => {
+        try {
+            if (setUser) setUser("user");
+            await ensureMetamaskConnection();
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} />;
+                return <AuthFlow handleStepper={handleStepper} auth={'login'} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'login':
                 return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
             case 'otp':

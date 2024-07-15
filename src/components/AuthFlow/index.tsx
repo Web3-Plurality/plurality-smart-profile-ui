@@ -6,14 +6,15 @@ import './styles.css'
 
 interface AuthFlowProps {
     handleStepper: (step: string) => void
+    handleMetamaskConnect: () => void
 }
 
-const AuthFlow = ({ handleStepper }: AuthFlowProps) => {
+const AuthFlow = ({ handleStepper, handleMetamaskConnect }: AuthFlowProps) => {
     return (
         <>
             <div className='login-buttons'>
                 <SocialButton text={'Login with Email'} icon={mailIcon} handleClick={() => handleStepper('login')} />
-                <SocialButton text={'Login with  Metamask'} icon={metamaskIcon} />
+                <SocialButton text={'Login with Metamask'} icon={metamaskIcon} handleClick={handleMetamaskConnect} />
             </div>
         </>
     )
