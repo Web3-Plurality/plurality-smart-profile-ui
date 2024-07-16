@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom"
 import CreateAccount from "../LitComponents/CreateAccount"
 import useSession from "../../hooks/useSession"
 import Dashboard from "../LitComponents/Dashboard"
-import AccountSelection from "../LitComponents/AccountSelection"
 
 import './styles.css'
 
@@ -69,10 +68,10 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     useEffect(() => {
         // If user is authenticated and has selected an account, initialize session
-        if (authMethod && currentAccount) {
-            initSession(authMethod, currentAccount);
+        if (authMethod && accounts.length) {
+            initSession(authMethod, accounts[0]);
         }
-    }, [authMethod, currentAccount, initSession])
+    }, [authMethod, JSON.stringify(accounts), initSession])
 
     if (authLoading) {
         return (
@@ -87,18 +86,9 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     if (sessionLoading) {
         return <Loading copy={'Securing your session...'} error={error} />;
     }
-    if (currentAccount && sessionSigs) {
+    if (accounts.length && sessionSigs) {
         return (
-            <Dashboard currentAccount={currentAccount} handleStepper={handleStepper} />
-        );
-    }
-    if (authMethod && accounts.length > 0) {
-        return (
-            <AccountSelection
-                accounts={accounts}
-                setCurrentAccount={setCurrentAccount}
-                error={error}
-            />
+            <Dashboard currentAccount={accounts[0]} handleStepper={handleStepper} />
         );
     }
 
