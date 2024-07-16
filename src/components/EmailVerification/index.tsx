@@ -48,7 +48,8 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     useEffect(() => {
         const registerInBackend = async () => {
-            await authWithStytch(finalPayload.session, finalPayload.session, finalPayload.method);
+            console.log("data", finalPayload.session, finalPayload.session, finalPayload.method)
+            await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
         }
         registerInBackend()
     }, [])
