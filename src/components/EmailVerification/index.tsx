@@ -1,11 +1,10 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import { PayloadDataType } from "../../globalTypes"
 import useAuthenticate from "../../hooks/useAuthenticate"
 import Loading from "../LitComponents/Loading"
 import useAccounts from "../../hooks/useAccount"
 import { useNavigate } from "react-router-dom"
-import CreateAccount from "../LitComponents/CreateAccount"
 import useSession from "../../hooks/useSession"
 import Dashboard from "../LitComponents/Dashboard"
 
@@ -18,6 +17,7 @@ interface EmailLoginProps {
 }
 
 const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => {
+    const isEntered = useRef<boolean>(false);
     const navigate = useNavigate();
     const {
         authMethod,
@@ -92,8 +92,9 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         );
     }
 
-    if (authMethod && accounts.length === 0) {
-        return <CreateAccount signUp={goToSignUp} error={error} />;
+    if (authMethod && accounts.length === 0 && !isEntered.current) {
+        isEntered.current = true;
+        goToSignUp();
     }
 }
 
