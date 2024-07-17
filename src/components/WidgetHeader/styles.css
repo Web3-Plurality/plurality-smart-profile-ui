@@ -5,6 +5,10 @@
     align-items: center;
 }
 
+.toogleShow {
+    display: none;
+}
+
 .widget-header h1 {
     font-size: 30px;
     text-align: center;

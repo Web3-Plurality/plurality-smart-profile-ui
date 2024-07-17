@@ -25,6 +25,7 @@ const OTPVerification = ({
     const [timer, setTimer] = useState(30);
     const [timerExpired, setTimerExpired] = useState(false);
     const email = localStorage.getItem('user')
+    const widgetHeader = document.getElementById('w-header');
 
     useEffect(() => {
         if (timer > 0) {
@@ -74,8 +75,17 @@ const OTPVerification = ({
         }
     }
 
-    if (loading || isLoading) {
-        return <Loading copy={'Sending OTP...'} />;
+    if (loading) {
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Verifying OTP...'} />;
+    }
+    if (isLoading) {
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Re-sending OTP...'} />;
+    }
+
+    if (!loading && !isLoading) {
+        widgetHeader?.classList.remove('toogleShow')
     }
 
     return (
