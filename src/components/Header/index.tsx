@@ -35,7 +35,6 @@ const Header = () => {
                     <span>John Doe</span>
                     <div className='icon-box'>
                         <CustomIcon path={BadgeIcon} />
-                        {/* <Drawer /> */}
                     </div>
                 </div>
                 <Drawer handleLogout={handleLogout} handleStepper={handleStepper} />
