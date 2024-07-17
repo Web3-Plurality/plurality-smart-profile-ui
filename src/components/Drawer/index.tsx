@@ -1,29 +1,27 @@
-import type { MenuProps } from 'antd';
-import { Dropdown, Space } from 'antd';
+import { Dropdown, Menu, Space } from 'antd';
 
 
 
 const Drawer = ({ handleLogout, handleStepper }: { handleLogout: () => void, handleStepper: (val: string) => void }) => {
-    const items: MenuProps['items'] = [
-        {
-            key: '1',
-            label: (
-                <span role='button' tabIndex={0} onClick={handleLogout}>Logout</span>
-            ),
-        },
-        {
-            key: '2',
-            label: (
-                <span role='button' tabIndex={0} onClick={() => handleStepper('digitalWardrobe')}>Digital Wardrobe</span>
-            ),
-        },
+    const handleMenuClick = (key: string) => {
+        if (key === '1') {
+            handleLogout();
+        } else if (key === '2') {
+            handleStepper('digitalWardrobe');
+        }
+    };
 
-    ];
+    const menu = (
+        <Menu onClick={({ key }) => handleMenuClick(key)}>
+            <Menu.Item key="1">Logout</Menu.Item>
+            <Menu.Item key="2">Digital Wardrobe</Menu.Item>
+        </Menu>
+    );
 
     return (
         <Space direction="vertical">
             <Space wrap>
-                <Dropdown menu={{ items }} placement="bottomLeft" trigger={['click']}>
+                <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
                     <div className="avatar"></div>
                 </Dropdown>
             </Space>
