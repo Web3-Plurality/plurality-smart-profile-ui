@@ -29,8 +29,6 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     const {
         createAccount,
         fetchAccounts,
-        setCurrentAccount,
-        currentAccount,
         accounts,
         loading: accountsLoading,
         error: accountsError,

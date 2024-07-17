@@ -38,7 +38,6 @@ const Login = () => {
         } else {
             handleStepper('initial')
         }
-        console.log("Address: ", address)
     }, [address])
 
 
@@ -132,7 +131,7 @@ const Login = () => {
             case 'digitalWardrobeConnect':
                 return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
             default:
-                return <div>Test div</div>;
+                return <div>Something went wrong!</div>;
         }
     };
 

@@ -95,7 +95,12 @@
    bottom: 2.9%;
    display: flex;
    justify-content: center;
-   align-items: center
+   align-items: center;
+   gap: 10px;
+ }
+
+ .footer span {
+   color: #4F4F4F;
  }
 
  .back-btn {

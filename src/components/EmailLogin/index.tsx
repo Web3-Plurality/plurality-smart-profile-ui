@@ -40,7 +40,6 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     }
 
     if (loading) {
-
         return <div>Loading...</div>
     }
 

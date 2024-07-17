@@ -1,22 +1,28 @@
 .otp-field>input {
     width: 3rem;
     height: 2.7rem;
-    background: #000000;
-    color: #ffffff;
+    outline: none;
     padding: 0.3rem 0.45rem;
     font-size: 2.3rem;
     font-weight: 500;
     border-radius: 10px;
     border: none;
     margin-left: 1rem;
+    background-color: white;
+    color: black;
     box-shadow:
         2px 2px 5px rgba(128, 128, 128, 1),
         4px 4px 10px rgba(128, 128, 128, 0.4),
-        6px 6px 15px rgba(128, 128, 128, 0.2)
+        6px 6px 15px rgba(128, 128, 128, 0.2);
 }
 
 .otp-field>input:first-child {
     margin-left: 0;
+}
+
+.otp-field>input.input-filled {
+    background-color: black;
+    color: white;
 }
 
 .code-resend {
@@ -29,5 +35,10 @@
 
 .code-resend span:hover {
     cursor: pointer;
-    color: #177EF8
+    color: #177EF8;
+}
+
+.error {
+    color: red;
+    font-size: 0.9rem;
 }

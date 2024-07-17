@@ -6,6 +6,7 @@ import './styles.css'
 import { useStytch } from "@stytch/react";
 import { PayloadDataType } from "../../globalTypes";
 import useStychLogin from "../../hooks/useStychLogin";
+import Loading from "../LitComponents/Loading";
 
 interface OTPVerificationProps {
     methodId: string
@@ -74,8 +75,7 @@ const OTPVerification = ({
     }
 
     if (loading || isLoading) {
-        document.getElementsByClassName('widget-header')
-        return <div>Loading...</div>
+        return <Loading copy={'Sending OTP...'} />;
     }
 
     return (
@@ -85,10 +85,11 @@ const OTPVerification = ({
                 onChange={setOtp}
                 numInputs={6}
                 containerStyle="otp-field"
-                renderInput={(props) => (
+                renderInput={(props, index) => (
                     <input
                         {...props}
                         onKeyPress={handleKeyPress}
+                        className={otp[index] ? 'input-filled' : ''}
                     />
                 )}
             />
