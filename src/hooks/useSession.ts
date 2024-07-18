@@ -24,7 +24,6 @@ export default function useSession() {
         // owner wallet which has the capacity NFT
         const DAPP_OWNER_WALLET = new ethers.Wallet(import.meta.env.VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY);
         // create capacity nft delegation
-        alert(import.meta.env.VITE_APP_PUBLIC_CAPACITY_TOKEN_ID);
         const { capacityDelegationAuthSig } =
         await litNodeClient.createCapacityDelegationAuthSig({
           uses: '1000',
