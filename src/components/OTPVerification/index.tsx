@@ -6,6 +6,7 @@ import './styles.css'
 import { useStytch } from "@stytch/react";
 import { PayloadDataType } from "../../globalTypes";
 import useStychLogin from "../../hooks/useStychLogin";
+import Loading from "../LitComponents/Loading";
 
 interface OTPVerificationProps {
     methodId: string
@@ -24,6 +25,7 @@ const OTPVerification = ({
     const [timer, setTimer] = useState(30);
     const [timerExpired, setTimerExpired] = useState(false);
     const email = localStorage.getItem('user')
+    const widgetHeader = document.getElementById('w-header');
 
     useEffect(() => {
         if (timer > 0) {
@@ -73,9 +75,17 @@ const OTPVerification = ({
         }
     }
 
-    if (loading || isLoading) {
-        document.getElementsByClassName('widget-header')
-        return <div>Loading...</div>
+    if (loading) {
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Verifying OTP...'} />;
+    }
+    if (isLoading) {
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Re-sending OTP...'} />;
+    }
+
+    if (!loading && !isLoading) {
+        widgetHeader?.classList.remove('toogleShow')
     }
 
     return (
@@ -85,10 +95,11 @@ const OTPVerification = ({
                 onChange={setOtp}
                 numInputs={6}
                 containerStyle="otp-field"
-                renderInput={(props) => (
+                renderInput={(props, index) => (
                     <input
                         {...props}
                         onKeyPress={handleKeyPress}
+                        className={otp[index] ? 'input-filled' : ''}
                     />
                 )}
             />

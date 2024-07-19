@@ -4,6 +4,7 @@ import CustomInputField from "../CustomInputField"
 
 import './styles.css'
 import useStychLogin from "../../hooks/useStychLogin"
+import Loading from "../LitComponents/Loading"
 
 
 interface EmailLoginProps {
@@ -15,6 +16,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     const [email, setEmail] = useState('')
+    const widgetHeader = document.getElementById('w-header');
 
     const {
         sendPasscode,
@@ -40,7 +42,10 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     }
 
     if (loading) {
-        return <div>Loading...</div>
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Sendind OTP to your Email...'} />;
+    } else {
+        widgetHeader?.classList.remove('toogleShow')
     }
 
     return (
