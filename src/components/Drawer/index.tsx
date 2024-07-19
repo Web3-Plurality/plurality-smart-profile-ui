@@ -2,6 +2,8 @@ import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
 import { UserAvatar } from '../Avatar';
 
+import './styles.css'
+
 interface DrawerProps {
     handleLogout: () => void;
     handleStepper: (val: string) => void;
