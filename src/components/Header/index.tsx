@@ -1,4 +1,4 @@
-import { useDisconnect } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
 import CustomIcon from '../CustomIcon'
@@ -14,6 +14,7 @@ const Header = () => {
 
     const navigate = useNavigate()
     const { disconnectAsync } = useDisconnect();
+    const { address } = useAccount();
 
     if (!isHeaderVisible) return
 
@@ -28,6 +29,8 @@ const Header = () => {
         navigate('/', { replace: true });
     }
 
+
+
     return (
         <div className='header-wrapper'>
             <div className='user-detail'>
@@ -38,7 +41,11 @@ const Header = () => {
                         {/* <Drawer /> */}
                     </div>
                 </div>
-                <Drawer handleLogout={handleLogout} handleStepper={handleStepper} />
+                <Drawer
+                    handleLogout={handleLogout}
+                    handleStepper={handleStepper}
+                    address={address}
+                />
             </div>
         </div>
     )
