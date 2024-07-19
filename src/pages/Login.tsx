@@ -4,7 +4,7 @@ import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
 import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
-import { getDescription, getTitleText, socialConnectButtons } from '../common/utils';
+import { getDescription, getTitleText, showBackButton, socialConnectButtons } from '../common/utils';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
@@ -23,9 +23,9 @@ const Login = () => {
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
-        email: '',
-        address: '',
-        subscribe: true
+        session: '',
+        userId: '',
+        method: 'email'
     });
 
     const [, setUser] = useState<string>('')
@@ -70,11 +70,8 @@ const Login = () => {
 
     const currentStep = stepHistory[stepHistory.length - 1];
     // const previousStep = stepHistory[stepHistory.length - 2];
-    const showBackButton = stepHistory.length > 1
-        && currentStep !== 'success'
-        && currentStep !== 'socialConnect'
-        && currentStep !== 'initial'
-    // && currentStep !== 'socialConfirmation';
+    const isBackButton = showBackButton(currentStep)
+
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
         console.log("Ensure MetaMask connection called");
@@ -113,14 +110,11 @@ const Login = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} auth={'login'} handleMetamaskConnect={handleMetamaskConnect} />;
+                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'login':
                 return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
-            case 'register':
-                return <AuthFlow handleStepper={handleStepper} auth={'register'} handleMetamaskConnect={handleMetamaskConnect} />;
             case 'otp':
                 return <OTPVerification
-                    address={(address as string)}
                     methodId={methodId}
                     handleStepper={handleStepper}
                     handleFinalPayload={handleFinalPayload}
@@ -145,7 +139,7 @@ const Login = () => {
     return (
         <WidgetLayout
             currentStep={currentStep === 'success'}
-            showBackButton={showBackButton}
+            showBackButton={isBackButton}
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
