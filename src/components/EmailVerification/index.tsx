@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect } from "react"
 
 import { PayloadDataType } from "../../globalTypes"
 import useAuthenticate from "../../hooks/useAuthenticate"
@@ -17,9 +18,6 @@ interface EmailLoginProps {
 }
 
 const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => {
-    const [signUpInitiated, setSignUpInitiated] = useState(false)
-
-
     const navigate = useNavigate();
     const {
         authMethod,
@@ -31,6 +29,7 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     const {
         createAccount,
         fetchAccounts,
+        isFetchTriggered,
         accounts,
         loading: accountsLoading,
         error: accountsError,
@@ -47,13 +46,13 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     useEffect(() => {
         const registerInBackend = async () => {
-            console.log("data", finalPayload.session, finalPayload.session, finalPayload.method)
             await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
         }
         registerInBackend()
     }, [])
 
     const goToSignUp = () => {
+        console.log("Hereee");
         navigate(window.location.pathname, { replace: true });
         createAccount(authMethod!);
     }
@@ -67,18 +66,13 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     }, [authMethod, fetchAccounts, navigate])
 
     useEffect(() => {
-        if (authMethod && !signUpInitiated) {
-            setSignUpInitiated(true);
-            goToSignUp();
-        }
-    }, [authMethod, JSON.stringify(accounts), signUpInitiated]);
-
-    useEffect(() => {
         // If user is authenticated and has selected an account, initialize session
         if (authMethod && accounts.length) {
             initSession(authMethod, accounts[0]);
+        } else if (authMethod && !accounts.length && isFetchTriggered) {
+            goToSignUp();
         }
-    }, [authMethod, JSON.stringify(accounts), initSession])
+    }, [authMethod, JSON.stringify(accounts), initSession, isFetchTriggered])
 
     if (authLoading) {
         return (
@@ -100,10 +94,6 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     }
 
     return
-
-    // if (authMethod && accounts.length === 0) {
-    //     goToSignUp();
-    // }
 }
 
 export default EmailVerification

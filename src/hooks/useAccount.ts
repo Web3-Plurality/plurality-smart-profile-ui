@@ -8,6 +8,7 @@ export default function useAccounts() {
   const [currentAccount, setCurrentAccount] = useState<IRelayPKP>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+  const [isFetchTriggered, setIsFetchTriggered] = useState<boolean>(false)
 
   /**
    * Fetch PKPs tied to given auth method
@@ -21,9 +22,9 @@ export default function useAccounts() {
         const myPKPs = await getPKPs(authMethod);
         // console.log('fetchAccounts pkps: ', myPKPs);
         setAccounts(myPKPs);
+        setIsFetchTriggered(true)
         // If only one PKP, set as current account
         if (myPKPs.length === 1) {
-          console.log("here")
           setCurrentAccount(myPKPs[0]);
         }
       } catch (err) {
@@ -60,6 +61,7 @@ export default function useAccounts() {
     fetchAccounts,
     createAccount,
     setCurrentAccount,
+    isFetchTriggered,
     accounts,
     currentAccount,
     loading,
