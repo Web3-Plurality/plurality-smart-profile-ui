@@ -41,7 +41,6 @@ export default function useStychLogin(email: string, handleMethodId?: (id: strin
         }
     }
 
-
     return {
         sendPasscode,
         setError,

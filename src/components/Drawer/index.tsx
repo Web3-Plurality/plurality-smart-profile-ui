@@ -1,8 +1,15 @@
 import { Dropdown, Menu, Space } from 'antd';
+import { UserAvatar } from '../Avatar';
 
+import './styles.css'
 
+interface DrawerProps {
+    handleLogout: () => void;
+    handleStepper: (val: string) => void;
+    address: `0x${string}` | undefined
+}
 
-const Drawer = ({ handleLogout, handleStepper }: { handleLogout: () => void, handleStepper: (val: string) => void }) => {
+const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
     const handleMenuClick = (key: string) => {
         if (key === '1') {
             handleLogout();
@@ -22,7 +29,9 @@ const Drawer = ({ handleLogout, handleStepper }: { handleLogout: () => void, han
         <Space direction="vertical">
             <Space wrap>
                 <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-                    <div className="avatar"></div>
+                    <div className="avatar">
+                        <UserAvatar address={address} />
+                    </div>
                 </Dropdown>
             </Space>
         </Space>
