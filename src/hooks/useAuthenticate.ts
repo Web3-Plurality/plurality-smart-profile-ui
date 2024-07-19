@@ -1,26 +1,11 @@
 import { useCallback, useState } from 'react';
-// import {
-//   isSignInRedirect,
-//   getProviderFromUrl,
-// } from '@lit-protocol/lit-auth-client';
 import { AuthMethod } from '@lit-protocol/types';
 import { authenticateWithStytch } from '../common/lit';
-// import { useConnect } from 'wagmi';
-
-// redirectUri?: string
 
 export default function useAuthenticate() {
   const [authMethod, setAuthMethod] = useState<AuthMethod>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
-
-
-  // wagmi hook (UPDATE REQUIRED)
-//   const { connectAsync } = useConnect({
-//     onError: (err: unknown) => {
-//       setError(err as Error);
-//     },
-//   });
 
   /**
    * Authenticate with Stytch

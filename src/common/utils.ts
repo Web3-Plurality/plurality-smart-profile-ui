@@ -129,8 +129,6 @@ export const showHeader = (currentStep: string) => {
     return true
 }
 
-console.log("Temp")
-
 export const showBackButton = (currentStep: string) => {
     if( 
         currentStep !== 'success'

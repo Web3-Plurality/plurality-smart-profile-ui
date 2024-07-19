@@ -56,7 +56,6 @@ export default function useSession() {
             chainId: 1,
           });
   
-          console.log("this is used");
           return response.authSig;
         };
         
@@ -88,39 +87,16 @@ export default function useSession() {
 
         setSessionSigs(sessionSigs);
 
-
-        // try signing via lit action --> works
-        const res = await litNodeClient.executeJs({
-          sessionSigs: sessionSigs,
-          code: `(async () => {
-              const sigShare = await LitActions.signEcdsa({
-                toSign: dataToSign,
-                publicKey,
-                sigName: "sig",
-              });
-            })();`,
-          authMethods: [],
-          jsParams: {     // parameters to js function above
-            dataToSign: ethers.utils.arrayify(
-              ethers.utils.keccak256([1, 2, 3, 4, 5])
-            ),
-            publicKey: pkp.publicKey,
-          },
-        });
-      
-        console.log("signature result ", res); // ----> This works
-
-        const pkpWallet = new PKPEthersWallet({
-          controllerSessionSigs: sessionSigs,
-          pkpPubKey: pkp.publicKey,
-          litNetwork: 'habanero',
-          debug: true
-        });
-        await pkpWallet.init();
+        // Example of how to create a pkp wallet
+        // const pkpWallet = new PKPEthersWallet({
+        //   controllerSessionSigs: sessionSigs,
+        //   pkpPubKey: pkp.publicKey,
+        //   litNetwork: 'habanero',
+        //   debug: true
+        // });
+        // await pkpWallet.init();
   
-        const signature = await pkpWallet.signMessage('Free the web!');  // -----> this returns timeout
-        console.log(signature);
-
+        // const signature = await pkpWallet.signMessage('Free the web!');  // -----> this returns timeout
       } catch (err) {
         setError(err as Error);
       } finally {

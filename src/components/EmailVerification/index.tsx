@@ -44,18 +44,17 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
 
     const error = authError || accountsError || sessionError;
 
+    const goToSignUp = () => {
+        navigate(window.location.pathname, { replace: true });
+        createAccount(authMethod!);
+    }
+
     useEffect(() => {
         const registerInBackend = async () => {
             await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
         }
         registerInBackend()
     }, [])
-
-    const goToSignUp = () => {
-        console.log("Hereee");
-        navigate(window.location.pathname, { replace: true });
-        createAccount(authMethod!);
-    }
 
     useEffect(() => {
         // If user is authenticated, fetch accounts
@@ -72,7 +71,7 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         } else if (authMethod && !accounts.length && isFetchTriggered) {
             goToSignUp();
         }
-    }, [authMethod, JSON.stringify(accounts), initSession, isFetchTriggered])
+    }, [JSON.stringify(accounts), initSession, isFetchTriggered])
 
     if (authLoading) {
         return (
