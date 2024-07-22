@@ -64,8 +64,13 @@
    padding: 60px 0;
  }
 
+ .widget-content h1 {
+   margin-top: 0;
+ }
+
  .showHeaderLogo {
    padding: 10px;
+   margin-top: 16px;
  }
 
  .digitalWardrobeConnect {

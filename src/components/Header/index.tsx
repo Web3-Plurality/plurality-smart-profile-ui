@@ -8,13 +8,20 @@ import './styles.css'
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+    const navigate = useNavigate()
+
     const { stepHistory, handleStepper } = useStep();
     const currentStep = stepHistory[stepHistory.length - 1];
     const isHeaderVisible = showHeader(currentStep)
 
-    const navigate = useNavigate()
+    const litAccount = localStorage.getItem('lit-wallet-sig')
+    let litAddress = ''
+    if (litAccount) {
+        litAddress = JSON.parse(litAccount).address
+    }
+
     const { disconnectAsync } = useDisconnect();
-    const { address } = useAccount();
+    const { address: metamaskAddress } = useAccount();
 
     if (!isHeaderVisible) return
 
@@ -43,7 +50,7 @@ const Header = () => {
                 <Drawer
                     handleLogout={handleLogout}
                     handleStepper={handleStepper}
-                    address={address}
+                    address={metamaskAddress ?? litAddress ?? ''}
                 />
             </div>
         </div>

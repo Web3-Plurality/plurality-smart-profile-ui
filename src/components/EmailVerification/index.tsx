@@ -7,17 +7,19 @@ import Loading from "../LitComponents/Loading"
 import useAccounts from "../../hooks/useAccount"
 import { useNavigate } from "react-router-dom"
 import useSession from "../../hooks/useSession"
-import Dashboard from "../LitComponents/Dashboard"
 
 import './styles.css'
+
 
 
 interface EmailLoginProps {
     finalPayload: PayloadDataType
     handleStepper: (step: string) => void
+    onError: () => void
+
 }
 
-const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => {
+const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginProps) => {
     const navigate = useNavigate();
     const {
         authMethod,
@@ -43,6 +45,7 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
     } = useSession();
 
     const error = authError || accountsError || sessionError;
+
 
     const goToSignUp = () => {
         navigate(window.location.pathname, { replace: true });
@@ -87,9 +90,12 @@ const EmailVerification = ({ finalPayload, handleStepper }: EmailLoginProps) => 
         return <Loading copy={'Securing your session...'} error={error} />;
     }
     if (accounts.length && sessionSigs) {
-        return (
-            <Dashboard currentAccount={accounts[0]} handleStepper={handleStepper} />
-        );
+        handleStepper("dashboard")
+    }
+
+    if (error) {
+        onError();
+        return null
     }
 
     return

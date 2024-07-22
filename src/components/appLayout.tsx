@@ -31,6 +31,7 @@ const WidgetLayout = ({
     const { stepHistory } = useStep();
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
+
     return (
         <div className="wrapper">
             <div className={classNames('widget', { widgetbg: showBackgroundImage })}>
