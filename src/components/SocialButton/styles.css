@@ -22,6 +22,10 @@
     gap: 5px;
 }
 
+.button-content-left .ant-image {
+    width: 30px;
+}
+
 .button-content-left p {
     padding: 0 !important;
     color: #4F4F4F;

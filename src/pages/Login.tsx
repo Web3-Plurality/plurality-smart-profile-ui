@@ -1,19 +1,28 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from 'react';
+import { message } from 'antd';
+import { useAccount, useConnect } from 'wagmi';
 import { useStep } from '../context/StepContext';
 import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
 import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
-import { getDescription, getTitleText, showBackButton, socialConnectButtons } from '../common/utils';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
 import SocialConnect from '../components/SocailConnect';
-import { useEffect, useState } from 'react';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
+import Dashboard from '../components/LitComponents/Dashboard';
+import {
+    getDescription,
+    getTitleText,
+    showBackButton,
+    showHeader,
+    socialConnectButtons
+} from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
-import { useAccount, useConnect } from 'wagmi';
+
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -28,17 +37,30 @@ const Login = () => {
         method: 'email'
     });
 
+    const widgetHeader = document.getElementById('w-header');
+    widgetHeader?.classList.remove('toogleShow')
+
+    const storedLitAccount = localStorage.getItem('lit-wallet-sig')
+    let litAddress = ''
+    if (storedLitAccount) {
+        litAddress = JSON.parse(storedLitAccount).address
+    }
+
     const [, setUser] = useState<string>('')
-    const { address, isConnected } = useAccount();
+    const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
 
     useEffect(() => {
-        if (address) {
+        if (metamaskAddress && currentStep === 'initial') {
             handleStepper("success")
+        } else if (litAddress || metamaskAddress) {
+            handleStepper(currentStep)
         } else {
-            handleStepper('initial')
+            if (showHeader(currentStep)) {
+                handleStepper('initial')
+            }
         }
-    }, [address])
+    }, [metamaskAddress])
 
 
     const handleIconClick = (index: number) => {
@@ -64,11 +86,16 @@ const Login = () => {
         setFinalPayload(data)
     }
 
+    const handleVerificationError = () => {
+        handleStepper('initial');
+        message.error('Something went wrong. Please try again.');
+    };
+
+
     const allowContinue = (activeStates.filter((item) => item)).length > 0
 
 
     const currentStep = stepHistory[stepHistory.length - 1];
-    // const previousStep = stepHistory[stepHistory.length - 2];
     const isBackButton = showBackButton(currentStep)
 
 
@@ -80,7 +107,7 @@ const Login = () => {
             console.log("MetaMask is installed");
 
             // Check if MetaMask is connected
-            if (!address || !isConnected) {
+            if (!metamaskAddress || !isConnected) {
                 const metamskConnector = connectors[0] //Metamask
                 connect({ connector: metamskConnector });
             }
@@ -119,7 +146,7 @@ const Login = () => {
                     handleFinalPayload={handleFinalPayload}
                 />;
             case 'verification':
-                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} />
+                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} onError={handleVerificationError} />
             case 'success':
                 return <AuthSuccess handleStepper={handleStepper} />
             case 'socialConnect':
@@ -130,6 +157,8 @@ const Login = () => {
                 return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
             case 'digitalWardrobeConnect':
                 return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
+            case 'dashboard':
+                return <Dashboard currentAccount={litAddress} handleStepper={handleStepper} />
             default:
                 return <div>Something went wrong!</div>;
         }

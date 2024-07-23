@@ -2,7 +2,7 @@ import { IRelayPKP } from '@lit-protocol/types';
 import CustomButtom from '../CustomButton';
 
 interface DashboardProps {
-    currentAccount: IRelayPKP;
+    currentAccount: string;
     handleStepper: (val: string) => void
 }
 
@@ -15,7 +15,7 @@ export default function Dashboard({
         <div className="dashboard-container">
             <h1>Ready for the open web</h1>
             <div className="details-card">
-                <p>My address: {currentAccount.ethAddress.toLowerCase()}</p>
+                <p>My address: {currentAccount?.toLowerCase()}</p>
             </div>
             <div className="divider"></div>
             <div className="message-card">

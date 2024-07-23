@@ -25,7 +25,6 @@ export default function useStychLogin(email: string, handleMethodId?: (id: strin
                 localStorage.setItem("user", email);
 
                 const response = await stytchClient.otps.email.loginOrCreate(email, options);
-                console.log("response", response);
     
                 handleMethodId?.(response.method_id);
 

@@ -22,7 +22,8 @@ const client = createConfig({
   chains: [goerli, mainnet, optimism],
   connectors: [
     metaMask({
-      extensionOnly: true
+      extensionOnly: true,
+      injectProvider: true
     }),
     safe({
       shimDisconnect: true,
@@ -45,7 +46,7 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <StytchProvider stytch={stytch}>
               <Router>
-              <Header />
+                <Header />
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="*" element={<NotFound />} />

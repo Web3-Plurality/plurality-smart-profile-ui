@@ -124,6 +124,7 @@ export const showHeader = (currentStep: string) => {
         && currentStep !== 'socialConfirmation'
         && currentStep !== 'digitalWardrobe'
         && currentStep !== 'digitalWardrobeConnect'
+        && currentStep !== 'dashboard'
     ) return false
 
     return true
@@ -135,6 +136,7 @@ export const showBackButton = (currentStep: string) => {
         && currentStep !== 'socialConnect'
         && currentStep !== 'initial'
         && currentStep !== 'verification'
+        && currentStep !== 'dashboard'
     ) return true
     return false
 }
