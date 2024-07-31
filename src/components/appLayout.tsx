@@ -4,6 +4,7 @@ import HeaderLogo from '../assets/svgIcons/fw-logo.svg';
 import classNames from 'classnames';
 import WidgetHeader from './WidgetHeader';
 import { useStep } from '../context/StepContext';
+import Loading from './LitComponents/Loading';
 
 interface WidgetLayoutProps {
     children: ReactNode,
@@ -14,6 +15,8 @@ interface WidgetLayoutProps {
     description: string,
     showBackButton: boolean
     showHeaderLogo: boolean,
+    isLoading: boolean,
+    selectedSocial: string,
     handleBack: () => void,
 }
 
@@ -26,6 +29,8 @@ const WidgetLayout = ({
     description,
     showBackButton,
     showHeaderLogo,
+    isLoading,
+    selectedSocial,
     handleBack
 }: WidgetLayoutProps) => {
     const { stepHistory } = useStep();
@@ -35,22 +40,30 @@ const WidgetLayout = ({
     return (
         <div className="wrapper">
             <div className={classNames('widget', { widgetbg: showBackgroundImage })}>
-                <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
-                    {showHeaderLogo && <img className="mvfw-logo" src={HeaderLogo} alt='' />}
-                    <WidgetHeader title={title} description={description} currentStep={currentStep} />
-                    {children}
-                </div>
-                <div
-                    onClick={handleBack}
-                    className={classNames('back-btn', { hideBtn: !showBackButton })}>
-                    Back
-                </div>
+                {isLoading ? (
+                    <Loading copy={`Connecting Your ${selectedSocial} Account...`} />
+                ) : (
+                    <>
+                        <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
 
-                {!showHeaderLogo && <div
-                    className='back-btn'
-                >
-                    {socialsFooter}
-                </div>}
+                            {showHeaderLogo && <img className="mvfw-logo" src={HeaderLogo} alt='' />}
+                            <WidgetHeader title={title} description={description} currentStep={currentStep} />
+                            {children}
+                        </div>
+                        <div
+                            onClick={handleBack}
+                            className={classNames('back-btn', { hideBtn: !showBackButton })}>
+                            Back
+                        </div>
+
+                        {!showHeaderLogo && <div
+                            className='back-btn'
+                        >
+                            {socialsFooter}
+                        </div>}
+                    </>
+                )}
+
             </div>
             <div className='footer'>
                 <span>Powered By</span>

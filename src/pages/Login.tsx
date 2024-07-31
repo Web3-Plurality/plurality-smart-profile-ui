@@ -24,7 +24,6 @@ import {
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import Loading from '../components/LitComponents/Loading';
 import { BASE_URL, FACEBOOK_ROUTE, FORTNITE_ROUTE, INSTAGRAM_ROUTE, ROBLOX_ROUTE, SNAPCHAT_ROUTE } from '../common/constants';
 
 
@@ -207,11 +206,6 @@ const Login = () => {
         }
     };
 
-
-    if (isLoading) {
-        <Loading copy='Snapchat Loading' />
-    }
-
     return (
         <WidgetLayout
             currentStep={currentStep === 'success'}
@@ -223,9 +217,10 @@ const Login = () => {
             }
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
+            isLoading={isLoading}
+            selectedSocial={selectedSocial}
         >
             {conditionalRendrer()}
-            {/* {metamaskAddress && <button onClick={connectInstagram}>Connect Instagram</button>} */}
         </WidgetLayout >
     );
 };
