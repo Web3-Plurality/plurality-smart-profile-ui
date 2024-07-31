@@ -1,0 +1,23 @@
+.header-wrapper {
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: flex-end;
+    padding: 16px;
+    background-color: #EFEFEF;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+}
+
+.user-detail {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.icon-box {
+    display: flex;
+    justify-content: flex-end;
+}

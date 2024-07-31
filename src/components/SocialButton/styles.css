@@ -1,0 +1,39 @@
+.social-btn {
+    min-width: 350px;
+    height: auto;
+    padding: 0 20px;
+    border-radius: 10px;
+    border: none;
+    background-color: #ffffff;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.09);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.ant-image-mask {
+    display: none;
+}
+
+.button-content-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.button-content-left .ant-image {
+    width: 30px;
+}
+
+.button-content-left p {
+    padding: 0 !important;
+    color: #4F4F4F;
+    font-size: 17px;
+    font-family: 'Lexend';
+}
+
+.social-btn:hover {
+    border: none;
+    color: black !important;
+}
