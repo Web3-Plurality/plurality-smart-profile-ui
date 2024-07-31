@@ -10,9 +10,10 @@ import { StytchUIClient } from '@stytch/vanilla-js';
 
 import { WagmiProvider } from 'wagmi';
 import { goerli, mainnet, optimism } from 'wagmi/chains';
-import { metaMask, safe } from 'wagmi/connectors';
+import { metaMask } from 'wagmi/connectors';
 import { http, createConfig } from '@wagmi/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import CallBackUrl from './pages/CallBackUrl';
 
 const stytch = new StytchUIClient(
   import.meta.env.VITE_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
@@ -25,9 +26,9 @@ const client = createConfig({
       extensionOnly: true,
       injectProvider: true
     }),
-    safe({
-      shimDisconnect: true,
-    })
+    // safe({
+    //   shimDisconnect: true,
+    // })
   ],
   transports: {
     [mainnet.id]: http(),
@@ -49,6 +50,7 @@ function App() {
                 <Header />
                 <Routes>
                   <Route path="/" element={<Login />} />
+                  <Route path="/auth-pages/login" element={<CallBackUrl />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Router>

@@ -3,7 +3,6 @@ import { CopyOutlined } from '@ant-design/icons';
 import { UserAvatar } from '../Avatar';
 
 import './styles.css'
-import { useState } from 'react';
 
 interface DrawerProps {
     handleLogout: () => void;
@@ -12,7 +11,6 @@ interface DrawerProps {
 }
 
 const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
-    const [copied, setCopied] = useState(false);
     const handleMenuClick = (key: string) => {
         if (key === '1') {
             handleLogout();
@@ -23,8 +21,6 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000); // Reset copied state after 2 seconds
         message.success('Address copied!');
     };
 
@@ -40,11 +36,7 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
             <Menu.Item key="1">Logout</Menu.Item>
             <Menu.Item key="2">Digital Wardrobe</Menu.Item>
             <Menu.Item key="3" onClick={handleCopyAddress}>
-                {copied ? 'Copied!' : (
-                    <>
-                        {shortenAddress(address)} <CopyOutlined />
-                    </>
-                )}
+                {shortenAddress(address)} <CopyOutlined />
             </Menu.Item>
         </Menu>
     );

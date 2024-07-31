@@ -17,25 +17,66 @@ import Dashboard from '../components/LitComponents/Dashboard';
 import {
     getDescription,
     getTitleText,
+    queryParams,
     showBackButton,
     showHeader,
     socialConnectButtons
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
+import { useRegisterEvent } from '../common/eventListner';
+import Loading from '../components/LitComponents/Loading';
+import { BASE_URL, FACEBOOK_ROUTE, FORTNITE_ROUTE, INSTAGRAM_ROUTE, ROBLOX_ROUTE, SNAPCHAT_ROUTE } from '../common/constants';
 
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
+    const { message: eventMessage, app } = useRegisterEvent();
+
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
+    const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
         method: 'email'
     });
+
+    const RouteMapper = (app: string) => {
+        switch (app) {
+            case 'instagram':
+                return INSTAGRAM_ROUTE
+            case 'snapchat':
+                return SNAPCHAT_ROUTE
+            case 'roblox':
+                return ROBLOX_ROUTE
+            case 'fortnite':
+                return FORTNITE_ROUTE
+            default:
+                return FACEBOOK_ROUTE
+        }
+    }
+
+    const socailConnect = (appName: string) => {
+        setIsLoading(true)
+        const ApppRoute = RouteMapper(appName)
+        const newWindow = window.open(`${BASE_URL}${ApppRoute}${queryParams}`, `oauth-${appName}`, 'width=500,height=600');
+        if (!newWindow) {
+            alert('Failed to open window. It might be blocked by a popup blocker.');
+        }
+    };
+
+    useEffect(() => {
+        const newActiveStates = [...activeStates];
+        if (activeIndex) {
+            newActiveStates[activeIndex] = !newActiveStates[activeIndex];
+        }
+        setActiveStates(newActiveStates);
+        setIsLoading(false)
+    }, [eventMessage, app]);
 
     const widgetHeader = document.getElementById('w-header');
     widgetHeader?.classList.remove('toogleShow')
@@ -68,9 +109,12 @@ const Login = () => {
             setSelectedSocial(socialConnectButtons[index].displayName)
             handleStepper('socialConfirmation')
         } else {
-            const newActiveStates = [...activeStates];
-            newActiveStates[index] = !newActiveStates[index];
-            setActiveStates(newActiveStates);
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLocaleLowerCase();
+            setActiveIndex(index)
+            console.log("clickedIconDisplayName", clickedIconDisplayName)
+
+            /// OAUTH HANDLER FUNCTION
+            socailConnect(clickedIconDisplayName);
         }
     };
 
@@ -89,7 +133,7 @@ const Login = () => {
     const handleVerificationError = () => {
         handleStepper('initial');
         message.error('Something went wrong. Please try again.');
-    };
+    }
 
 
     const allowContinue = (activeStates.filter((item) => item)).length > 0
@@ -97,7 +141,6 @@ const Login = () => {
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
-
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
         console.log("Ensure MetaMask connection called");
@@ -164,6 +207,11 @@ const Login = () => {
         }
     };
 
+
+    if (isLoading) {
+        <Loading copy='Snapchat Loading' />
+    }
+
     return (
         <WidgetLayout
             currentStep={currentStep === 'success'}
@@ -177,6 +225,7 @@ const Login = () => {
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
         >
             {conditionalRendrer()}
+            {/* {metamaskAddress && <button onClick={connectInstagram}>Connect Instagram</button>} */}
         </WidgetLayout >
     );
 };
