@@ -27,28 +27,32 @@ import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import { BASE_URL } from '../common/constants';
 
-
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
     const { message: eventMessage, app } = useRegisterEvent();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
-    const [selectedSocial, setSelectedSocial] = useState('')
-    const [selectedNFT, setSelectedNFT] = useState('')
-    const [methodId, setMethodId] = useState<string>('')
-    const [activeIndex, setActiveIndex] = useState<number | null>(null)
+    // Initialize activeStates from localStorage
+    const storedActiveStates = localStorage.getItem('activeStates');
+    const initialActiveStates = storedActiveStates ? JSON.parse(storedActiveStates) : socialConnectButtons.map(button => button.active);
+    const [activeStates, setActiveStates] = useState(initialActiveStates);
+    const [selectedSocial, setSelectedSocial] = useState('');
+    const [selectedNFT, setSelectedNFT] = useState('');
+    const [methodId, setMethodId] = useState<string>('');
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
         method: 'email'
     });
 
+    useEffect(() => {
+        // Update localStorage whenever activeStates change
+        localStorage.setItem('activeStates', JSON.stringify(activeStates));
+    }, [activeStates]);
 
     const socailConnect = (appName: string) => {
-        // setIsLoading(true)
-        const ApppRoute = RouteMapper(appName)
+        const ApppRoute = RouteMapper(appName);
         const newWindow = window.open(`${BASE_URL}${ApppRoute}${queryParams}`, `oauth-${appName}`, 'width=500,height=600');
         if (!newWindow) {
             alert('Failed to open window. It might be blocked by a popup blocker.');
@@ -61,95 +65,81 @@ const Login = () => {
             newActiveStates[activeIndex] = !newActiveStates[activeIndex];
         }
         setActiveStates(newActiveStates);
-        setIsLoading(false)
+        setIsLoading(false);
     }, [eventMessage, app]);
 
     const widgetHeader = document.getElementById('w-header');
-    widgetHeader?.classList.remove('toogleShow')
+    widgetHeader?.classList.remove('toogleShow');
 
-    const storedLitAccount = localStorage.getItem('lit-wallet-sig')
-    let litAddress = ''
+    const storedLitAccount = localStorage.getItem('lit-wallet-sig');
+    let litAddress = '';
     if (storedLitAccount) {
-        litAddress = JSON.parse(storedLitAccount).address
+        litAddress = JSON.parse(storedLitAccount).address;
     }
 
-    const [, setUser] = useState<string>('')
+    const [, setUser] = useState<string>('');
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
 
     useEffect(() => {
         if (metamaskAddress && currentStep === 'initial') {
-            handleStepper("success")
+            handleStepper("success");
         } else if (litAddress || metamaskAddress) {
-            handleStepper(currentStep)
+            handleStepper(currentStep);
         } else {
             if (showHeader(currentStep)) {
-                handleStepper('initial')
+                handleStepper('initial');
             }
         }
-    }, [metamaskAddress])
-
+    }, [metamaskAddress]);
 
     const handleIconClick = (index: number) => {
         if (activeStates[index]) {
-            setSelectedSocial(socialConnectButtons[index].displayName)
-            handleStepper('socialConfirmation')
+            setSelectedSocial(socialConnectButtons[index].displayName);
+            handleStepper('socialConfirmation');
         } else {
             const clickedIconDisplayName = socialConnectButtons[index].displayName.toLocaleLowerCase();
-            setActiveIndex(index)
-            console.log("clickedIconDisplayName", clickedIconDisplayName)
-
-            /// OAUTH HANDLER FUNCTION
+            setActiveIndex(index);
             socailConnect(clickedIconDisplayName);
         }
     };
 
     const handleSelectedNFT = (nft: string) => {
-        setSelectedNFT(nft)
-    }
+        setSelectedNFT(nft);
+    };
 
     const handleMethodId = (id: string) => {
-        setMethodId(id)
-    }
+        setMethodId(id);
+    };
 
     const handleFinalPayload = (data: PayloadDataType) => {
-        setFinalPayload(data)
-    }
+        setFinalPayload(data);
+    };
 
     const handleVerificationError = () => {
         handleStepper('initial');
         message.error('Something went wrong. Please try again.');
-    }
+    };
 
-
-    const allowContinue = (activeStates.filter((item) => item)).length > 0
-
-
+    const allowContinue = (activeStates.filter((item: boolean) => item)).length > 0;
     const currentStep = stepHistory[stepHistory.length - 1];
-    const isBackButton = showBackButton(currentStep)
+    const isBackButton = showBackButton(currentStep);
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
-        console.log("Ensure MetaMask connection called");
-
-        // Check if MetaMask is installed
         if (typeof window.ethereum !== 'undefined') {
-            console.log("MetaMask is installed");
-
-            // Check if MetaMask is connected
             if (!metamaskAddress || !isConnected) {
-                const metamskConnector = connectors[0] //Metamask
+                const metamskConnector = connectors[0]; // Metamask
                 connect({ connector: metamskConnector });
             }
             return true; // MetaMask is installed
         } else {
             alert("MetaMask is not installed");
-            const params = new URLSearchParams(window.location.search)
+            const params = new URLSearchParams(window.location.search);
             const origin = params.get('origin')!;
             window.parent.postMessage({ eventName: 'errorMessage', data: "Please install metamask" }, origin);
             return false; // MetaMask is not installed
         }
     };
-
 
     const handleMetamaskConnect = async () => {
         try {
@@ -159,7 +149,6 @@ const Login = () => {
             console.error(e);
         }
     };
-
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
@@ -175,19 +164,19 @@ const Login = () => {
                     handleFinalPayload={handleFinalPayload}
                 />;
             case 'verification':
-                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} onError={handleVerificationError} />
+                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} onError={handleVerificationError} />;
             case 'success':
-                return <AuthSuccess handleStepper={handleStepper} />
+                return <AuthSuccess handleStepper={handleStepper} />;
             case 'socialConnect':
-                return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
+                return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />;
             case 'socialConfirmation':
-                return <SocialConfirmation selectedSocial={selectedSocial} />
+                return <SocialConfirmation selectedSocial={selectedSocial} />;
             case 'digitalWardrobe':
-                return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
+                return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />;
             case 'digitalWardrobeConnect':
-                return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
+                return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />;
             case 'dashboard':
-                return <Dashboard currentAccount={litAddress} handleStepper={handleStepper} />
+                return <Dashboard currentAccount={litAddress} handleStepper={handleStepper} />;
             default:
                 return <div>Something went wrong!</div>;
         }
@@ -200,15 +189,14 @@ const Login = () => {
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
-            showHeaderLogo={currentStep !== 'socialConnect'
-            }
+            showHeaderLogo={currentStep !== 'socialConnect'}
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
             isLoading={isLoading}
             selectedSocial={selectedSocial}
         >
             {conditionalRendrer()}
-        </WidgetLayout >
+        </WidgetLayout>
     );
 };
 

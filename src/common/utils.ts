@@ -4,12 +4,12 @@ import instaIcon from './../assets/images/insta-icon.png'
 import snapchatIcon from './../assets/images/snapchat-icon.png'
 import robloxIcon from './../assets/images/roblox-icon.png'
 import fortniteIcon from './../assets/images/fortnite-icon.png'
-import SIcon from './../assets/images/s-icon.png'
-import openseaIcon from './../assets//images/opensea-icon.png'
-import oIcon from './../assets/images/o-icon.png'
+// import SIcon from './../assets/images/s-icon.png'
+import decentralandIcon from './../assets//images/decentraland-icon.png'
+import spatialIcon from './../assets/images/spatial-icon.png'
 import metaIcon from './../assets/images/meta-icon.png'
-import appleIcon from './../assets/images/apple-icon.png'
-import journeyIcon from './../assets/images/journey-icon.png'
+// import appleIcon from './../assets/images/apple-icon.png'
+// import journeyIcon from './../assets/images/journey-icon.png'
 
 // Connected Socail icons
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
@@ -17,12 +17,12 @@ import instaIconColored from './../assets/images/insta-icon-colored.png'
 import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
 import robloxIconColored from './../assets/images/roblox-icon-colored.png'
 import fortniteIconColored from './../assets/images/fortnite-icon-colored.png'
-import SIconColored from './../assets/images/s-icon-colored.png'
-import openseaIconColored from './../assets//images/opensea-icon-colored.png'
-import oIconColored from './../assets/images/o-icon-colored.png'
+// import SIconColored from './../assets/images/s-icon-colored.png'
+import decentralandIconColored from './../assets//images/decentraland-icon-colored.png'
+import spatialIconColored from './../assets/images/snapchat-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
-import appleIconColored from './../assets/images/apple-icon-colored.png'
-import journeyIconColored from './../assets/images/journey-icon-colored.png'
+// import appleIconColored from './../assets/images/apple-icon-colored.png'
+// import journeyIconColored from './../assets/images/journey-icon-colored.png'
 
 // Digital Wardrobe Images
 import firstImage from './../assets/images/wardrobe/first.png'
@@ -37,11 +37,14 @@ import ninthImage from './../assets/images/wardrobe/ninth.png'
 
 // Constant Routes
 import {
+    ARTIFICIAL_ROME_ROUTE,
+    DECENTRALAND_ROUTE,
     FACEBOOK_ROUTE,
     FORTNITE_ROUTE,
     INSTAGRAM_ROUTE,
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
+    SPATIAL_ROUTE,
     TIKTOK_ROUTE
 } from './constants'
 
@@ -106,12 +109,12 @@ export const socialConnectButtons = [
     { id: 2, iconName: "snapchat", displayName: 'SnapChat', icon: snapchatIcon, active: false, activeIcon: snapchatIconColored },
     { id: 3, iconName: "roblox", displayName: 'Roblox', icon: robloxIcon, active: false, activeIcon: robloxIconColored },
     { id: 4, iconName: "fortnite", displayName: 'Fortnite', icon: fortniteIcon, active: false, activeIcon: fortniteIconColored },
-    { id: 5, iconName: "sIcon", displayName: 'S', icon: SIcon, active: false, activeIcon: SIconColored },
-    { id: 6, iconName: "opensea", displayName: 'Opensea', icon: openseaIcon, active: false, activeIcon: openseaIconColored },
-    { id: 7, iconName: "oIcon", displayName: 'O', icon: oIcon, active: false, activeIcon: oIconColored },
-    { id: 8, iconName: "meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored },
-    { id: 9, iconName: "apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
-    { id: 10, iconName: "midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
+    { id: 5, iconName: "decentraland ", displayName: 'Decentraland', icon: decentralandIcon, active: false, activeIcon: decentralandIconColored },
+    { id: 6, iconName: "spatial", displayName: 'Spatial', icon: spatialIcon, active: false, activeIcon: spatialIconColored },
+    { id: 7, iconName: "meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored },
+    // { id: 5, iconName: "sIcon", displayName: 'S', icon: SIcon, active: false, activeIcon: SIconColored },
+    // { id: 9, iconName: "apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
+    // { id: 10, iconName: "midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
 ]
 
 export const digitalWardrobeImages = [
@@ -164,6 +167,12 @@ export const RouteMapper = (app: string) => {
             return FORTNITE_ROUTE
         case 'tiktok':
             return TIKTOK_ROUTE
+        case 'decentraland':
+            return DECENTRALAND_ROUTE
+        case 'spatial':
+            return SPATIAL_ROUTE
+        case 'artificialRome':
+            return ARTIFICIAL_ROME_ROUTE
         default:
             return FACEBOOK_ROUTE
     }

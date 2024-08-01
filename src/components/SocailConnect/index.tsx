@@ -9,7 +9,7 @@ interface SocialConnectProps {
 }
 
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
-    const numIcons = 11;
+    const numIcons = 8;
     const circleRadius = 153;
 
     // Calculate the angle between each icon
