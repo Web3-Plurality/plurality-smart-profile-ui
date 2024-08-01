@@ -18,13 +18,14 @@ import {
     getDescription,
     getTitleText,
     queryParams,
+    RouteMapper,
     showBackButton,
     showHeader,
     socialConnectButtons
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import { BASE_URL, FACEBOOK_ROUTE, FORTNITE_ROUTE, INSTAGRAM_ROUTE, ROBLOX_ROUTE, SNAPCHAT_ROUTE } from '../common/constants';
+import { BASE_URL } from '../common/constants';
 
 
 const Login = () => {
@@ -44,23 +45,9 @@ const Login = () => {
         method: 'email'
     });
 
-    const RouteMapper = (app: string) => {
-        switch (app) {
-            case 'instagram':
-                return INSTAGRAM_ROUTE
-            case 'snapchat':
-                return SNAPCHAT_ROUTE
-            case 'roblox':
-                return ROBLOX_ROUTE
-            case 'fortnite':
-                return FORTNITE_ROUTE
-            default:
-                return FACEBOOK_ROUTE
-        }
-    }
 
     const socailConnect = (appName: string) => {
-        setIsLoading(true)
+        // setIsLoading(true)
         const ApppRoute = RouteMapper(appName)
         const newWindow = window.open(`${BASE_URL}${ApppRoute}${queryParams}`, `oauth-${appName}`, 'width=500,height=600');
         if (!newWindow) {
@@ -70,7 +57,7 @@ const Login = () => {
 
     useEffect(() => {
         const newActiveStates = [...activeStates];
-        if (activeIndex) {
+        if (activeIndex !== null) {
             newActiveStates[activeIndex] = !newActiveStates[activeIndex];
         }
         setActiveStates(newActiveStates);

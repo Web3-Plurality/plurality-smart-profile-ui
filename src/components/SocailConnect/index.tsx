@@ -9,7 +9,7 @@ interface SocialConnectProps {
 }
 
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
-    const numIcons = 10;
+    const numIcons = 11;
     const circleRadius = 153;
 
     // Calculate the angle between each icon
@@ -20,24 +20,24 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
             <div className='mid-icon'>
                 <img className="mvfw-logo" src={HeaderLogo} alt='' />
             </div>
-            {socialConnectButtons.map(({ id, icon, activeIcon }, index) => {
+            {socialConnectButtons.map(({ id, icon, activeIcon }) => {
                 // Calculate position for each icon
-                const x = circleRadius * Math.cos(angle * index);
-                const y = circleRadius * Math.sin(angle * index);
+                const x = circleRadius * Math.cos(angle * id);
+                const y = circleRadius * Math.sin(angle * id);
 
                 return (
                     <div
                         key={id}
-                        className={`icon icon${index + 1}`}
+                        className={`icon icon${id}`}
                         style={{
                             position: "absolute",
                             left: `calc(50% + ${x}px - 27px)`, // Adjusted for icon size
                             top: `calc(50% + ${y}px - 25px)`,
                             cursor: 'pointer'
                         }}
-                        onClick={() => handleIconClick(index)}
+                        onClick={() => handleIconClick(id)}
                     >
-                        <CustomIcon path={activeStates[index] ? activeIcon : icon} />
+                        <CustomIcon path={activeStates[id] ? activeIcon : icon} />
                     </div>
                 );
             })}

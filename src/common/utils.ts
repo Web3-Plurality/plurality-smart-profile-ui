@@ -35,6 +35,16 @@ import seventhImage from './../assets/images/wardrobe/seventh.png'
 import eightImage from './../assets/images/wardrobe/eight.png'
 import ninthImage from './../assets/images/wardrobe/ninth.png'
 
+// Constant Routes
+import {
+    FACEBOOK_ROUTE,
+    FORTNITE_ROUTE,
+    INSTAGRAM_ROUTE,
+    ROBLOX_ROUTE,
+    SNAPCHAT_ROUTE,
+    TIKTOK_ROUTE
+} from './constants'
+
 
 export const getTitleText = (prevSteps: string[]) => {
     const currentStep = prevSteps[prevSteps.length - 1];
@@ -91,17 +101,17 @@ export const getDescription = (prevSteps: string[]) => {
 };
 
 export const socialConnectButtons = [
-    { id: 1, iconName: "tiktok", displayName: 'Tiktok', icon: tiktokIcon, active: false, activeIcon: tiktokIconColored },
-    { id: 2, iconName: "insta", displayName: 'Instagram', icon: instaIcon, active: false, activeIcon: instaIconColored },
-    { id: 3, iconName: "snapchat", displayName: 'SnapChat', icon: snapchatIcon, active: false, activeIcon: snapchatIconColored },
-    { id: 4, iconName: "roblox", displayName: 'Roblox', icon: robloxIcon, active: false, activeIcon: robloxIconColored },
-    { id: 5, iconName: "fortnite", displayName: 'Fortnite', icon: fortniteIcon, active: false, activeIcon: fortniteIconColored },
-    { id: 6, iconName: "sIcon", displayName: 'S', icon: SIcon, active: false, activeIcon: SIconColored },
-    { id: 7, iconName: "opensea", displayName: 'Opensea', icon: openseaIcon, active: false, activeIcon: openseaIconColored },
-    { id: 8, iconName: "oIcon", displayName: 'O', icon: oIcon, active: false, activeIcon: oIconColored },
-    { id: 9, iconName: "meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored },
-    { id: 10, iconName: "apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
-    { id: 11, iconName: "midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
+    { id: 0, iconName: "tiktok", displayName: 'Tiktok', icon: tiktokIcon, active: false, activeIcon: tiktokIconColored },
+    { id: 1, iconName: "insta", displayName: 'Instagram', icon: instaIcon, active: false, activeIcon: instaIconColored },
+    { id: 2, iconName: "snapchat", displayName: 'SnapChat', icon: snapchatIcon, active: false, activeIcon: snapchatIconColored },
+    { id: 3, iconName: "roblox", displayName: 'Roblox', icon: robloxIcon, active: false, activeIcon: robloxIconColored },
+    { id: 4, iconName: "fortnite", displayName: 'Fortnite', icon: fortniteIcon, active: false, activeIcon: fortniteIconColored },
+    { id: 5, iconName: "sIcon", displayName: 'S', icon: SIcon, active: false, activeIcon: SIconColored },
+    { id: 6, iconName: "opensea", displayName: 'Opensea', icon: openseaIcon, active: false, activeIcon: openseaIconColored },
+    { id: 7, iconName: "oIcon", displayName: 'O', icon: oIcon, active: false, activeIcon: oIconColored },
+    { id: 8, iconName: "meta", displayName: 'Meta', icon: metaIcon, active: false, activeIcon: metaIconColored },
+    { id: 9, iconName: "apple", displayName: 'Apple', icon: appleIcon, active: false, activeIcon: appleIconColored },
+    { id: 10, iconName: "midJourney", displayName: 'Journey', icon: journeyIcon, active: false, activeIcon: journeyIconColored },
 ]
 
 export const digitalWardrobeImages = [
@@ -139,6 +149,24 @@ export const showBackButton = (currentStep: string) => {
         && currentStep !== 'dashboard'
     ) return true
     return false
+}
+
+
+export const RouteMapper = (app: string) => {
+    switch (app) {
+        case 'instagram':
+            return INSTAGRAM_ROUTE
+        case 'snapchat':
+            return SNAPCHAT_ROUTE
+        case 'roblox':
+            return ROBLOX_ROUTE
+        case 'fortnite':
+            return FORTNITE_ROUTE
+        case 'tiktok':
+            return TIKTOK_ROUTE
+        default:
+            return FACEBOOK_ROUTE
+    }
 }
 
 export const queryParams = '?isWidget=true&origin=false&apps=false'

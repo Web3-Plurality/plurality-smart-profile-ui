@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 const CallBackUrl = () => {
-    useEffect(() => {
+    useLayoutEffect(() => {
         window.close()
-    }, []);
+    }, [])
 
     return <></>
 };
