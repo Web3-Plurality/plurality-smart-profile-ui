@@ -30,7 +30,6 @@ import { BASE_URL } from '../common/constants';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
-    const { message: eventMessage, app } = useRegisterEvent();
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -45,23 +44,35 @@ const Login = () => {
         method: 'email'
     });
 
+    const [, setUser] = useState<string>('')
+    const { address: metamaskAddress, isConnected } = useAccount();
+    const { connect, connectors } = useConnect();
 
-    const socailConnect = (appName: string) => {
-        // setIsLoading(true)
+
+    function socailConnect(appName: string) {
+        setIsLoading(true)
         const ApppRoute = RouteMapper(appName)
         const newWindow = window.open(`${BASE_URL}${ApppRoute}${queryParams}`, `oauth-${appName}`, 'width=500,height=600');
         if (!newWindow) {
             alert('Failed to open window. It might be blocked by a popup blocker.');
         }
-    };
+    }
+
+    const {
+        message: eventMessage,
+        app,
+        registerEvent,
+    } = useRegisterEvent({ socailConnect });
 
     useEffect(() => {
-        const newActiveStates = [...activeStates];
-        if (activeIndex !== null) {
-            newActiveStates[activeIndex] = !newActiveStates[activeIndex];
+        if (eventMessage === 'received') {
+            const newActiveStates = [...activeStates];
+            if (activeIndex !== null) {
+                newActiveStates[activeIndex] = !newActiveStates[activeIndex];
+            }
+            setActiveStates(newActiveStates);
+            setIsLoading(false)
         }
-        setActiveStates(newActiveStates);
-        setIsLoading(false)
     }, [eventMessage, app]);
 
     const widgetHeader = document.getElementById('w-header');
@@ -72,10 +83,6 @@ const Login = () => {
     if (storedLitAccount) {
         litAddress = JSON.parse(storedLitAccount).address
     }
-
-    const [, setUser] = useState<string>('')
-    const { address: metamaskAddress, isConnected } = useAccount();
-    const { connect, connectors } = useConnect();
 
     useEffect(() => {
         if (metamaskAddress && currentStep === 'initial') {
@@ -100,7 +107,7 @@ const Login = () => {
             console.log("clickedIconDisplayName", clickedIconDisplayName)
 
             /// OAUTH HANDLER FUNCTION
-            socailConnect(clickedIconDisplayName);
+            registerEvent(clickedIconDisplayName)
         }
     };
 
