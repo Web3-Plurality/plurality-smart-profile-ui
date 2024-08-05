@@ -19,18 +19,6 @@ export const useRegisterEvent = ({ socailConnect }: { socailConnect: (appName: s
                 console.log('Message: ', event.data)
                 if (message === "received") {
                     fetchUserInfo(app)
-                    // if (app === "twitter") {
-                    //     setIsLoading(true);
-                    //     console.log("Twitter message received");
-                    //     // handleInfoRequestTwitter();
-                    // } else if (app === "tiktok") {
-                    //     console.log("Tiktok message received");
-                    //     // handleInfoRequestTiktok();
-                    // } else if (app === "instagram") {
-                    //     setIsLoading(true);
-                    //     console.log("Instagram message received");
-                    //     // handleInfoRequestInstagram();
-                    // }
                 } else {
                     socailConnect(appName)
                 }
@@ -64,17 +52,6 @@ export const useRegisterEvent = ({ socailConnect }: { socailConnect: (appName: s
             setIsLoading(false)
         }
     }
-
-
-    //   const handleInfoRequest = () => {
-    //     axios.get('https://app.plurality.local/oauth-roblox/info')
-    //       .then(response => {
-    //         console.log('Info:', response.data);
-    //       })
-    //       .catch(error => {
-    //         console.error('Error getting info:', error);
-    //       });
-    //   };
 
     return {
         message,
