@@ -9,7 +9,7 @@ import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
-import SocialConnect from '../components/SocailConnect';
+import SocialConnect from '../components/SocialConnect';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
@@ -17,7 +17,7 @@ import Dashboard from '../components/LitComponents/Dashboard';
 import {
     getDescription,
     getTitleText,
-    queryParams,
+    //queryParams,
     RouteMapper,
     showBackButton,
     showHeader,
@@ -49,10 +49,10 @@ const Login = () => {
     const { connect, connectors } = useConnect();
 
 
-    function socailConnect(appName: string) {
+    function socialConnect(appName: string) {
         setIsLoading(true)
         const ApppRoute = RouteMapper(appName)
-        const newWindow = window.open(`${BASE_URL}${ApppRoute}${queryParams}`, `oauth-${appName}`, 'width=500,height=600');
+        const newWindow = window.open(`${BASE_URL}${ApppRoute}`, `oauth-${appName}`, 'width=500,height=600');
         if (!newWindow) {
             alert('Failed to open window. It might be blocked by a popup blocker.');
         }
@@ -62,7 +62,7 @@ const Login = () => {
         message: eventMessage,
         app,
         registerEvent,
-    } = useRegisterEvent({ socailConnect });
+    } = useRegisterEvent({ socialConnect });
 
     useEffect(() => {
         if (eventMessage === 'received') {

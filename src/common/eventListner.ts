@@ -3,7 +3,7 @@ import { RouteMapper } from './utils'
 import { BASE_URL } from './constants'
 import axios from 'axios'
 
-export const useRegisterEvent = ({ socailConnect }: { socailConnect: (appName: string) => void }) => {
+export const useRegisterEvent = ({ socialConnect }: { socialConnect: (appName: string) => void }) => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
@@ -20,7 +20,7 @@ export const useRegisterEvent = ({ socailConnect }: { socailConnect: (appName: s
                 if (message === "received") {
                     fetchUserInfo(app)
                 } else {
-                    socailConnect(appName)
+                    socialConnect(appName)
                 }
             };
 

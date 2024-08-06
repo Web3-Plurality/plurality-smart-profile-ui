@@ -1,4 +1,4 @@
-// Non connected Socail icons
+// Non connected Social icons
 import tiktokIcon from './../assets//images/tiktok-icon.png'
 import instaIcon from './../assets/images/insta-icon.png'
 import snapchatIcon from './../assets/images/snapchat-icon.png'
@@ -11,7 +11,7 @@ import metaIcon from './../assets/images/meta-icon.png'
 // import appleIcon from './../assets/images/apple-icon.png'
 // import journeyIcon from './../assets/images/journey-icon.png'
 
-// Connected Socail icons
+// Connected Social icons
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
 import instaIconColored from './../assets/images/insta-icon-colored.png'
 import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
@@ -178,4 +178,4 @@ export const RouteMapper = (app: string) => {
     }
 }
 
-export const queryParams = '?isWidget=true&origin=false&apps=false'
+//export const queryParams = '?isWidget=true&origin=false&apps=false'
