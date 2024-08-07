@@ -1,0 +1,45 @@
+name: Semantic Release Docker
+
+on:
+  push:
+    branches: [ "main" ]
+  release:
+    types: [created]
+  workflow_dispatch:
+  
+jobs:
+  semantic_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.email "plurality.web3@gmail.com"
+          git config --global user.name "semantic-release-bot"
+
+      - name: Docker Login
+        run: docker login --username ${{ secrets.GHCR_USERNAME }} --password ${{ secrets.GHCR_TOKEN }} ghcr.io
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          npm install
+      
+      # These values are here on experimental basis - only for testnet for production we would move to a secure backend signer service
+      - name: Prepare Environment files
+        run: |
+          cp .env.production.example .env.production
+          echo "VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY=${{ secrets.LIT_DAPP_OWNER_WALLET_PRIVATE_KEY }}" >> .env.production
+
+      - name: Semantic Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
