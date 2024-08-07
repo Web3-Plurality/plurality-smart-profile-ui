@@ -5,7 +5,6 @@ import { LitAbility, LitActionResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
 import { ethers } from 'ethers';
-import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
