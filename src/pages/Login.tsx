@@ -9,7 +9,7 @@ import OTPVerification from '../components/OTPVerification';
 import AuthFlow from '../components/AuthFlow';
 import EmailVerification from '../components/EmailVerification';
 import AuthSuccess from '../components/AuthSuccess';
-import SocialConnect from '../components/SocailConnect';
+import SocialConnect from '../components/SocialConnect';
 import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
@@ -17,25 +17,63 @@ import Dashboard from '../components/LitComponents/Dashboard';
 import {
     getDescription,
     getTitleText,
+    //queryParams,
+    RouteMapper,
     showBackButton,
     showHeader,
     socialConnectButtons
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
+import { useRegisterEvent } from '../common/eventListner';
+import { BASE_URL } from '../common/constants';
 
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
 
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
+    const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
         method: 'email'
     });
+
+    const [, setUser] = useState<string>('')
+    const { address: metamaskAddress, isConnected } = useAccount();
+    const { connect, connectors } = useConnect();
+
+
+    function socialConnect(appName: string) {
+        setIsLoading(true)
+        const ApppRoute = RouteMapper(appName)
+        const newWindow = window.open(`${BASE_URL}${ApppRoute}`, `oauth-${appName}`, 'width=500,height=600');
+        if (!newWindow) {
+            alert('Failed to open window. It might be blocked by a popup blocker.');
+        }
+    }
+
+    const {
+        message: eventMessage,
+        app,
+        registerEvent,
+    } = useRegisterEvent({ socialConnect });
+
+    useEffect(() => {
+        if (eventMessage === 'received') {
+            const newActiveStates = [...activeStates];
+            if (activeIndex !== null) {
+                newActiveStates[activeIndex] = !newActiveStates[activeIndex];
+            }
+            setActiveStates(newActiveStates);
+            setIsLoading(false)
+        }
+    }, [eventMessage, app]);
 
     const widgetHeader = document.getElementById('w-header');
     widgetHeader?.classList.remove('toogleShow')
@@ -45,10 +83,6 @@ const Login = () => {
     if (storedLitAccount) {
         litAddress = JSON.parse(storedLitAccount).address
     }
-
-    const [, setUser] = useState<string>('')
-    const { address: metamaskAddress, isConnected } = useAccount();
-    const { connect, connectors } = useConnect();
 
     useEffect(() => {
         if (metamaskAddress && currentStep === 'initial') {
@@ -68,9 +102,12 @@ const Login = () => {
             setSelectedSocial(socialConnectButtons[index].displayName)
             handleStepper('socialConfirmation')
         } else {
-            const newActiveStates = [...activeStates];
-            newActiveStates[index] = !newActiveStates[index];
-            setActiveStates(newActiveStates);
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLocaleLowerCase();
+            setActiveIndex(index)
+            console.log("clickedIconDisplayName", clickedIconDisplayName)
+
+            /// OAUTH HANDLER FUNCTION
+            registerEvent(clickedIconDisplayName)
         }
     };
 
@@ -89,7 +126,7 @@ const Login = () => {
     const handleVerificationError = () => {
         handleStepper('initial');
         message.error('Something went wrong. Please try again.');
-    };
+    }
 
 
     const allowContinue = (activeStates.filter((item) => item)).length > 0
@@ -97,7 +134,6 @@ const Login = () => {
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
-
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
         console.log("Ensure MetaMask connection called");
@@ -175,6 +211,8 @@ const Login = () => {
             }
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
+            isLoading={isLoading}
+            selectedSocial={selectedSocial}
         >
             {conditionalRendrer()}
         </WidgetLayout >

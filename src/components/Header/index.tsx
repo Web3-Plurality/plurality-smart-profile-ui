@@ -1,4 +1,5 @@
 import { useAccount, useDisconnect } from 'wagmi';
+import classNames from 'classnames';
 import { showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
 import CustomIcon from '../CustomIcon'
@@ -6,6 +7,9 @@ import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
+
+
+const isIframe = window.location !== window.parent.location
 
 const Header = () => {
     const navigate = useNavigate()
@@ -39,7 +43,7 @@ const Header = () => {
 
 
     return (
-        <div className='header-wrapper'>
+        <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>John Doe</span>
