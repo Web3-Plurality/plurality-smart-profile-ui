@@ -11,19 +11,23 @@ interface DrawerProps {
 }
 
 const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
-    const handleMenuClick = (key: string) => {
-        if (key === '1') {
-            handleLogout();
-        } else if (key === '2') {
-            handleStepper('digitalWardrobe');
-        }
-    };
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);
         message.success('Address copied!');
     };
 
+    const handleMenuClick = (key: string) => {
+        if (key === '1') {
+            handleLogout();
+        } else if (key === '2') {
+            handleStepper('digitalWardrobe');
+        } else if (key === '3') {
+            handleCopyAddress()
+        } else if (key === '4') {
+            handleStepper('profileSettings')
+        }
+    };
 
     const shortenAddress = (address: string): string => {
         const startChars = address.slice(0, 6); // Take first 6 characters
@@ -35,7 +39,8 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
         <Menu onClick={({ key }) => handleMenuClick(key)}>
             <Menu.Item key="1">Logout</Menu.Item>
             <Menu.Item key="2">Digital Wardrobe</Menu.Item>
-            <Menu.Item key="3" onClick={handleCopyAddress}>
+            <Menu.Item key="4">Profile Settings</Menu.Item>
+            <Menu.Item key="3">
                 {shortenAddress(address)} <CopyOutlined />
             </Menu.Item>
         </Menu>
@@ -46,7 +51,7 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
             <Space wrap>
                 <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
                     <div className="avatar">
-                        <UserAvatar address={address} />
+                        <UserAvatar address={address} size={46} />
                     </div>
                 </Dropdown>
             </Space>

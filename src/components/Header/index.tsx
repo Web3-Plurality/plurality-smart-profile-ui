@@ -19,10 +19,7 @@ const Header = () => {
     const isHeaderVisible = showHeader(currentStep)
 
     const litAccount = localStorage.getItem('lit-wallet-sig')
-    let litAddress = ''
-    if (litAccount) {
-        litAddress = JSON.parse(litAccount).address
-    }
+    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
 
     const { disconnectAsync } = useDisconnect();
     const { address: metamaskAddress } = useAccount();
@@ -54,7 +51,7 @@ const Header = () => {
                 <Drawer
                     handleLogout={handleLogout}
                     handleStepper={handleStepper}
-                    address={metamaskAddress ?? litAddress ?? ''}
+                    address={metamaskAddress || litAddress}
                 />
             </div>
         </div>

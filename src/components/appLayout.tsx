@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import footerLogo from '../assets/images/footer-logo.png'
-import HeaderLogo from '../assets/svgIcons/fw-logo.svg';
+import HeaderLogo from '../assets/svgIcons/temp-logo.png';
 import classNames from 'classnames';
 import WidgetHeader from './WidgetHeader';
 import { useStep } from '../context/StepContext';
