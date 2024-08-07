@@ -1,4 +1,3 @@
-import { IRelayPKP } from '@lit-protocol/types';
 import CustomButtom from '../CustomButton';
 
 interface DashboardProps {
