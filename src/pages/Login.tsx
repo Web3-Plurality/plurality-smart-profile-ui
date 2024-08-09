@@ -17,22 +17,18 @@ import Dashboard from '../components/LitComponents/Dashboard';
 import {
     getDescription,
     getTitleText,
-    //queryParams,
-    RouteMapper,
     showBackButton,
     showHeader,
     socialConnectButtons
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import { BASE_URL } from '../common/constants';
 
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
-
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
@@ -48,21 +44,12 @@ const Login = () => {
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
 
-
-    function socialConnect(appName: string) {
-        setIsLoading(true)
-        const ApppRoute = RouteMapper(appName)
-        const newWindow = window.open(`${BASE_URL}${ApppRoute}`, `oauth-${appName}`, 'width=500,height=600');
-        if (!newWindow) {
-            alert('Failed to open window. It might be blocked by a popup blocker.');
-        }
-    }
-
     const {
         message: eventMessage,
         app,
+        isLoading: infoLoading,
         registerEvent,
-    } = useRegisterEvent({ socialConnect });
+    } = useRegisterEvent();
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -212,6 +199,7 @@ const Login = () => {
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
             isLoading={isLoading}
+            infoLoading={infoLoading}
             selectedSocial={selectedSocial}
         >
             {conditionalRendrer()}

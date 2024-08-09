@@ -16,6 +16,7 @@ interface WidgetLayoutProps {
     showBackButton: boolean
     showHeaderLogo: boolean,
     isLoading: boolean,
+    infoLoading: boolean,
     selectedSocial: string,
     handleBack: () => void,
 }
@@ -30,6 +31,7 @@ const WidgetLayout = ({
     showBackButton,
     showHeaderLogo,
     isLoading,
+    infoLoading,
     selectedSocial,
     handleBack
 }: WidgetLayoutProps) => {
@@ -42,6 +44,8 @@ const WidgetLayout = ({
             <div className={classNames('widget', { widgetbg: showBackgroundImage })}>
                 {isLoading ? (
                     <Loading copy={`Connecting Your ${selectedSocial} Account...`} />
+                ) : infoLoading ? (
+                    <Loading copy={`Getting Your Profile Info...`} />
                 ) : (
                     <>
                         <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
