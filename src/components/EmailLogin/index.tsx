@@ -43,7 +43,7 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
 
     if (loading) {
         widgetHeader?.classList.add('toogleShow')
-        return <Loading copy={'Sendind OTP to your Email...'} />;
+        return <Loading copy={'Sending OTP to your Email...'} />;
     } else {
         widgetHeader?.classList.remove('toogleShow')
     }
