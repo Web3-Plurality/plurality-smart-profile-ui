@@ -3,7 +3,7 @@ import { RouteMapper } from './utils'
 import { BASE_URL } from './constants'
 import axios from 'axios'
 
-export const useRegisterEvent = ({ socialConnect }: { socialConnect: (appName: string) => void }) => {
+export const useRegisterEvent = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
@@ -13,14 +13,15 @@ export const useRegisterEvent = ({ socialConnect }: { socialConnect: (appName: s
         try {
             const evtSource = new EventSource(`${import.meta.env.VITE_APP_API_BASE_URL}/register-event`, { withCredentials: true });
             evtSource.onmessage = function (event) {
-                const { message, app } = JSON.parse(event?.data);
+                const { message, app, id, auth } = JSON.parse(event?.data);
                 setMessage(message);
                 setApp(app);
                 console.log('Message: ', event.data)
                 if (message === "received") {
-                    fetchUserInfo(app)
+                    fetchUserInfo(app, auth)
                 } else {
-                    socialConnect(appName)
+                    localStorage.setItem('sseId', id);
+                    socialConnect(id, appName)
                 }
             };
 
@@ -35,16 +36,28 @@ export const useRegisterEvent = ({ socialConnect }: { socialConnect: (appName: s
             };
         } catch (error) {
             console.error('Error setting up EventSource:', error);
-            // Handle the error if needed
         }
     };
 
 
-    const fetchUserInfo = async (appName: string) => {
+    const socialConnect = (id: string, appName: string) => {
+        const ApppRoute = RouteMapper(appName)
+        const newWindow = window.open(`${BASE_URL}${ApppRoute}?sse_id=${id}`, `oauth-${appName}`, 'width=500,height=600');
+        if (!newWindow) {
+            alert('Failed to open window. It might be blocked by a popup blocker.');
+        }
+    }
+
+    const fetchUserInfo = async (appName: string, auth: string) => {
         const ApppRoute = RouteMapper(appName)
         const infoUrl = `${BASE_URL}${ApppRoute}/info`
         try {
-            const response = await axios.get(infoUrl, { withCredentials: true })
+            setIsLoading(true)
+            const response = await axios.get(infoUrl, {
+                headers: {
+                    'x-token-id': auth
+                }
+            })
             console.log(response.data)
         } catch (err) {
             setError('Error')
