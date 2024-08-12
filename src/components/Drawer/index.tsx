@@ -39,10 +39,10 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
         <Menu onClick={({ key }) => handleMenuClick(key)}>
             <Menu.Item key="1">Logout</Menu.Item>
             <Menu.Item key="2">Digital Wardrobe</Menu.Item>
-            <Menu.Item key="4">Profile Settings</Menu.Item>
             <Menu.Item key="3">
                 {shortenAddress(address)} <CopyOutlined />
             </Menu.Item>
+            <Menu.Item key="4">Profile Settings</Menu.Item>
         </Menu>
     );
 

@@ -2,7 +2,6 @@ import { ChangeEvent } from 'react';
 import { Input } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import CustomEditIcon from './../../assets/svgIcons/edit-icon.svg'
-// import { EditOutlined } from '@ant-design/icons';
 import './styles.css';
 
 
@@ -14,6 +13,7 @@ type CustomInputFieldProps = {
     id?: string;
     isDisable?: boolean;
     onEdit?: () => void
+    showEdit?: boolean
     handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
@@ -24,6 +24,7 @@ const CustomInputField = ({
     isDisable,
     placeholderText,
     value,
+    showEdit,
     onEdit,
     handleChange
 }: CustomInputFieldProps) => {
@@ -70,13 +71,12 @@ const CustomInputField = ({
             placeholder={placeholderText}
             disabled={isDisable}
             suffix={
-                <div
+                showEdit && (<div
                     style={{ position: 'absolute', top: 5, right: 10, cursor: 'pointer' }}
                     onClick={onEdit}
                 >
                     <img src={CustomEditIcon} />
-                </div>
-
+                </div>)
             }
         />
     );

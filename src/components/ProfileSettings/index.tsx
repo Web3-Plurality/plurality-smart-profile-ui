@@ -51,6 +51,7 @@ const ProfileSettings = () => {
                 isDisable={!editNameField}
                 handleChange={handleInputChnage}
                 onEdit={() => setEditNameField((prev) => !prev)}
+                showEdit={true}
             />
 
             <div className="upload-file">
