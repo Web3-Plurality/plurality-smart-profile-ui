@@ -20,7 +20,6 @@ export const useRegisterEvent = () => {
                 if (message === "received") {
                     fetchUserInfo(app, auth)
                 } else {
-                    localStorage.setItem('sseId', id);
                     socialConnect(id, appName)
                 }
             };
@@ -42,7 +41,7 @@ export const useRegisterEvent = () => {
 
     const socialConnect = (id: string, appName: string) => {
         const ApppRoute = RouteMapper(appName)
-        const newWindow = window.open(`${BASE_URL}${ApppRoute}?sse_id=${id}`, `oauth-${appName}`, 'width=500,height=600');
+        const newWindow = window.open(`/auth-start?sse_id=${id}&route=${ApppRoute}`, `oauth-${appName}`, 'width=500,height=600');
         if (!newWindow) {
             alert('Failed to open window. It might be blocked by a popup blocker.');
         }
