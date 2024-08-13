@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BASE_URL } from '../common/constants';
-import Loading from '../components/LitComponents/Loading';
 
 const AuthStart = () => {
     const [searchParams] = useSearchParams();
