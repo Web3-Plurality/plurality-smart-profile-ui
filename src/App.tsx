@@ -51,7 +51,7 @@ function App() {
                 <Header />
                 <Routes>
                   <Route path="/" element={<Login />} />
-                  <Route path="/auth-pages/login" element={<CallBackUrl />} />
+                  <Route path="/auth-callback" element={<CallBackUrl />} />
                   <Route path="/auth-start" element={<AuthStart />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
