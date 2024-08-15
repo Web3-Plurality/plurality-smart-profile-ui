@@ -19,7 +19,7 @@ import robloxIconColored from './../assets/images/roblox-icon-colored.png'
 import fortniteIconColored from './../assets/images/fortnite-icon-colored.png'
 // import SIconColored from './../assets/images/s-icon-colored.png'
 import decentralandIconColored from './../assets//images/decentraland-icon-colored.png'
-import spatialIconColored from './../assets/images/snapchat-icon-colored.png'
+import spatialIconColored from './../assets/images/spatial-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
 // import appleIconColored from './../assets/images/apple-icon-colored.png'
 // import journeyIconColored from './../assets/images/journey-icon-colored.png'
@@ -163,5 +163,3 @@ export const RouteMapper = (app: string) => {
             return FACEBOOK_ROUTE
     }
 }
-
-//export const queryParams = '?isWidget=true&origin=false&apps=false'

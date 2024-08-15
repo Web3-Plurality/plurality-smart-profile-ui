@@ -28,6 +28,19 @@ export const backButtonSteps = new Set([
     'dashboard'
 ]);
 
+export const SocialProfileUrls = {
+    Meta: 'https://www.facebook.com/',
+    Instagram: 'https://www.instagram.com/',
+    SnapChat: 'https://www.snapchat.com/',
+    Tiktok: 'https://www.tiktok.com/',
+    Roblox: 'https://www.roblox.com/home',
+    Fortnite: 'https://store.epicgames.com/en-US/',
+    Decentraland: 'https://decentraland.org/',
+    Spatial: 'https://www.spatial.io/',
+    ARTIFICIAL_ROME: 'https://artificialrome.com/'
+}
+
+
 
 
 
