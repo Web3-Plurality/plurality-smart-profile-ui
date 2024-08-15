@@ -38,9 +38,11 @@ import ninthImage from './../assets/images/wardrobe/ninth.png'
 // Constant Routes
 import {
     ARTIFICIAL_ROME_ROUTE,
+    backButtonSteps,
     DECENTRALAND_ROUTE,
     FACEBOOK_ROUTE,
     FORTNITE_ROUTE,
+    headerSteps,
     INSTAGRAM_ROUTE,
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
@@ -131,32 +133,13 @@ export const digitalWardrobeImages = [
     ninthImage
 ]
 
-
 export const showHeader = (currentStep: string) => {
-    const location = window.location.href
-    const visibleSteps = [
-        'success',
-        'socialConnect',
-        'socialConfirmation',
-        'digitalWardrobe',
-        'digitalWardrobeConnect',
-        'dashboard'
-    ];
-
-    return visibleSteps.includes(currentStep) && location !== '/auth-start';
+    return headerSteps.has(currentStep);
 }
 
 export const showBackButton = (currentStep: string) => {
-    if (
-        currentStep !== 'success'
-        && currentStep !== 'socialConnect'
-        && currentStep !== 'initial'
-        && currentStep !== 'verification'
-        && currentStep !== 'dashboard'
-    ) return true
-    return false
+    return !backButtonSteps.has(currentStep);
 }
-
 
 export const RouteMapper = (app: string) => {
     switch (app) {

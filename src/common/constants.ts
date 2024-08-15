@@ -10,5 +10,24 @@ export const DECENTRALAND_ROUTE = '/oauth-decentraland'
 export const SPATIAL_ROUTE = '/oauth-spatial'
 export const ARTIFICIAL_ROME_ROUTE = '/oauth-artificialRome'
 
+export const headerSteps = new Set([
+    'success',
+    'socialConnect',
+    'metaverseHub',
+    'socialConfirmation',
+    'digitalWardrobe',
+    'digitalWardrobeConnect',
+    'dashboard'
+]);
+
+export const backButtonSteps = new Set([
+    'success',
+    'socialConnect',
+    'initial',
+    'verification',
+    'dashboard'
+]);
+
+
 
 
