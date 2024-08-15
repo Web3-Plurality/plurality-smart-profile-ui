@@ -70,6 +70,8 @@ export const getTitleText = (prevSteps: string[]) => {
             return 'Welcome to Your Metaverse Profile!';
         case 'socialConnect':
             return 'Connect Your Platforms';
+        case 'metaverseHub':
+            return 'Your Metaverse Hub';
         case 'digitalWardrobe':
             return 'Digital Wardrobe';
         case 'digitalWardrobeConnect':

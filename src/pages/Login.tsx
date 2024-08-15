@@ -24,6 +24,7 @@ import {
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
+import MetaverseHub from '../components/MetaverseHub';
 
 
 
@@ -41,6 +42,10 @@ const Login = () => {
         userId: '',
         method: 'email'
     });
+
+    const [selectedProfile, setSelectedProfile] = useState('')
+
+    const previousStep = stepHistory[stepHistory.length - 2]
 
     const [, setUser] = useState<string>('')
     const { address: metamaskAddress, isConnected } = useAccount();
@@ -89,7 +94,6 @@ const Login = () => {
     const handleIconClick = (index: number) => {
         if (activeStates[index]) {
             setSelectedSocial(socialConnectButtons[index].displayName)
-            handleStepper('socialConfirmation')
         } else {
             const clickedIconDisplayName = socialConnectButtons[index].displayName.toLocaleLowerCase();
             setActiveIndex(index)
@@ -177,7 +181,9 @@ const Login = () => {
             case 'socialConnect':
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'socialConfirmation':
-                return <SocialConfirmation selectedSocial={selectedSocial} />
+                return <SocialConfirmation selectedProfile={selectedProfile} previousStep={previousStep} handleStepper={handleStepper} />
+            case 'metaverseHub':
+                return <MetaverseHub handleStepper={handleStepper} setSelectedProfile={setSelectedProfile} />
             case 'digitalWardrobe':
                 return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
             case 'digitalWardrobeConnect':
@@ -198,7 +204,7 @@ const Login = () => {
             handleBack={handleBack}
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
-            showHeaderLogo={currentStep !== 'socialConnect'
+            showHeaderLogo={currentStep !== 'socialConnect' && currentStep !== 'metaverseHub'
             }
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}

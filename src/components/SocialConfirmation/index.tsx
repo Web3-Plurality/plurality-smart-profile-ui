@@ -1,12 +1,13 @@
 import CustomButtom from '../CustomButton'
 import './styles.css'
 
-const SocialConfirmation = ({ selectedSocial }: { selectedSocial: string }) => {
+const SocialConfirmation = ({ selectedProfile, previousStep, handleStepper }: { selectedProfile: string, previousStep: string, handleStepper: (step: string) => void }) => {
+    const showConnectedProfile = previousStep === 'socialConnect'
     return (
         <>
-            <p className='social-connect-text'>{`Continue to`}</p>
-            <p className='social-connect-text'>{`${selectedSocial}?`}</p>
-            <CustomButtom text={`Let's Go`} />
+            <p className='social-connect-text'>{`Continue to ${showConnectedProfile ? 'Your' : ''}`}</p>
+            <p className='social-connect-text'>{`${showConnectedProfile ? 'Metaverse Hub' : selectedProfile}?`}</p>
+            <CustomButtom handleClick={showConnectedProfile ? () => handleStepper('metaverseHub') : () => { }} text={`Let's Go`} />
         </>
     )
 }

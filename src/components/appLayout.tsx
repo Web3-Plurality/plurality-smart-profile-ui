@@ -35,7 +35,7 @@ const WidgetLayout = ({
     selectedSocial,
     handleBack
 }: WidgetLayoutProps) => {
-    const { stepHistory } = useStep();
+    const { stepHistory, handleStepper } = useStep();
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
 
@@ -60,8 +60,11 @@ const WidgetLayout = ({
                             Back
                         </div>
 
-                        {!showHeaderLogo && <div
+                        {!showHeaderLogo && currentStep1 !== 'metaverseHub' && <div
                             className='back-btn'
+                            role='button'
+                            tabIndex={0}
+                            onClick={() => handleStepper('socialConfirmation')}
                         >
                             {socialsFooter}
                         </div>}
