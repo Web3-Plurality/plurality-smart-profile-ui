@@ -25,6 +25,7 @@ import {
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import MetaverseHub from '../components/MetaverseHub';
+import { useOrbisHandler } from '../hooks/useOrbishandler';
 
 
 
@@ -57,6 +58,11 @@ const Login = () => {
         isLoading: infoLoading,
         registerEvent,
     } = useRegisterEvent();
+
+    const {
+        sumbitDataToOrbis,
+        isLoading: orbisLoading
+    } = useOrbisHandler()
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -210,7 +216,10 @@ const Login = () => {
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
             isLoading={isLoading}
             infoLoading={infoLoading}
+            orbisLoading={orbisLoading}
             selectedSocial={selectedSocial}
+            sumbitDataToOrbis={sumbitDataToOrbis}
+
         >
             {conditionalRendrer()}
         </WidgetLayout >

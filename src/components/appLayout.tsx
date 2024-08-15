@@ -17,8 +17,10 @@ interface WidgetLayoutProps {
     showHeaderLogo: boolean,
     isLoading: boolean,
     infoLoading: boolean,
+    orbisLoading: boolean,
     selectedSocial: string,
     handleBack: () => void,
+    sumbitDataToOrbis: () => void
 }
 
 const WidgetLayout = ({
@@ -32,8 +34,10 @@ const WidgetLayout = ({
     showHeaderLogo,
     isLoading,
     infoLoading,
+    orbisLoading,
     selectedSocial,
-    handleBack
+    handleBack,
+    sumbitDataToOrbis
 }: WidgetLayoutProps) => {
     const { stepHistory, handleStepper } = useStep();
     const currentStep1 = stepHistory[stepHistory.length - 1]
@@ -46,9 +50,10 @@ const WidgetLayout = ({
                     <Loading copy={`Connecting Your ${selectedSocial} Account...`} />
                 ) : infoLoading ? (
                     <Loading copy={`Getting Your Profile Info...`} />
-                ) : (
-                    <>
-                        <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
+                ) : orbisLoading ? <Loading copy={`Submitting Your Data...`} />
+                    : (
+                        <>
+                            <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
 
                             {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
                             <WidgetHeader title={title} description={description} currentStep={currentStep} />
@@ -60,16 +65,16 @@ const WidgetLayout = ({
                             Back
                         </div>
 
-                        {!showHeaderLogo && currentStep1 !== 'metaverseHub' && <div
-                            className='back-btn'
-                            role='button'
-                            tabIndex={0}
-                            onClick={() => handleStepper('socialConfirmation')}
-                        >
-                            {socialsFooter}
-                        </div>}
-                    </>
-                )}
+                            {!showHeaderLogo && currentStep1 !== 'metaverseHub' && <div
+                                className='back-btn'
+                                role='button'
+                                tabIndex={0}
+                                onClick={socialsFooter === 'Continue' ? () => sumbitDataToOrbis() : () => handleStepper('socialConfirmation')}
+                            >
+                                {socialsFooter}
+                            </div>}
+                        </>
+                    )}
 
             </div>
             <div className='footer'>
