@@ -1,7 +1,6 @@
 import { ChangeEvent } from 'react';
 import { Input } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import CustomEditIcon from './../../assets/svgIcons/edit-icon.svg'
 import './styles.css';
 
 
@@ -11,9 +10,6 @@ type CustomInputFieldProps = {
     placeholderText?: string;
     value?: string; // Use only string for text inputs
     id?: string;
-    isDisable?: boolean;
-    onEdit?: () => void
-    showEdit?: boolean
     handleChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
@@ -21,11 +17,8 @@ const CustomInputField = ({
     InputType,
     name,
     id,
-    isDisable,
     placeholderText,
     value,
-    showEdit,
-    onEdit,
     handleChange
 }: CustomInputFieldProps) => {
     if (InputType === 'file') {
@@ -52,11 +45,7 @@ const CustomInputField = ({
                     value={value}
                     onChange={handleChange}
                     placeholder={placeholderText}
-                    disabled={isDisable}
                 />
-                <div className='edit-icon-bio' onClick={onEdit}>
-                    <img src={CustomEditIcon} />
-                </div>
             </div>
         );
     }
@@ -69,15 +58,6 @@ const CustomInputField = ({
             value={value}
             onChange={handleChange}
             placeholder={placeholderText}
-            disabled={isDisable}
-            suffix={
-                showEdit && (<div
-                    style={{ position: 'absolute', top: 5, right: 10, cursor: 'pointer' }}
-                    onClick={onEdit}
-                >
-                    <img src={CustomEditIcon} />
-                </div>)
-            }
         />
     );
 };

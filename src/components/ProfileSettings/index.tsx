@@ -12,10 +12,6 @@ const ProfileSettings = () => {
     const [profilePic, setProfilePic] = useState<string | null>(null)
     const [userBio, setUserBio] = useState('')
 
-    const [editNameField, setEditNameField] = useState<boolean>(false)
-    const [editBioField, setEditBioField] = useState<boolean>(false)
-
-
     const litAccount = localStorage.getItem('lit-wallet-sig')
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
@@ -48,10 +44,7 @@ const ProfileSettings = () => {
                 name='username'
                 placeholderText="Username"
                 value={username}
-                isDisable={!editNameField}
                 handleChange={handleInputChnage}
-                onEdit={() => setEditNameField((prev) => !prev)}
-                showEdit={true}
             />
 
             <div className="upload-file">
@@ -78,15 +71,14 @@ const ProfileSettings = () => {
                 name="userBio"
                 placeholderText="Enter Your Bio"
                 value={userBio}
-                isDisable={!editBioField}
                 handleChange={handleInputChnage}
-                onEdit={() => setEditBioField((prev) => !prev)}
             />
 
             <div>
                 <CustomButtom
                     text="Update Profile"
                     handleClick={submitData}
+                    isDisable={!username && !profilePic && !userBio}
                 />
             </div>
 
