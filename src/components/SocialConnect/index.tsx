@@ -8,6 +8,7 @@ interface SocialConnectProps {
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     return (
         <SocialProfiles
+            metaverse={false}
             handleIconClick={handleIconClick}
             activeStates={activeStates}
         />

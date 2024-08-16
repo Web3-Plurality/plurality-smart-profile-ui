@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { message } from 'antd';
 import { useAccount, useConnect } from 'wagmi';
 import { useStep } from '../context/StepContext';
@@ -19,18 +19,20 @@ import {
     getDescription,
     getTitleText,
     showBackButton,
-    showHeader,
-    socialConnectButtons
+    showHeader
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import MetaverseHub from '../components/MetaverseHub';
 import { useOrbisHandler } from '../hooks/useOrbishandler';
+import { metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { MessageType } from 'antd/es/message/interface';
 
 
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
+    const warningMessageRef = useRef<MessageType | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
@@ -43,8 +45,6 @@ const Login = () => {
         userId: '',
         method: 'email'
     });
-
-    const [selectedProfile, setSelectedProfile] = useState('')
 
     const previousStep = stepHistory[stepHistory.length - 2]
 
@@ -96,19 +96,41 @@ const Login = () => {
         }
     }, [metamaskAddress])
 
-
     const handleIconClick = (index: number) => {
-        if (activeStates[index]) {
-            setSelectedSocial(socialConnectButtons[index].displayName)
-        } else {
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLocaleLowerCase();
-            setActiveIndex(index)
-            console.log("clickedIconDisplayName", clickedIconDisplayName)
+        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialConnectButtons;
 
-            /// OAUTH HANDLER FUNCTION
-            registerEvent(clickedIconDisplayName)
+        const isMetaverseHub = currentStep === 'metaverseHub';
+        const isIndexValid = index < socialConnectButtons.length;
+
+        const handleMetaverseHubClick = () => {
+            if (activeStates[index] || !isIndexValid) {
+                handleStepper('socialConfirmation');
+                setSelectedSocial(profiles[index].displayName);
+            } else {
+                if (warningMessageRef.current) {
+                    warningMessageRef.current();
+                    warningMessageRef.current = null;
+                }
+                warningMessageRef.current = message.warning('Please connect this profile first!');
+            }
+        };
+
+        const handleSocialConnectClick = () => {
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
+            setActiveIndex(index);
+            console.log("clickedIconDisplayName", clickedIconDisplayName);
+            registerEvent(clickedIconDisplayName);
+        };
+
+        if (isMetaverseHub) {
+            handleMetaverseHubClick();
+        } else if (!activeStates[index]) {
+            handleSocialConnectClick();
+        } else {
+            setSelectedSocial(profiles[index].displayName);
         }
     };
+
 
     const handleSelectedNFT = (nft: string) => {
         setSelectedNFT(nft)
@@ -129,7 +151,6 @@ const Login = () => {
 
 
     const allowContinue = (activeStates.filter((item) => item)).length > 0
-
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
@@ -171,15 +192,11 @@ const Login = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />;
+                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />
             case 'login':
-                return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />;
+                return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />
             case 'otp':
-                return <OTPVerification
-                    methodId={methodId}
-                    handleStepper={handleStepper}
-                    handleFinalPayload={handleFinalPayload}
-                />;
+                return <OTPVerification handleStepper={handleStepper} methodId={methodId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} onError={handleVerificationError} />
             case 'success':
@@ -187,9 +204,9 @@ const Login = () => {
             case 'socialConnect':
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'socialConfirmation':
-                return <SocialConfirmation selectedProfile={selectedProfile} previousStep={previousStep} handleStepper={handleStepper} />
+                return <SocialConfirmation handleStepper={handleStepper} selectedProfile={selectedSocial} previousStep={previousStep} />
             case 'metaverseHub':
-                return <MetaverseHub handleStepper={handleStepper} setSelectedProfile={setSelectedProfile} />
+                return <MetaverseHub handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'digitalWardrobe':
                 return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
             case 'digitalWardrobeConnect':
@@ -208,9 +225,12 @@ const Login = () => {
             currentStep={currentStep === 'success'}
             showBackButton={isBackButton}
             handleBack={handleBack}
+            // handlefooterClick={ }
             title={getTitleText(stepHistory)}
             description={getDescription(stepHistory)}
-            showHeaderLogo={currentStep !== 'socialConnect' && currentStep !== 'metaverseHub'
+            showHeaderLogo={
+                currentStep !== 'socialConnect' &&
+                currentStep !== 'metaverseHub'
             }
             showBackgroundImage={currentStep === 'socialConfirmation'}
             socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}

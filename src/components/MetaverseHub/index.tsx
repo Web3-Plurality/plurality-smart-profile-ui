@@ -1,21 +1,16 @@
 import SocialProfiles from '../SocialProfiles';
 
 interface SocialConnectProps {
-    handleStepper: (step: string) => void
-    setSelectedProfile: (profile: string) => void
+    activeStates: boolean[]
+    handleIconClick: (idx: number) => void
 }
 
-const MetaverseHub = ({ handleStepper, setSelectedProfile }: SocialConnectProps) => {
-
-    const handleProfileClick = (socialProfile: string) => {
-        setSelectedProfile(socialProfile)
-        handleStepper('socialConfirmation')
-    }
-
+const MetaverseHub = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     return (
         <SocialProfiles
             metaverse={true}
-            handleClick={handleProfileClick}
+            activeStates={activeStates}
+            handleIconClick={handleIconClick}
         />
     );
 }

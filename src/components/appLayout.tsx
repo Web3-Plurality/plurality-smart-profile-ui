@@ -43,6 +43,7 @@ const WidgetLayout = ({
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
 
+
     return (
         <div className="wrapper">
             <div className={classNames('widget', { widgetbg: showBackgroundImage })}>
@@ -65,13 +66,16 @@ const WidgetLayout = ({
                             Back
                         </div>
 
-                            {!showHeaderLogo && currentStep1 !== 'metaverseHub' && <div
+                            {!showHeaderLogo && <div
                                 className='back-btn'
                                 role='button'
                                 tabIndex={0}
-                                onClick={socialsFooter === 'Continue' ? () => sumbitDataToOrbis() : () => handleStepper('socialConfirmation')}
+                                onClick={
+                                    currentStep1 === 'metaverseHub' ? () => handleStepper("socialConnect") :
+                                        socialsFooter === 'Continue' ? () => sumbitDataToOrbis() :
+                                            () => handleStepper('socialConfirmation')}
                             >
-                                {socialsFooter}
+                                {currentStep1 === 'metaverseHub' ? "Connect more platforms" : socialsFooter}
                             </div>}
                         </>
                     )}
