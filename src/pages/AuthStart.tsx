@@ -7,12 +7,12 @@ const AuthStart = () => {
 
     useEffect(() => {
         const id = searchParams.get('sse_id');
-        const ApppRoute = searchParams.get('route');
+        const AppRoute = searchParams.get('route');
 
         if (id) {
             localStorage.setItem('sseId', id);
 
-            const oauthUrl = `${BASE_URL}${ApppRoute}?sse_id=${id}`;
+            const oauthUrl = `${BASE_URL}${AppRoute}?sse_id=${id}`;
             window.location.href = oauthUrl;
         } else {
             console.error('sse_id query parameter is missing');
