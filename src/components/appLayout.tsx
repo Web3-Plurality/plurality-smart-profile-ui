@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import footerLogo from '../assets/images/footer-logo.png'
-import HeaderLogo from '../assets/svgIcons/dfdc-logo.png';
+import HeaderLogo from '../assets/svgIcons/app-logo.png';
 import classNames from 'classnames';
 import WidgetHeader from './WidgetHeader';
 import { useStep } from '../context/StepContext';
@@ -50,7 +50,7 @@ const WidgetLayout = ({
                     <>
                         <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
 
-                            {showHeaderLogo && <img className="mvfw-logo" src={HeaderLogo} alt='' />}
+                            {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
                             <WidgetHeader title={title} description={description} currentStep={currentStep} />
                             {children}
                         </div>
