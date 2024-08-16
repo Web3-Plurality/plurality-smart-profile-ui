@@ -131,16 +131,17 @@ export const digitalWardrobeImages = [
 
 
 export const showHeader = (currentStep: string) => {
-    if (
-        currentStep !== 'success'
-        && currentStep !== 'socialConnect'
-        && currentStep !== 'socialConfirmation'
-        && currentStep !== 'digitalWardrobe'
-        && currentStep !== 'digitalWardrobeConnect'
-        && currentStep !== 'dashboard'
-    ) return false
+    const location = window.location.href
+    const visibleSteps = [
+        'success',
+        'socialConnect',
+        'socialConfirmation',
+        'digitalWardrobe',
+        'digitalWardrobeConnect',
+        'dashboard'
+    ];
 
-    return true
+    return visibleSteps.includes(currentStep) && location !== '/auth-start';
 }
 
 export const showBackButton = (currentStep: string) => {

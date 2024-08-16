@@ -14,6 +14,7 @@ import { metaMask } from 'wagmi/connectors';
 import { http, createConfig } from '@wagmi/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CallBackUrl from './pages/CallBackUrl';
+import AuthStart from './pages/AuthStart';
 
 const stytch = new StytchUIClient(
   import.meta.env.VITE_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
@@ -51,6 +52,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />
+                  <Route path="/auth-start" element={<AuthStart />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Router>
