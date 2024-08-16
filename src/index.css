@@ -34,18 +34,11 @@
    border-radius: 25px;
    box-shadow:
      2px 2px 5px rgba(128, 128, 128, 0.2),
-     /* Light gray shadow */
      4px 4px 10px rgba(128, 128, 128, 0.2),
-     /* Slightly larger light gray shadow */
      6px 6px 15px rgba(128, 128, 128, 0.2),
-     /* Larger gray shadow */
      -2px -2px 5px rgba(255, 255, 255, 0.8),
-     /* Light white shadow */
      -2px -2px 10px rgba(255, 255, 255, 0.8),
-     /* Slightly larger light white shadow */
      -6px -6px 15px rgba(255, 255, 255, 0.8);
-   /* Larger white shadow */
-
  }
 
  .widgetbg {
@@ -77,17 +70,27 @@
    padding-bottom: 0;
  }
 
- .mvfw-logo {
+ .app-logo {
    position: absolute;
    bottom: 100%;
    left: 50%;
-   transform: translate(-50%, 65%);
-   height: 142px;
+   transform: translate(-50%, 50%);
+   height: 120px;
    width: auto;
    object-fit: contain;
    z-index: 100;
  }
 
+ .app-logo-center {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  height: 120px;
+  width: auto;
+  object-fit: contain;
+  z-index: 100;
+}
  .widget-footer {
    text-align: left;
  }

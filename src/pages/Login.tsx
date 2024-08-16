@@ -14,6 +14,7 @@ import SocialConfirmation from '../components/SocialConfirmation';
 import DigitalWardrobe from '../components/DigitaWardrobe';
 import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import Dashboard from '../components/LitComponents/Dashboard';
+import ProfileSettings from '../components/ProfileSettings';
 import {
     getDescription,
     getTitleText,
@@ -23,6 +24,7 @@ import {
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
+
 
 
 const Login = () => {
@@ -182,6 +184,8 @@ const Login = () => {
                 return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
             case 'dashboard':
                 return <Dashboard currentAccount={litAddress} handleStepper={handleStepper} />
+            case 'profileSettings':
+                return <ProfileSettings />
             default:
                 return <div>Something went wrong!</div>;
         }

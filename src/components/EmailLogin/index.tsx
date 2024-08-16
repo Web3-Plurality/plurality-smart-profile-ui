@@ -26,7 +26,7 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     } = useStychLogin(email, handleMethodId)
 
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (error) setError('')
         setEmail(e.target.value)
     }
@@ -43,7 +43,7 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
 
     if (loading) {
         widgetHeader?.classList.add('toogleShow')
-        return <Loading copy={'Sendind OTP to your Email...'} />;
+        return <Loading copy={'Sending OTP to your Email...'} />;
     } else {
         widgetHeader?.classList.remove('toogleShow')
     }
@@ -52,6 +52,8 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
         <div className="email-login">
             <CustomInputField
                 InputType={'email'}
+                name="email"
+                placeholderText="Enter your email"
                 value={email}
                 handleChange={handleChange}
             />

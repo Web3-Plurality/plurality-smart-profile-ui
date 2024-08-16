@@ -1,7 +1,7 @@
 import './styles.css';
 import { socialConnectButtons } from '../../common/utils';
 import CustomIcon from '../CustomIcon';
-import HeaderLogo from './../../assets/svgIcons/fw-logo.svg'
+import HeaderLogo from './../../assets/svgIcons/app-logo.png'
 
 interface SocialConnectProps {
     activeStates: boolean[],
@@ -18,7 +18,7 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
     return (
         <div className="circle">
             <div className='mid-icon'>
-                <img className="mvfw-logo" src={HeaderLogo} alt='' />
+                <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
             {socialConnectButtons.map(({ id, icon, activeIcon }) => {
                 // Calculate position for each icon
