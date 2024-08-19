@@ -37,3 +37,7 @@
     border: none;
     color: black !important;
 }
+
+.emailText {
+    transform: translateY(2px);
+}

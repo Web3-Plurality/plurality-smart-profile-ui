@@ -1,21 +1,20 @@
-import { useState } from "react"
-import CustomButtom from "../CustomButton"
-import CustomInputField from "../CustomInputField"
-
-import './styles.css'
-import useStychLogin from "../../hooks/useStychLogin"
-import Loading from "../LitComponents/Loading"
-
+import { useState } from "react";
+import CustomButtom from "../CustomButton";
+import CustomInputField from "../CustomInputField";
+import './styles.css';
+import useStychLogin from "../../hooks/useStychLogin";
+import Loading from "../LitComponents/Loading";
+import { Checkbox, CheckboxProps } from "antd";
 
 interface EmailLoginProps {
-    handleStepper: (step: string) => void
-    handleMethodId: (id: string) => void
+    handleMethodId: (id: string) => void;
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState('');
+    const [acceptance, setAcceptance] = useState(false);
     const widgetHeader = document.getElementById('w-header');
 
     const {
@@ -23,30 +22,28 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
         setError,
         loading,
         error,
-    } = useStychLogin(email, handleMethodId)
-
+    } = useStychLogin(email, handleMethodId);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if (error) setError('')
-        setEmail(e.target.value)
-    }
+        if (error) setError('');
+        setEmail(e.target.value);
+    };
 
     const handleEmailSubmit = () => {
-        if (!email) {
-            setError('Email Field Cannot Be Empty')
-        } else if (!emailRegex.test(email)) {
-            setError('Inval Email! Please Enter a Valid Email')
-        } else {
-            sendPasscode()
-        }
-    }
+        sendPasscode();
+    };
 
     if (loading) {
-        widgetHeader?.classList.add('toogleShow')
+        widgetHeader?.classList.add('toogleShow');
         return <Loading copy={'Sending OTP to your Email...'} />;
     } else {
-        widgetHeader?.classList.remove('toogleShow')
+        widgetHeader?.classList.remove('toogleShow');
     }
+
+    const onChange: CheckboxProps['onChange'] = (e) => {
+        console.log(`checked = ${e.target.checked}`);
+        setAcceptance(e.target.checked);
+    };
 
     return (
         <div className="email-login">
@@ -57,14 +54,20 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
                 value={email}
                 handleChange={handleChange}
             />
-            <p className="error">{error}</p>
+            <div className="checkbox-container">
+                <Checkbox checked={acceptance} onChange={onChange} />
+                <span>
+                    I accept the <a href="https://plurality.network/user-terms-of-service/">terms of service</a>{" "}
+                    and subscribe to receive updates from the DFDC
+                </span>
+            </div>
             <CustomButtom
                 text="Submit"
                 handleClick={handleEmailSubmit}
+                isDisable={!emailRegex.test(email) || !acceptance}
             />
         </div>
+    );
+};
 
-    )
-}
-
-export default EmailLogin
+export default EmailLogin;
