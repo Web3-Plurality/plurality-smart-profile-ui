@@ -1,6 +1,6 @@
 import { socialConnectButtons, metaverseHubButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
-import HeaderLogo from './../../assets/svgIcons/fw-logo.svg'
+import HeaderLogo from './../../assets/svgIcons/app-logo.png'
 import './styles.css'
 
 type MetaverseProps = {
@@ -26,7 +26,7 @@ const SocialProfiles = ({
     return (
         <div className="circle">
             <div className='mid-icon'>
-                <img className="mvfw-logo" src={HeaderLogo} alt='' />
+                <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
             {profiles.map(({ id, icon, activeIcon }) => {
                 // Calculate position for each icon
