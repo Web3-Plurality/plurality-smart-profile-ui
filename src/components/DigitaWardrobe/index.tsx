@@ -1,4 +1,4 @@
-import { digitalWardrobeImages, socialConnectButtons } from "../../common/utils"
+import { digitalWardrobeImages, socialConnectButtons } from "../../common/constants";
 import { useStep } from "../../context/StepContext";
 import AddProfile from './../../assets/svgIcons/add-profile-icon.svg'
 

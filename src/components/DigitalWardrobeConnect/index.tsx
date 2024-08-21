@@ -1,4 +1,4 @@
-import { socialConnectButtons } from "../../common/utils";
+import { socialConnectButtons } from "../../common/constants";
 import { useStep } from "../../context/StepContext";
 import AddProfile from './../../assets/svgIcons/add-profile-icon.svg'
 
