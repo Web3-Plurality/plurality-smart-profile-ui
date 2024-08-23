@@ -49,7 +49,9 @@ export const headerSteps = new Set([
     'socialConfirmation',
     'digitalWardrobe',
     'digitalWardrobeConnect',
-    'dashboard'
+    'dashboard',
+    'profileSettings'
+
 ]);
 
 export const backButtonSteps = new Set([
