@@ -1,4 +1,47 @@
 .email-login {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.custom-input-container,
+.checkbox-container {
+    width: 91.3%;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.checkbox-container span {
+    font-size: 12px;
+    color: gray;
+}
+
+.checkbox-container span a {
+    text-decoration: underline;
+    color: rgb(33, 33, 218);
+}
+
+.checkbox-container .ant-checkbox {
+    margin-right: 8px;
+}
+
+.checkbox-container .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: gray !important;
+    border-color: gray !important;
+}
+
+.checkbox-container .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+    border-color: gray !important;
+    /* Change border color on hover */
+}
+
+.error {
+    color: red;
+    margin: 10px 0;
 }

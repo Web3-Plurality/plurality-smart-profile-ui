@@ -8,6 +8,7 @@ import classNames from "classnames";
 interface CustomButtomProps {
     text: string,
     icon: string,
+    name: string,
     handleClick?: () => void
 }
 
@@ -15,7 +16,7 @@ const defaultProps = {
     handleClick: () => { }
 };
 
-const SocialButton = ({ text, icon, handleClick }: CustomButtomProps) => {
+const SocialButton = ({ text, icon, name, handleClick }: CustomButtomProps) => {
     return (
         <Button
             className={classNames("social-btn")}
@@ -24,9 +25,9 @@ const SocialButton = ({ text, icon, handleClick }: CustomButtomProps) => {
             iconPosition="end"
             onClick={handleClick}
         >
-            <div className="button-content-left">
+            <div className={classNames("button-content-left", { emailText: name === 'email' })}>
                 <CustomIcon path={icon} />
-                <p>{text}</p>
+                <p className={classNames({ emailText: name === 'email' })}>{text}</p>
             </div>
 
         </Button >

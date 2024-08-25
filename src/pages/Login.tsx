@@ -194,7 +194,7 @@ const Login = () => {
             case 'initial':
                 return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />
             case 'login':
-                return <EmailLogin handleStepper={handleStepper} handleMethodId={handleMethodId} />
+                return <EmailLogin handleMethodId={handleMethodId} />;
             case 'otp':
                 return <OTPVerification handleStepper={handleStepper} methodId={methodId} handleFinalPayload={handleFinalPayload} />
             case 'verification':

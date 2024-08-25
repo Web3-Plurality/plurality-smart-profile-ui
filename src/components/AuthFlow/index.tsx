@@ -13,8 +13,8 @@ const AuthFlow = ({ handleStepper, handleMetamaskConnect }: AuthFlowProps) => {
     return (
         <>
             <div className='login-buttons'>
-                <SocialButton text={'Login with Email'} icon={mailIcon} handleClick={() => handleStepper('login')} />
-                <SocialButton text={'Login with Metamask'} icon={metamaskIcon} handleClick={handleMetamaskConnect} />
+                <SocialButton name={'email'} text={'Login with Email'} icon={mailIcon} handleClick={() => handleStepper('login')} />
+                <SocialButton name={'metamask'} text={'Login with Metamask'} icon={metamaskIcon} handleClick={handleMetamaskConnect} />
             </div>
         </>
     )
