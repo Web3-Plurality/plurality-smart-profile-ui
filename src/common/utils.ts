@@ -3,6 +3,7 @@ import {
     ARTIFICIAL_ROME_ROUTE,
     backButtonSteps,
     DECENTRALAND_ROUTE,
+    AIDRESSING_ROUTE,
     FACEBOOK_ROUTE,
     FORTNITE_ROUTE,
     headerSteps,
@@ -92,6 +93,8 @@ export const RouteMapper = (app: string) => {
             return TIKTOK_ROUTE
         case 'decentraland':
             return DECENTRALAND_ROUTE
+        case 'ai-dressing':
+            return AIDRESSING_ROUTE
         case 'spatial':
             return SPATIAL_ROUTE
         case 'artificialRome':

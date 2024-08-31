@@ -14,6 +14,7 @@ import instaIconColored from './../assets/images/insta-icon-colored.png'
 import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
 import robloxIconColored from './../assets/images/roblox-icon-colored.png'
 import fortniteIconColored from './../assets/images/fortnite-icon-colored.png'
+import aidressingIconColored from './../assets/images/ai-colored.png'
 import decentralandIconColored from './../assets//images/decentraland-icon-colored.png'
 import spatialIconColored from './../assets/images/spatial-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
@@ -39,6 +40,7 @@ export const TIKTOK_ROUTE = '/oauth-tiktok'
 export const ROBLOX_ROUTE = '/oauth-roblox'
 export const FORTNITE_ROUTE = '/oauth-fortnite'
 export const DECENTRALAND_ROUTE = '/oauth-decentraland'
+export const AIDRESSING_ROUTE = '/oauth-aidressing'
 export const SPATIAL_ROUTE = '/oauth-spatial'
 export const ARTIFICIAL_ROME_ROUTE = '/oauth-artificialRome'
 
@@ -63,15 +65,15 @@ export const backButtonSteps = new Set([
 ]);
 
 export const SocialProfileUrls = {
-    Meta: 'https://www.facebook.com/',
-    Instagram: 'https://www.instagram.com/',
-    SnapChat: 'https://www.snapchat.com/',
-    Tiktok: 'https://www.tiktok.com/',
-    Roblox: 'https://www.roblox.com/home',
-    Fortnite: 'https://store.epicgames.com/en-US/',
+    Instagram: 'https://www.instagram.com/ar/1246108036298968',
+    SnapChat: 'https://www.roblox.com/games/12563183319/Outfit-Shopping-Mall-DRESSX-MANGO',
+    Tiktok: 'https://www.fortnite.com/@gcg_games/3511-4821-9572',
+    Roblox: 'https://www.roblox.com/games/12563183319/Outfit-Shopping-Mall-DRESSX-MANGO',
+    Fortnite: 'https://www.fortnite.com/@gcg_games/3511-4821-9572',
+    AIDressing: 'https://dressx.me/',
     Decentraland: 'https://decentraland.org/',
-    Spatial: 'https://www.spatial.io/',
-    ArtificialRome: 'https://artificialrome.com/'
+    Spatial: 'https://www.spatial.io/s/BOSS-Immersive-Showroom-641e08bd6127ed8eaff70faa?share=3302646144092575883',
+    ArtificialRome: 'https://artificialrome.com/case/legacy-of-tomorrow'
 }
 
 export const digitalWardrobeImages = [
@@ -196,14 +198,6 @@ export const metaverseHubButtons = [
     },
     {
         id: 5,
-        iconName: "decentraland ",
-        displayName: 'Decentraland',
-        icon: decentralandIcon,
-        active: false,
-        activeIcon: decentralandIconColored,
-    },
-    {
-        id: 6,
         iconName: "spatial",
         displayName: 'Spatial',
         icon: spatialIcon,
@@ -211,20 +205,20 @@ export const metaverseHubButtons = [
         activeIcon: spatialIconColored,
     },
     {
-        id: 7,
-        iconName: "meta",
-        displayName: 'Meta',
-        icon: metaIcon,
-        active: false,
-        activeIcon: metaIconColored,
-    },
-    {
-        id: 8,
+        id: 6,
         iconName: "artificialRome",
         displayName: 'ArtificialRome',
         icon: artificialRomeIconColored,
         active: true,
         activeIcon: artificialRomeIconColored,
+    },
+    {
+        id: 7,
+        iconName: "aiDressing ",
+        displayName: 'AIDressing',
+        icon: aidressingIconColored,
+        active: true,
+        activeIcon: aidressingIconColored,
     },
 ]
 

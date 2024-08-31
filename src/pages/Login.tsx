@@ -121,7 +121,8 @@ const Login = () => {
         const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialConnectButtons;
 
         const isMetaverseHub = currentStep === 'metaverseHub';
-        const isIndexValid = index < socialConnectButtons.length;
+        // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
+        const isIndexValid = index < socialConnectButtons.length - 2;
 
         const handleMetaverseHubClick = () => {
             if (activeStates[index] || !isIndexValid) {
