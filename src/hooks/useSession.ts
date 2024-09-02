@@ -4,9 +4,9 @@ import { litNodeClient } from '../common/lit';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
+import { useAuth } from '../context/AuthContext';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
@@ -47,6 +47,7 @@ export default function useSession() {
         console.log("✅ Got PKP Session Sigs");
 
         setSessionSigs(sessionSigs);
+        localStorage.setItem('signature', JSON.stringify(sessionSigs))
 
       } catch (err) {
         setError(err as Error);

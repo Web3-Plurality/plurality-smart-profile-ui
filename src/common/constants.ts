@@ -233,4 +233,8 @@ export const metaverseHubButtons = [
 
 
 
-
+export const CEREMAIC_URL = import.meta.env.VITE_APP_CERAMIC_URL
+export const ORBIS_NODE_URL = import.meta.env.VITE_APP_ORBIS_NODE_URL
+export const ORBIS_ENV = import.meta.env.VITE_APP_ORBIS_ENV
+export const PLURALITY_CONTEXT = import.meta.env.VITE_APP_PLURALITY_CONTEXT
+export const TEST_MODEL = import.meta.env.VITE_APP_TEST_MODEL

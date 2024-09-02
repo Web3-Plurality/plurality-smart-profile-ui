@@ -15,6 +15,9 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  optimizeDeps: {
+    exclude: ['crypto'],
+  },
   define: {
     // Define environment variables accessible in your application code
     'process.env': process.env,
