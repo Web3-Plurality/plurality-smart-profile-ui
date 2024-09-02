@@ -7,12 +7,14 @@ import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 
 const isIframe = window.location !== window.parent.location
 
 const Header = () => {
     const navigate = useNavigate()
+    const { user } = useAuth()
 
     const { stepHistory, handleStepper } = useStep();
     const currentStep = stepHistory[stepHistory.length - 1];
@@ -43,7 +45,7 @@ const Header = () => {
         <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
-                    <span>John Doe</span>
+                    <span>{user?.username || 'John Doe'}</span>
                     <div className='icon-box'>
                         <CustomIcon path={BadgeIcon} />
                     </div>

@@ -1,0 +1,53 @@
+/* CustomModal.css */
+
+.custom-modal-wrapper .ant-modal {
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90vw;
+    /* Ensure it is responsive */
+}
+
+.custom-modal-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.custom-modal-text {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.custom-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    /* Space between buttons */
+}
+
+.custom-modal-button {
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    width: 100px;
+    /* Fixed width for buttons */
+}
+
+.custom-modal-button-yes {
+    background-color: #4caf50;
+    /* Green background for Yes */
+    color: white;
+    border: none;
+}
+
+.custom-modal-button-no {
+    background-color: #f44336;
+    /* Red background for No */
+    color: white;
+    border: none;
+}
+
+.custom-modal-button:hover {
+    opacity: 0.9;
+    /* Slight opacity change on hover */
+}

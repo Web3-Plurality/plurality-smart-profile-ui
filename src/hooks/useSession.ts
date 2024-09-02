@@ -4,12 +4,16 @@ import { litNodeClient } from '../common/lit';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
-import { ethers } from 'ethers';
+import Cookies from 'js-cookie';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+
+  const { setUser } = useAuth()
 
 
   /**
@@ -19,19 +23,11 @@ export default function useSession() {
     async (authMethod: AuthMethod, pkp: IRelayPKP): Promise<void> => {
       setLoading(true);
       setError(undefined);
-      try {
-        // owner wallet which has the capacity NFT
-        const DAPP_OWNER_WALLET = new ethers.Wallet(import.meta.env.VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY);
-        // create capacity nft delegation
-        const { capacityDelegationAuthSig } =
-          await litNodeClient.createCapacityDelegationAuthSig({
-            uses: '1000',
-            dAppOwnerWallet: DAPP_OWNER_WALLET,
-            capacityTokenId: import.meta.env.VITE_APP_PUBLIC_CAPACITY_TOKEN_ID,
-            delegateeAddresses: [pkp.ethAddress],
-            domain: window.location.host
-          });
-
+      try{
+        
+      const authToken = await userAuthorization(pkp.ethAddress)
+      const capacityDelegationAuthSig = await getCapacityDelegationAuthSig(authToken)
+  
         // Generate session sigs
         const sessionSigs = await litNodeClient.getPkpSessionSigs({
           pkpPublicKey: pkp.publicKey!,
@@ -58,6 +54,44 @@ export default function useSession() {
     },
     []
   );
+
+  const userAuthorization = async (pkpAddress: string) => {
+    try {
+      const url = `${import.meta.env.VITE_APP_API_BASE_URL}/user`
+      const payload = {
+        address: pkpAddress,
+        email: localStorage.getItem('user'),
+        subscribe: true
+      };
+      const headers = {
+        'x-stytch-token': Cookies.get('stytch_session_jwt'),
+      };
+      const { data } = await axios.post(url, { data: payload }, { headers })
+      if (data.success) {
+        localStorage.setItem("token", data.token)
+        setUser(data.user)
+        return data.token
+      }
+    } catch (err) {
+      console.log("Something went wrong!")
+    }
+  }
+
+  const getCapacityDelegationAuthSig = async (token: string) => {
+    try {
+      const url = `${import.meta.env.VITE_APP_API_BASE_URL}/user/capacity`
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+      };
+      const { data } = await axios.get(url, { headers })
+      console.log("Dataa", data)
+      if (data.success) {
+        return data.capacityDelegationAuthSig
+      }
+    } catch (err) {
+      console.log("Something went wrong!")
+    }
+  }
 
   return {
     initSession,

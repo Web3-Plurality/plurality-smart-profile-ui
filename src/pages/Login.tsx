@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState, useRef } from 'react';
 import { message } from 'antd';
-import { useAccount, useConnect } from 'wagmi';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { useStep } from '../context/StepContext';
 import WidgetLayout from '../components/appLayout';
 import EmailLogin from '../components/EmailLogin';
@@ -27,11 +27,15 @@ import MetaverseHub from '../components/MetaverseHub';
 import { useOrbisHandler } from '../hooks/useOrbishandler';
 import { metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
-
+import { useMetamaskToken } from '../hooks/useMetamaskToken';
+import { useNavigate } from 'react-router-dom';
+import LogoutModal from '../components/LogoutModal';
 
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
+    const { disconnectAsync } = useDisconnect();
+    const navigate = useNavigate()
     const warningMessageRef = useRef<MessageType | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -57,12 +61,21 @@ const Login = () => {
         app,
         isLoading: infoLoading,
         registerEvent,
-    } = useRegisterEvent();
+    } = useRegisterEvent()
 
     const {
         sumbitDataToOrbis,
         isLoading: orbisLoading
     } = useOrbisHandler()
+
+    const {
+        generateMetamaskToken,
+        error: metmaskLoginError,
+        setError
+        // isLoading: nonceLoading
+    } = useMetamaskToken()
+
+
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -74,6 +87,15 @@ const Login = () => {
             setIsLoading(false)
         }
     }, [eventMessage, app]);
+
+
+
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if (isConnected && !token) {
+            generateMetamaskToken()
+        }
+    }, [isConnected])
 
     const widgetHeader = document.getElementById('w-header');
     widgetHeader?.classList.remove('toogleShow')
@@ -164,6 +186,7 @@ const Login = () => {
 
             // Check if MetaMask is connected
             if (!metamaskAddress || !isConnected) {
+                await disconnectAsync()
                 const metamskConnector = connectors[0] //Metamask
                 connect({ connector: metamskConnector });
             }
@@ -182,6 +205,7 @@ const Login = () => {
         try {
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
+
         } catch (e) {
             console.error(e);
         }
@@ -220,29 +244,65 @@ const Login = () => {
         }
     };
 
-    return (
-        <WidgetLayout
-            currentStep={currentStep === 'success'}
-            showBackButton={isBackButton}
-            handleBack={handleBack}
-            // handlefooterClick={ }
-            title={getTitleText(stepHistory)}
-            description={getDescription(stepHistory)}
-            showHeaderLogo={
-                currentStep !== 'socialConnect' &&
-                currentStep !== 'metaverseHub'
-            }
-            showBackgroundImage={currentStep === 'socialConfirmation'}
-            socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
-            isLoading={isLoading}
-            infoLoading={infoLoading}
-            orbisLoading={orbisLoading}
-            selectedSocial={selectedSocial}
-            sumbitDataToOrbis={sumbitDataToOrbis}
+    async function handleLogout() {
+        try {
+            await disconnectAsync();
+        } catch (err) {
+            console.error(err);
+        }
+        localStorage.clear();
+        handleStepper("initial")
+        navigate('/', { replace: true });
+    }
 
-        >
-            {conditionalRendrer()}
-        </WidgetLayout >
+    const handleOk = async () => {
+        generateMetamaskToken()
+        setError(false)
+    }
+    const handleCancel = async () => {
+        await handleLogout()
+        setError(false)
+    }
+
+    return (
+        <>
+            <LogoutModal
+                isVisible={metmaskLoginError}
+                handleOk={handleOk}
+                handleCancel={handleCancel}
+            />
+            {/* <Modal
+                open={metmaskLoginError}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                okText="Yes"
+                cancelText="NO"
+            >
+                <p>Are you sure? In this case you will be logged out</p>
+            </Modal> */}
+            <WidgetLayout
+                currentStep={currentStep === 'success'}
+                showBackButton={isBackButton}
+                handleBack={handleBack}
+                // handlefooterClick={ }
+                title={getTitleText(stepHistory)}
+                description={getDescription(stepHistory)}
+                showHeaderLogo={
+                    currentStep !== 'socialConnect' &&
+                    currentStep !== 'metaverseHub'
+                }
+                showBackgroundImage={currentStep === 'socialConfirmation'}
+                socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
+                isLoading={isLoading}
+                infoLoading={infoLoading}
+                orbisLoading={orbisLoading}
+                selectedSocial={selectedSocial}
+                sumbitDataToOrbis={sumbitDataToOrbis}
+
+            >
+                {conditionalRendrer()}
+            </WidgetLayout >
+        </>
     );
 };
 

@@ -58,7 +58,7 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
                 <Checkbox checked={acceptance} onChange={onChange} />
                 <span>
                     I accept the <a href="https://plurality.network/user-terms-of-service/">terms of service</a>{" "}
-                    and subscribe to receive updates from the DFDC
+                    and subscribe to receive updates from the DFDC and Plurality Network
                 </span>
             </div>
             <CustomButtom

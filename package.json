@@ -27,11 +27,13 @@
     "classnames": "^2.5.1",
     "ethers": "^5.7.2",
     "global": "^4.4.0",
+    "js-cookie": "^3.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-metamask-avatar": "^2.0.9",
     "react-otp-input": "^3.1.1",
     "react-router-dom": "^6.23.0",
+    "siwe": "^2.3.2",
     "styled-components": "^6.1.11",
     "viem": "^2.17.3",
     "vite-plugin-node-polyfills": "^0.22.0",
@@ -39,21 +41,22 @@
     "web3": "^4.10.0"
   },
   "devDependencies": {
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^11.0.2",
+    "@types/js-cookie": "^3.0.6",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "@semantic-release/exec": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^9.2.6",
-    "@semantic-release/npm": "^11.0.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "semantic-release": "^22.0.12",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0",
-    "semantic-release": "^22.0.12"
+    "vite": "^5.2.0"
   }
 }
