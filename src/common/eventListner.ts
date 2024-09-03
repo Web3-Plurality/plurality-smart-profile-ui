@@ -88,8 +88,12 @@ export const useRegisterEvent = () => {
         if (sessionSigs) {
             console.log("Using Lit decryption")
             const result = await litDecryptData(sessionSigs, cipher, cipherHash)
-            decryptionResult = JSON.parse(result)
-            console.log("Dataa: ", decryptionResult)
+            if (result && typeof result === 'object') {
+                decryptionResult = JSON.parse(result.decryptedMessage);
+                console.log("Dataa: ", decryptionResult);
+            } else {
+                throw new Error("Invalid result from Lit decryption");
+            }
         } else {
             console.log("Using metamask decryption")
             const result = await metamaskDecryptData(cipher)
@@ -114,6 +118,7 @@ export const useRegisterEvent = () => {
             ecryptData(JSON.stringify(response.data))
         } catch (err) {
             setError('Error')
+            decryptData()
         } finally {
             setIsLoading(false)
         }
