@@ -43,7 +43,6 @@ export const SPATIAL_ROUTE = '/oauth-spatial'
 export const ARTIFICIAL_ROME_ROUTE = '/oauth-artificialRome'
 
 export const headerSteps = new Set([
-    'success',
     'socialConnect',
     'metaverseHub',
     'socialConfirmation',

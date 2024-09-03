@@ -1,8 +1,15 @@
-import React, { ReactNode, createContext, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 // Define the user type (example)
 interface User {
-    name: string;
+    id: string
+    email: string | null
+    address: string | null
+    subscribe: boolean
+    profileImg: string
+    username: string
+    bio: string
 }
 
 // Define the context type
@@ -15,7 +22,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(() => {
+        const storedUser = localStorage.getItem('userData');
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
+
+    // Save user to localStorage whenever it changes
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('userData', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('userData');
+        }
+    }, [user]);
 
     return (
         <AuthContext.Provider value={{ user, setUser }}>
@@ -24,5 +43,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 };
 
-export { AuthContext, AuthProvider };
+const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
 
+export { AuthProvider, useAuth };

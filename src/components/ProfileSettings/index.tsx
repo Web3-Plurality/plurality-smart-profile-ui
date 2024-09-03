@@ -6,11 +6,20 @@ import './styles.css'
 import CustomButtom from "../CustomButton"
 import { useAccount } from "wagmi"
 import { UserAvatar } from "../Avatar"
+import axios from "axios"
+import { BASE_URL } from "../../common/constants"
+import { useAuth } from "../../context/AuthContext"
+import { message } from "antd"
+import { useStep } from "../../context/StepContext"
 
 const ProfileSettings = () => {
-    const [username, setUsername] = useState('')
-    const [profilePic, setProfilePic] = useState<string | null>(null)
-    const [userBio, setUserBio] = useState('')
+    const { user: userData, setUser } = useAuth()
+    const { handleBack } = useStep();
+    const [loading, setLoading] = useState(false)
+
+    const [username, setUsername] = useState(userData?.username || '')
+    const [profilePic, setProfilePic] = useState<string>(userData?.profileImg || '')
+    const [userBio, setUserBio] = useState(userData?.bio || '')
 
     const litAccount = localStorage.getItem('lit-wallet-sig')
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
@@ -33,8 +42,51 @@ const ProfileSettings = () => {
         }
     }
 
-    const submitData = () => {
-        console.log("Data: ", username, userBio, profilePic)
+
+    const handleDataSumbit = () => {
+        if (
+            username === userData?.username &&
+            profilePic === userData?.profileImg &&
+            userBio === userData?.bio
+        ) {
+            message.warning("Your data is alreday upto date")
+        } else {
+            submitData()
+        }
+    }
+    const submitData = async () => {
+        try {
+            setLoading(true)
+            const token = localStorage.getItem('token')
+            const payLoaddata = {
+                username,
+                profileImg: profilePic === userData?.profileImg ? "" : profilePic,
+                bio: userBio
+            }
+            const { data } = await axios.put(`${BASE_URL}/user`, { data: payLoaddata }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            const { success, user } = data
+            if (success) {
+                setLoading(false)
+                setUser({
+                    id: userData?.id || '',
+                    email: userData?.email || null,
+                    address: userData?.address || null,
+                    subscribe: userData?.subscribe || false,
+                    profileImg: user.profileImg || '',
+                    username: user.username || '',
+                    bio: user.bio || ''
+                })
+                message.success("Profile updated successfully!")
+                handleBack()
+            }
+        } catch (err) {
+            console.log("Some Error:", err)
+        }
     }
 
     return (
@@ -76,9 +128,9 @@ const ProfileSettings = () => {
 
             <div>
                 <CustomButtom
-                    text="Update Profile"
-                    handleClick={submitData}
-                    isDisable={!username && !profilePic && !userBio}
+                    text={loading ? 'Updating Profile...' : "Update Profile"}
+                    handleClick={handleDataSumbit}
+                    isDisable={(!username && !profilePic && !userBio) || loading}
                 />
             </div>
 
