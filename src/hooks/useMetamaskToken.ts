@@ -46,9 +46,12 @@ export const useMetamaskToken = () => {
                 const message = await createSiweMessage(userAddress, nonce);
                 const signature = await signer.signMessage(message);
                 return { message, signature };
-            } catch (err) {
-                if (err.code === 4001) {
-                    setError(true)
+            } catch (err: unknown) {
+                if (err && typeof err === 'object') {
+                    const errorWithCode = err as { code: number };
+                    if (errorWithCode.code === 4001) {
+                        setError(true);
+                    }
                 }
             }
         }
