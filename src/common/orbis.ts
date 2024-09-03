@@ -7,7 +7,9 @@ import {
     ORBIS_ENV,
     ORBIS_NODE_URL,
     PLURALITY_CONTEXT,
-    TEST_MODEL
+    INDIVIDUAL_PROFILE_MODEL,
+    SMART_PROFILE_MODEL,
+    PROFILE_TYPE_MODEL
 } from "./constants";
 import { litNodeClient } from "./lit";
 
@@ -20,7 +22,7 @@ const orbisdb = new OrbisDB({
 
 const data = {
     contexts: { plurality: PLURALITY_CONTEXT },
-    models: { test_model: TEST_MODEL }
+    models: { individual_profile: INDIVIDUAL_PROFILE_MODEL, smart_profile: SMART_PROFILE_MODEL, profile_type: PROFILE_TYPE_MODEL }
 }
 
 const generatePkpWalletInstance = async () => {
