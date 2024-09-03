@@ -31,6 +31,7 @@ import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
 
+import useSession from '../hooks/useSession';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -55,6 +56,7 @@ const Login = () => {
     const [, setUser] = useState<string>('')
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
+    const { sessionSigs } = useSession();
 
     const {
         message: eventMessage,

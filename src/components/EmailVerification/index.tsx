@@ -46,7 +46,6 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
 
     const error = authError || accountsError || sessionError;
 
-
     const goToSignUp = () => {
         navigate(window.location.pathname, { replace: true });
         createAccount(authMethod!);
@@ -71,6 +70,7 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
         // If user is authenticated and has selected an account, initialize session
         if (authMethod && accounts.length) {
             initSession(authMethod, accounts[0]);
+            localStorage.setItem("pkpKey", JSON.stringify(accounts[0]))
         } else if (authMethod && !accounts.length && isFetchTriggered) {
             goToSignUp();
         }
