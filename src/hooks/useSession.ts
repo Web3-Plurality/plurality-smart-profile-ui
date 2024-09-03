@@ -23,11 +23,13 @@ export default function useSession() {
     async (authMethod: AuthMethod, pkp: IRelayPKP): Promise<void> => {
       setLoading(true);
       setError(undefined);
-      try{
-        
-      const authToken = await userAuthorization(pkp.ethAddress)
-      const capacityDelegationAuthSig = await getCapacityDelegationAuthSig(authToken)
-  
+      try {
+
+        const authToken = await userAuthorization(pkp.ethAddress)
+        const capacityDelegationAuthSig = await getCapacityDelegationAuthSig(authToken)
+
+        await litNodeClient.connect()
+
         // Generate session sigs
         const sessionSigs = await litNodeClient.getPkpSessionSigs({
           pkpPublicKey: pkp.publicKey!,
