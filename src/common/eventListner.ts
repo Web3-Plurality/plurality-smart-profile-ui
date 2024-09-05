@@ -3,7 +3,7 @@ import { RouteMapper } from './utils'
 import { BASE_URL } from './constants'
 import axios from 'axios'
 import { metamaskEncryptData, metamaskDecryptData } from './crypto'
-import { insert, connectOrbisDidPkh } from './orbis';
+import { insert, select, connectOrbisDidPkh } from './orbis';
 import { litEncryptData, litDecryptData } from './crypto'
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey'
 
@@ -115,7 +115,8 @@ export const useRegisterEvent = () => {
             })
             console.log(response.data)
             //// dont encrypt here
-            ecryptData(JSON.stringify(response.data))
+            // ecryptData(JSON.stringify(response.data))
+
         } catch (err) {
             setError('Error')
             decryptData()

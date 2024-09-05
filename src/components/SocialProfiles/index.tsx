@@ -15,20 +15,23 @@ const SocialProfiles = ({
     handleIconClick,
 }: MetaverseProps) => {
 
-    const numIcons = metaverse ? metaverseHubButtons.length : socialConnectButtons.length;
+    // const numIcons = metaverse ? metaverseHubButtons.length : socialConnectButtons.length;
+    const numIcons = socialConnectButtons.length
     const circleRadius = 153;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
 
-    const profiles = metaverse ? metaverseHubButtons : socialConnectButtons
+    // const profiles = metaverse ? metaverseHubButtons : socialConnectButtons
+    const socailIcons = localStorage.getItem("platforms")
+    const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : ''
 
     return (
         <div className="circle">
             <div className='mid-icon'>
                 <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
-            {profiles.map(({ id, icon, activeIcon }) => {
+            {parsedSocailIcons && parsedSocailIcons.map(({ id, icon, activeIcon }) => {
                 // Calculate position for each icon
                 const x = circleRadius * Math.cos(angle * id);
                 const y = circleRadius * Math.sin(angle * id);

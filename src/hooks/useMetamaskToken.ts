@@ -5,6 +5,8 @@ import { providers } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { useAccount } from 'wagmi';
 import { useAuth } from '../context/AuthContext';
+import { connectOrbisDidPkh } from '../common/orbis';
+import { AuthUserInformation } from '@useorbis/db-sdk';
 
 // Define constants and provider outside the hook
 const domain = window.location.host;
@@ -92,6 +94,11 @@ export const useMetamaskToken = () => {
             if (success) {
                 setUser(user)
                 localStorage.setItem('token', data.token)
+                const result: AuthUserInformation | "" = await connectOrbisDidPkh();
+                if (result?.did) {
+                    localStorage.setItem('metamaskDid', JSON.stringify(result?.did))
+                }
+                console.log("Result: ", result, result.did)
             }
         } catch (err) {
             console.error("Error posting signature response:", err);

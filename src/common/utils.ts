@@ -13,6 +13,7 @@ import {
     SPATIAL_ROUTE,
     TIKTOK_ROUTE
 } from './constants'
+import { litDecryptData, litEncryptData, metamaskDecryptData, metamaskEncryptData } from './crypto';
 
 // Component Title Mapper
 export const getTitleText = (prevSteps: string[]) => {
@@ -102,4 +103,39 @@ export const RouteMapper = (app: string) => {
         default:
             return FACEBOOK_ROUTE
     }
+}
+
+export const encryptData = async (dataToEncrypt: string, publicKey: string) => {
+    const sessionSigs = localStorage.getItem("signature")
+    if (sessionSigs) {
+        console.log("Using Lit encryption")
+        const result = await litEncryptData(dataToEncrypt)
+        return result
+    } else {
+        console.log("Using metamask encryption")
+        console.log("the public key is:", publicKey)
+        const result = metamaskEncryptData(publicKey, dataToEncrypt)
+        return result
+    }
+}
+
+export const decryptData = async (cipher: string, cipherHash: string) => {
+    let decryptionResult;
+    const sessionSigs = localStorage.getItem("signature")
+    if (sessionSigs) {
+        console.log("Using Lit decryption")
+        const result = await litDecryptData(JSON.parse(sessionSigs), cipher, cipherHash)
+        if (result && typeof result === 'object') {
+            decryptionResult = JSON.parse(result.decryptedMessage);
+            console.log("Dataa: ", decryptionResult);
+        } else {
+            throw new Error("Invalid result from Lit decryption");
+        }
+    } else {
+        console.log("Using metamask decryption")
+        const result = await metamaskDecryptData(cipher)
+        decryptionResult = JSON.parse(result)
+        console.log("Dataa: ", decryptionResult)
+    }
+    return decryptionResult
 }

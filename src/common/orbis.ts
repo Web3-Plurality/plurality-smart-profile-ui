@@ -9,9 +9,11 @@ import {
     PLURALITY_CONTEXT,
     INDIVIDUAL_PROFILE_MODEL,
     SMART_PROFILE_MODEL,
-    PROFILE_TYPE_MODEL
+    PROFILE_TYPE_MODEL,
+    PROFILE_TYPE_STREAM_ID
 } from "./constants";
 import { litNodeClient } from "./lit";
+import { litEncryptData } from "./crypto";
 
 type ValidationResult = { valid: true } | { valid: false; error: string };
 
@@ -22,7 +24,11 @@ const orbisdb = new OrbisDB({
 
 const data = {
     contexts: { plurality: PLURALITY_CONTEXT },
-    models: { individual_profile: INDIVIDUAL_PROFILE_MODEL, smart_profile: SMART_PROFILE_MODEL, profile_type: PROFILE_TYPE_MODEL }
+    models: {
+        individual_profile: INDIVIDUAL_PROFILE_MODEL,
+        smart_profile: SMART_PROFILE_MODEL,
+        profile_type: PROFILE_TYPE_MODEL
+    }
 }
 
 const generatePkpWalletInstance = async () => {
@@ -81,6 +87,7 @@ export async function connectOrbisDidPkh() {
         const authResult: OrbisConnectResult = await orbisdb.connectUser({ auth });
 
         if (authResult?.user) {
+            console.log("authResult?.user", authResult, authResult.user)
             return authResult.user;
         } else {
             return "";
@@ -146,7 +153,7 @@ export async function userLogout() {
 /** Will retrieve the active profile for the connected user */
 export async function getMostRecentDataFromTable(did: string) {
     try {
-        const _profileRes = await orbisdb.select().from(data.models.test_model || '').context(PLURALITY_CONTEXT)
+        const _profileRes = await orbisdb.select().from(data.models.profile_type).context(PLURALITY_CONTEXT)
             .where({ "controller": did.toString() }).orderBy(["indexed_at", "desc"]).run();
         if (_profileRes && _profileRes.rows.length > 0) {
             return _profileRes.rows[0];
@@ -165,7 +172,7 @@ export async function getMostRecentDataFromTable(did: string) {
 
 export async function insert(msg: string) {
     const insertStatement = await orbisdb
-        .insert(data.models.test_model || '')
+        .insert(data.models.profile_type)
         .value(
             {
                 TestProperty: msg
@@ -183,6 +190,8 @@ export async function insert(msg: string) {
     try {
         const result = await insertStatement.run();
         console.log(result);
+        return result
+
     }
     catch (error) {
         console.log(error);
@@ -193,7 +202,7 @@ export async function insert(msg: string) {
 
 export async function bulkInsert() {
     const insertStatement = await orbisdb
-        .insertBulk(data.models.test_model || '')
+        .insertBulk(data.models.profile_type)
         .value(
             {
                 TestProperty: "test"
@@ -248,7 +257,7 @@ export async function partialUpdate() {
     // This will perform a shallow merge before updating the document 
     // { ...oldContent, ...newContent }
     const updateStatement = await orbisdb
-        .update(data.models.test_model || '')
+        .update(data.models.profile_type)
         .set(
             {
                 TestProperty: "test-updated"
@@ -268,7 +277,14 @@ export async function partialUpdate() {
 
 export async function select() {
     try {
-        const selectStatement = await orbisdb.select().from(data.models.test_model || '').context(PLURALITY_CONTEXT);
+        const selectStatement = await orbisdb
+            .select()
+            .from(data.models.profile_type)
+            .where({
+                stream_id: PROFILE_TYPE_STREAM_ID
+            })
+            .context(PLURALITY_CONTEXT)
+
         const query = selectStatement.build()
         console.log("Query that will be run", query)
         const result = await selectStatement.run();
@@ -282,4 +298,67 @@ export async function select() {
     catch (error) {
         console.log("Error", error)
     }
+}
+
+export async function selectSmartProfiles() {
+    try {
+        const selectStatement = await orbisdb
+            .select()
+            .from(data.models.smart_profile)
+            .where({
+                profile_type_stream_id: PROFILE_TYPE_STREAM_ID,
+                controller: JSON.parse(localStorage.getItem("metamaskDid") ?? '')
+                ////address
+            })
+            .orderBy(["indexed_at", "desc"])
+            .context(PLURALITY_CONTEXT)
+
+        const query = selectStatement.build()
+        console.log("Query that will be run", query)
+        const result = await selectStatement.run();
+        console.log(result);
+        // columns: Array<string>
+        // rows: Array<T | Record<string, any>>
+        const { columns, rows } = result
+        console.log({ columns, rows });
+        return { columns, rows };
+    }
+    catch (error) {
+        console.log("Error", error)
+    }
+}
+
+export async function insertSmartProfile(encrypted_profile_data: string, scores: string, version = '1', connectedPlatforms: string) {
+    console.log("Insert payload data: ", encrypted_profile_data, scores, version, connectedPlatforms, PROFILE_TYPE_STREAM_ID)
+
+    const insertStatement = await orbisdb
+        .insert(data.models.smart_profile)
+        .value(
+            {
+                encrypted_profile_data: encrypted_profile_data,
+                scores: scores,
+                connected_platforms: connectedPlatforms,
+                version: version,
+                profile_type_stream_id: PROFILE_TYPE_STREAM_ID
+            }
+        )
+        // optionally, you can scope this insert to a specific context
+        .context(PLURALITY_CONTEXT);
+
+    // Perform local JSON Schema validation before running the query
+    const validation: ValidationResult = await insertStatement.validate()
+    if (!validation.valid) {
+        throw "Error during validation: " + validation.error
+    }
+
+    try {
+        const result = await insertStatement.run();
+        return result
+        console.log(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+    // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
+    console.log(insertStatement.runs)
 }
