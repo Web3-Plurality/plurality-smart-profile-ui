@@ -41,8 +41,9 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
 
             //////////////////////////////////////////
             const response = await selectSmartProfiles();
-            console.log("Rows (first time select ssmart profile): ", response)
+            console.log("Rows (first time select smart profile): ", response)
             if (!response?.rows?.length) {
+                // no profile found in orbis for this user
                 const token = localStorage.getItem('token')
                 const { data } = await axios.post(`${BASE_URL}/user/smart-profile`, {}, {
                     headers: {
@@ -56,12 +57,12 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
                     const result = await encryptData(JSON.stringify(data), publicKey)
                     console.log("encryption result: ", result)
 
-                    const decryptedData = decryptData(result?.ciphertext, '')
-                    console.log("encryption result: ", decryptedData)
+                    //const decryptedData = decryptData(JSON.stringify(result), '')
+                    //console.log("encryption result: ", decryptedData)
 
                     const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify([]))
-
-                    if (result) {
+                    // save smart profile in local storage along with the returned stream id
+                    if (insertionResult) {
                         const objData = {
                             streamId: insertionResult?.id,
                             data
@@ -71,26 +72,29 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
                     }
 
                 }
-            } else {
+            } 
+            else {
+                // user has a smart profile in orbis
                 const smartprofileData = localStorage.getItem("smartProfileData")
                 if (smartprofileData) {
                     const { streamId } = JSON.parse(smartprofileData)
                     if (streamId === response.rows[0].stream_id) {
-                        console.log("see you after this")
+                        handleStepper('socialConnect')
                     } else {
-                        console.log("see you after this 2")
+                        console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
+                        const decryptedData = decryptData(response.rows[0].encrypted_profile_data, '')
+                        localStorage.setItem('smartProfileData', JSON.stringify(decryptedData))
+                        handleStepper('socialConnect')
                     }
                 } else {
-                    const { ciphertext, dataToEncryptHash } = JSON.parse(response.rows[0].encrypted_profile_data)
-                    console.log("Ned to decrypt: ", ciphertext, dataToEncryptHash)
-                    const decryptedData = decryptData(ciphertext, dataToEncryptHash)
+                    //const { ciphertext, dataToEncryptHash } = JSON.parse(response.rows[0].encrypted_profile_data)
+                    console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
+                    const decryptedData = decryptData(response.rows[0].encrypted_profile_data, '')
                     localStorage.setItem('smartProfileData', JSON.stringify(decryptedData))
-
+                    handleStepper('socialConnect')
                 }
             }
         }
-        //       //     setCipher(result?.ciphertext)
-        //     setCipherHash(result?.dataToEncryptHash)
     }
 
     return (

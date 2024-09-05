@@ -81,12 +81,12 @@ export const metamaskEncryptData = (publicKey: string, message: string, version:
   return encryptedData
 }
 
-export const metamaskDecryptData = async (encryptedData: unknown) => {
+export const metamaskDecryptData = async (encryptedData: string) => {
   await window.ethereum.enable();
   const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
   const decrypt = await window.ethereum.request({
     method: 'eth_decrypt',
-    params: [`0x${Buffer.from(JSON.stringify(encryptedData), "utf8").toString("hex")}`, accounts[0]],
+    params: [`0x${Buffer.from(encryptedData, "utf8").toString("hex")}`, accounts[0]],
   });
   console.log("Decrypted Data", decrypt)
   return decrypt

@@ -54,8 +54,8 @@ export const useRegisterEvent = () => {
             alert('Failed to open window. It might be blocked by a popup blocker.');
         }
     }
-
-    const ecryptData = async (dataToEncrypt: string) => {
+// I think we are not using this one so we should remove it?
+    const encryptData = async (dataToEncrypt: string) => {
         let encryptionResult: string;
         const sessionSigs = localStorage.getItem("signature")
         if (sessionSigs) {
@@ -81,7 +81,7 @@ export const useRegisterEvent = () => {
         await connectOrbisDidPkh();
         await insert(encryptionResult);
     }
-
+// I think we are not using this one so we should remove it?
     const decryptData = async () => {
         let decryptionResult;
         const sessionSigs = JSON.parse(localStorage.getItem("signature") ?? '')
