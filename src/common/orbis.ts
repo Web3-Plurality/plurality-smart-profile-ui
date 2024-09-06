@@ -302,12 +302,13 @@ export async function select() {
 
 export async function selectSmartProfiles() {
     try {
+        const didKey = localStorage.getItem("metamaskDid")
         const selectStatement = await orbisdb
             .select()
             .from(data.models.smart_profile)
             .where({
                 profile_type_stream_id: PROFILE_TYPE_STREAM_ID,
-                controller: JSON.parse(localStorage.getItem("metamaskDid") ?? '')
+                controller: didKey ? JSON.parse(didKey) : ''
                 ////address
             })
             .orderBy(["indexed_at", "desc"])
@@ -329,8 +330,6 @@ export async function selectSmartProfiles() {
 }
 
 export async function insertSmartProfile(encrypted_profile_data: string, scores: string, version = '1', connectedPlatforms: string) {
-    console.log("Insert payload data: ", encrypted_profile_data, scores, version, connectedPlatforms, PROFILE_TYPE_STREAM_ID)
-
     const insertStatement = await orbisdb
         .insert(data.models.smart_profile)
         .value(
@@ -354,7 +353,38 @@ export async function insertSmartProfile(encrypted_profile_data: string, scores:
     try {
         const result = await insertStatement.run();
         return result
-        console.log(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+    // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
+    console.log(insertStatement.runs)
+}
+
+export async function insertIndividualProfile(encrypted_profile_data: string, scores: string, version = '1', platformName: string) {
+    const insertStatement = await orbisdb
+        .insert(data.models.individual_profile)
+        .value(
+            {
+                platform_name: platformName,
+                encrypted_profile_data,
+                scores,
+                version: version,
+            }
+        )
+        // optionally, you can scope this insert to a specific context
+        .context(PLURALITY_CONTEXT);
+
+    // Perform local JSON Schema validation before running the query
+    const validation: ValidationResult = await insertStatement.validate()
+    if (!validation.valid) {
+        throw "Error during validation: " + validation.error
+    }
+
+    try {
+        const result = await insertStatement.run();
+        console.log("Result: ", result)
+        return result
     }
     catch (error) {
         console.log(error);

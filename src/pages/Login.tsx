@@ -16,6 +16,7 @@ import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import Dashboard from '../components/LitComponents/Dashboard';
 import ProfileSettings from '../components/ProfileSettings';
 import {
+    encryptData,
     getDescription,
     getTitleText,
     showBackButton,
@@ -24,12 +25,14 @@ import {
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import MetaverseHub from '../components/MetaverseHub';
-import { useOrbisHandler } from '../hooks/useOrbishandler';
-import { metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
+import axios from 'axios';
+import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
+import { insertSmartProfile } from '../common/orbis';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -54,6 +57,8 @@ const Login = () => {
     const [, setUser] = useState<string>('')
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
+    const { getPublicKey } = useMetamaskPublicKey()
+
 
     const {
         message: eventMessage,
@@ -62,10 +67,44 @@ const Login = () => {
         registerEvent,
     } = useRegisterEvent()
 
-    const {
-        sumbitDataToOrbis,
-        isLoading: orbisLoading
-    } = useOrbisHandler()
+    // const {
+    //     sumbitDataToOrbis,
+    //     isLoading: orbisLoading
+    // } = useOrbisHandler()
+
+    const getLatestSmartProfile = async () => {
+        const presentSmartProfileData = localStorage.getItem('smartProfileData')
+        const token = localStorage.getItem('token')
+        if (presentSmartProfileData) {
+            const { data } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: JSON.parse(presentSmartProfileData) }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            if (data.success) {
+                console.log("Data of smart profile: ", data)
+                const publicKey = await getPublicKey()
+                const result = await encryptData(JSON.stringify(data), publicKey)
+                console.log("encryption result: ", result)
+
+                //const decryptedData = decryptData(JSON.stringify(result), '')
+                //console.log("encryption result: ", decryptedData)
+
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify([]))
+                // save smart profile in local storage along with the returned stream id
+                if (insertionResult) {
+                    const objData = {
+                        streamId: insertionResult?.id,
+                        data
+                    }
+                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    handleStepper('metaverseHub')
+                }
+
+            }
+        }
+    }
 
     const {
         generateMetamaskToken,
@@ -172,7 +211,7 @@ const Login = () => {
     }
 
 
-    const allowContinue = (activeStates.filter((item) => item)).length > 0
+    const allowContinue = (activeStates.filter((item) => item && activeStates.indexOf(item) !== 6 && activeStates.indexOf(item) !== 7)).length > 0
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
@@ -295,9 +334,9 @@ const Login = () => {
                 socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
                 isLoading={isLoading}
                 infoLoading={infoLoading}
-                orbisLoading={orbisLoading}
+                // orbisLoading={orbisLoading}
                 selectedSocial={selectedSocial}
-                sumbitDataToOrbis={sumbitDataToOrbis}
+                sumbitDataToOrbis={getLatestSmartProfile}
 
             >
                 {conditionalRendrer()}
