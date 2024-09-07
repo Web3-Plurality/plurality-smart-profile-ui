@@ -84,7 +84,11 @@ const Login = () => {
 
             if (data.success) {
                 console.log("Data of smart profile: ", data)
-                const publicKey = await getPublicKey()
+                const litSignature = localStorage.getItem("signature")
+                let publicKey;
+                if (!litSignature) {
+                    publicKey = await getPublicKey()
+                }
                 const result = await encryptData(JSON.stringify(data), publicKey)
                 console.log("encryption result: ", result)
 
@@ -177,10 +181,15 @@ const Login = () => {
         };
 
         const handleSocialConnectClick = () => {
+            const smartProfileData = localStorage.getItem('smartProfileData')
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_profiles : []
             const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
-            setActiveIndex(index);
-            console.log("clickedIconDisplayName", clickedIconDisplayName);
-            registerEvent(clickedIconDisplayName);
+            if (!connectedPlatforms.includes(clickedIconDisplayName)) {
+                // const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
+                setActiveIndex(index);
+                console.log("clickedIconDisplayName", clickedIconDisplayName);
+                registerEvent(clickedIconDisplayName);
+            }
         };
 
         if (isMetaverseHub) {
@@ -289,7 +298,9 @@ const Login = () => {
         } catch (err) {
             console.error(err);
         }
+        const smartprofileData = localStorage.getItem("smartProfileData")
         localStorage.clear();
+        localStorage.setItem("smartProfileData", smartprofileData || '')
         handleStepper("initial")
         navigate('/', { replace: true });
     }

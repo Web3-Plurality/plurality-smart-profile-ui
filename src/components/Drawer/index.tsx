@@ -32,6 +32,11 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
         }
     };
 
+    const userOrbisData = localStorage.getItem('smartProfileData')
+    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
+
+    const userAvatar = parssedUserOrbisData?.data?.smartProfile.avatar
+
     const shortenAddress = (address: string): string => {
         const startChars = address.slice(0, 6); // Take first 6 characters
         const endChars = address.slice(-4); // Take last 4 characters
@@ -56,7 +61,7 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
                 <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
                     <div className="avatar">
                         {/* <UserAvatar address={address} size={46} /> */}
-                        {user?.profileImg ? <img src={user.profileImg} /> : <UserAvatar address={address} size={46} />}
+                        {userAvatar ? <img src={userAvatar} /> : <UserAvatar address={address} size={46} />}
                     </div>
                 </Dropdown>
             </Space>

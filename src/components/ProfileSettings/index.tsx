@@ -11,15 +11,25 @@ import { BASE_URL } from "../../common/constants"
 import { useAuth } from "../../context/AuthContext"
 import { message } from "antd"
 import { useStep } from "../../context/StepContext"
+import { useMetamaskPublicKey } from "../../hooks/useMetamaskPublicKey"
+import { encryptData } from "../../common/utils"
+import { autoConnect, insertSmartProfile } from "../../common/orbis"
 
 const ProfileSettings = () => {
     const { user: userData, setUser } = useAuth()
+    const { getPublicKey } = useMetamaskPublicKey()
     const { handleBack } = useStep();
     const [loading, setLoading] = useState(false)
+    const userOrbisData = localStorage.getItem('smartProfileData')
+    const parsedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
-    const [username, setUsername] = useState(userData?.username || '')
-    const [profilePic, setProfilePic] = useState<string>(userData?.profileImg || '')
-    const [userBio, setUserBio] = useState(userData?.bio || '')
+    const name = parsedUserOrbisData?.data?.smartProfile?.username
+    const userAvatar = parsedUserOrbisData?.data?.smartProfile?.avatar
+    const bio = parsedUserOrbisData?.data?.smartProfile?.bio
+
+    const [username, setUsername] = useState(name || '')
+    const [profilePic, setProfilePic] = useState<string>(userAvatar || '')
+    const [userBio, setUserBio] = useState(bio || '')
 
     const litAccount = localStorage.getItem('lit-wallet-sig')
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
@@ -46,7 +56,7 @@ const ProfileSettings = () => {
     const handleDataSumbit = () => {
         if (
             username === userData?.username &&
-            profilePic === userData?.profileImg &&
+            profilePic === userAvatar &&
             userBio === userData?.bio
         ) {
             message.warning("Your data is alreday upto date")
@@ -60,29 +70,54 @@ const ProfileSettings = () => {
             const token = localStorage.getItem('token')
             const payLoaddata = {
                 username,
-                profileImg: profilePic === userData?.profileImg ? "" : profilePic,
+                profileImg: profilePic === userAvatar ? "" : profilePic,
                 bio: userBio
             }
-            const { data } = await axios.put(`${BASE_URL}/user`, { data: payLoaddata }, {
+            const { data } = await axios.put(`${BASE_URL}/user`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             })
 
-            const { success, user } = data
+            const { success, smartProfile } = data
             if (success) {
-                setLoading(false)
-                setUser({
-                    id: userData?.id || '',
-                    email: userData?.email || null,
-                    address: userData?.address || null,
-                    subscribe: userData?.subscribe || false,
-                    profileImg: user.profileImg || '',
-                    username: user.username || '',
-                    bio: user.bio || ''
-                })
-                message.success("Profile updated successfully!")
-                handleBack()
+
+
+                console.log("Data of smart profile: ", smartProfile)
+                const litSignature = localStorage.getItem("signature")
+                let publicKey;
+                if (!litSignature) {
+                    publicKey = await getPublicKey()
+                }
+                const result = await encryptData(JSON.stringify(smartProfile), publicKey)
+                console.log("encryption result: ", result)
+                //const decryptedData = decryptData(JSON.stringify(result), '')
+                //console.log("encryption result: ", decryptedData)
+                await autoConnect()
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_profiles))
+                console.log("insertion result: ", insertionResult)
+                // save smart profile in local storage along with the returned stream id
+                if (insertionResult) {
+                    const objData = {
+                        streamId: insertionResult?.id,
+                        data: { smartProfile }
+                    }
+                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    // setUser({
+                    //     id: userData?.id || '',
+                    //     email: userData?.email || null,
+                    //     address: userData?.address || null,
+                    //     subscribe: userData?.subscribe || false,
+                    //     profileImg: user.profileImg || '',
+                    //     username: user.username || '',
+                    //     bio: user.bio || ''
+                    // })
+                    // message.success("Profile updated successfully!")
+
+                    setLoading(false)
+
+                    handleBack()
+                }
             }
         } catch (err) {
             console.log("Some Error:", err)

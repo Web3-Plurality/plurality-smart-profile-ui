@@ -50,9 +50,7 @@ export const headerSteps = new Set([
     'socialConfirmation',
     'digitalWardrobe',
     'digitalWardrobeConnect',
-    'dashboard',
     'profileSettings'
-
 ]);
 
 export const backButtonSteps = new Set([
@@ -170,6 +168,7 @@ export const socialConnectButtons = [
         activeIcon: aidressingIconColored,
     },
 ]
+
 
 export const metaverseHubButtons = [
     {

@@ -96,7 +96,7 @@ export const useMetamaskToken = () => {
                 localStorage.setItem('token', data.token)
                 const result: AuthUserInformation | "" = await connectOrbisDidPkh();
                 if (result?.did) {
-                    localStorage.setItem('metamaskDid', JSON.stringify(result?.did))
+                    localStorage.setItem('userDid', JSON.stringify(result?.did))
                 }
                 console.log("Result: ", result, result.did)
             }

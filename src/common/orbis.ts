@@ -62,11 +62,11 @@ async function createHash(data: string) {
 }
 
 const createSigature = async () => {
-    const email = localStorage.getItem("user") as string
-    // const userId = JSON.parse(localStorage.getItem("userData") as string).id
+    // const email = localStorage.getItem("user") as string
+    const userId = JSON.parse(localStorage.getItem("userData") as string).id
 
     const wallet = await generatePkpWalletInstance()
-    const signature = await wallet?.signMessage(email);
+    const signature = await wallet?.signMessage(userId);
     return signature
 }
 
@@ -77,8 +77,9 @@ export async function connectOrbisDidPkh() {
     try {
         const sessionSigs = localStorage.getItem("signature");
         if (sessionSigs) {
-            const sigedData = await createSigature();
-            const hasedUser = await createHash(sigedData as string);
+            // const sigedData = await createSigature();
+            const userId = JSON.parse(localStorage.getItem("userData") as string).id
+            const hasedUser = await createHash(userId as string);
             auth = await OrbisKeyDidAuth.fromSeed(hasedUser);
         } else {
             auth = new OrbisEVMAuth(window.ethereum);
@@ -302,7 +303,7 @@ export async function select() {
 
 export async function selectSmartProfiles() {
     try {
-        const didKey = localStorage.getItem("metamaskDid")
+        const didKey = localStorage.getItem("userDid")
         const selectStatement = await orbisdb
             .select()
             .from(data.models.smart_profile)

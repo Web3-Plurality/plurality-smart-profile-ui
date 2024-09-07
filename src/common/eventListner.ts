@@ -3,7 +3,7 @@ import { encryptData, RouteMapper } from './utils'
 import { BASE_URL } from './constants'
 import axios from 'axios'
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey'
-import { autoConnect, insertIndividualProfile } from './orbis'
+import { autoConnect, insertIndividualProfile, insertSmartProfile } from './orbis'
 
 export const useRegisterEvent = () => {
     const [isLoading, setIsLoading] = useState(false)
@@ -74,12 +74,48 @@ export const useRegisterEvent = () => {
             const encryptedIndividualProfile = await encryptData(JSON.stringify(data), publicKey)
             console.log("Individual profile encryption: ", encryptedIndividualProfile)
             await autoConnect()
-            await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
-            // if (encryptedIndividualProfile) {
-            //     const res = 
-            //     console.log("Individual profile insertion: ", res)
-            // }
+            const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
 
+            if (individualresult) {
+                const token = localStorage.getItem('token')
+                const localSmartProfile = localStorage.getItem('smartProfileData')
+                let payload;
+
+                if (localSmartProfile) {
+                    payload = JSON.parse(localSmartProfile).data.smartProfile
+                }
+
+                const { data: smartProfileResponse } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+
+                if (smartProfileResponse.success) {
+                    console.log("Data of smart profile: ", smartProfileResponse)
+                    const litSignature = localStorage.getItem("signature")
+                    let publicKey;
+                    if (!litSignature) {
+                        publicKey = await getPublicKey()
+                    }
+                    const result = await encryptData(JSON.stringify(smartProfileResponse), publicKey)
+                    console.log("encryption result: ", result)
+                    //const decryptedData = decryptData(JSON.stringify(result), '')
+                    //console.log("encryption result: ", decryptedData)
+                    await autoConnect()
+                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_profiles))
+                    console.log("insertion result: ", insertionResult)
+                    // save smart profile in local storage along with the returned stream id
+                    if (insertionResult) {
+                        const objData = {
+                            streamId: insertionResult?.id,
+                            data: smartProfileResponse
+                        }
+                        localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        // setLoading(false)
+                    }
+                }
+            }
         } catch (err) {
             setError('Error')
         } finally {

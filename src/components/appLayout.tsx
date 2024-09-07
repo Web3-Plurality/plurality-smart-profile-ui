@@ -56,15 +56,15 @@ const WidgetLayout = ({
                         <>
                             <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
 
-                            {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
-                            <WidgetHeader title={title} description={description} currentStep={currentStep} />
-                            {children}
-                        </div>
-                        <div
-                            onClick={handleBack}
-                            className={classNames('back-btn', { hideBtn: !showBackButton })}>
-                            Back
-                        </div>
+                                {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
+                                <WidgetHeader title={title} description={description} currentStep={currentStep} />
+                                {children}
+                            </div>
+                            <div
+                                onClick={handleBack}
+                                className={classNames('back-btn', { hideBtn: !showBackButton })}>
+                                Back
+                            </div>
 
                             {!showHeaderLogo && <div
                                 className='back-btn'
@@ -72,7 +72,7 @@ const WidgetLayout = ({
                                 tabIndex={0}
                                 onClick={
                                     currentStep1 === 'metaverseHub' ? () => handleStepper("socialConnect") :
-                                        socialsFooter === 'Continue' ? () => sumbitDataToOrbis() :
+                                        socialsFooter === 'Continue' ? () => handleStepper('socialConfirmation') :
                                             () => handleStepper('socialConfirmation')}
                             >
                                 {currentStep1 === 'metaverseHub' ? "Connect more platforms" : socialsFooter}

@@ -4,17 +4,19 @@ import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { litNodeClient } from './lit';
 
+const currentPkp = localStorage.getItem('pkpKey')
+
 // Lit encrption & decrption
-export const accessControlConditions: AccessControlConditions = [
+const accessControlConditions: AccessControlConditions = [
   {
     contractAddress: "",
     standardContractType: "",
-    chain: "ethereum",
-    method: "eth_getBalance",
-    parameters: [":userAddress", "latest"],
+    chain: "ethereum", // todo: this needs to be ethereum otherwise throws an error! Need to see
+    method: "",
+    parameters: [":userAddress"],
     returnValueTest: {
-      comparator: ">=",
-      value: "0", // We allow any account
+      comparator: "=",
+      value: currentPkp ? JSON.parse(currentPkp).ethAddress : ''
     },
   },
 ];

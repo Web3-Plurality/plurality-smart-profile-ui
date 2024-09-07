@@ -10,6 +10,8 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
         return platforms ? JSON.parse(platforms) : null;
     });
 
+    const [loading, setLoading] = useState(false)
+
     useEffect(() => {
         if (socialIcons) {
             localStorage.setItem('platforms', JSON.stringify(socialIcons));
@@ -20,6 +22,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
 
     const getSmartProfileFromOrbis = async () => {
         // if (socialIcons) return
+        setLoading(true)
         const { rows } = await select();
         const orbisData = JSON.parse(rows?.[0]?.platforms)
         if (orbisData) {
@@ -46,14 +49,18 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
 
                 if (data.success) {
                     console.log("Data of smart profile: ", data)
-                    const publicKey = await getPublicKey()
+                    const litSignature = localStorage.getItem("signature")
+                    let publicKey;
+                    if (!litSignature) {
+                        publicKey = await getPublicKey()
+                    }
                     const result = await encryptData(JSON.stringify(data), publicKey)
                     console.log("encryption result: ", result)
-
                     //const decryptedData = decryptData(JSON.stringify(result), '')
                     //console.log("encryption result: ", decryptedData)
 
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify([]))
+                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_profiles))
+                    console.log("insertion result: ", insertionResult)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
                         const objData = {
@@ -61,9 +68,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                             data
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        setLoading(false)
                         handleStepper(step)
                     }
-
                 }
             }
             else {
@@ -72,24 +79,35 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                 if (smartprofileData) {
                     const { streamId } = JSON.parse(smartprofileData)
                     if (streamId === response.rows[0].stream_id) {
+                        setLoading(false)
                         handleStepper(step)
                     } else {
                         console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data, '')
-                        localStorage.setItem('smartProfileData', JSON.stringify(decryptedData))
+                        const objData = {
+                            streamId: response.rows[0].stream_id,
+                            data: { smartProfile: decryptedData }
+                        }
+                        localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        setLoading(false)
                         handleStepper(step)
                     }
                 } else {
                     console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data, '')
-                    localStorage.setItem('smartProfileData', JSON.stringify(decryptedData.smartProfile))
+                    const objData = {
+                        streamId: response.rows[0].stream_id,
+                        data: { smartProfile: decryptedData }
+                    }
+                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    setLoading(false)
                     handleStepper(step)
                 }
             }
         }
     }
 
-    return { getSmartProfileFromOrbis }
+    return { loading, getSmartProfileFromOrbis }
 }
 
 export default useRefreshOrbisData
