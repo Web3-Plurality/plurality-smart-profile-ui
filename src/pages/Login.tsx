@@ -262,6 +262,10 @@ const Login = () => {
 
     const handleMetamaskConnect = async () => {
         try {
+            if ((localStorage.getItem('tool') as string) !== 'metamask')
+            {
+                localStorage.clear();
+            }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
 
@@ -270,12 +274,19 @@ const Login = () => {
         }
     };
 
+    const handleLitConnect = async () => {
+        if ((localStorage.getItem('tool') as string) !== 'lit')
+        {
+            localStorage.clear();
+        }
+        handleStepper('login')
+    }
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />
+                return <AuthFlow handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
             case 'login':
                 return <EmailLogin handleMethodId={handleMethodId} />;
             case 'otp':

@@ -35,8 +35,10 @@ const Header = () => {
             console.error(err);
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
+        const tool = localStorage.getItem("tool")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
+        localStorage.setItem("tool", tool || '')
         handleStepper("initial")
         navigate('/', { replace: true });
     }

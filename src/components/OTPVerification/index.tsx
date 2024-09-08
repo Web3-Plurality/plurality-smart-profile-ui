@@ -66,6 +66,7 @@ const OTPVerification = ({
 
             if (response.status_code == 200 && response.session_jwt) {
                 handleFinalPayload({ session: response.session_jwt, userId: response.user_id, method: 'email' })
+                localStorage.setItem('tool', 'lit');
                 handleStepper('verification')
             }
         } catch (err: unknown) {
