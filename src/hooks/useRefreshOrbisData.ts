@@ -52,7 +52,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     const litSignature = localStorage.getItem("signature")
                     let publicKey;
                     if (!litSignature) {
-                        publicKey = await getPublicKey()
+                        publicKey = JSON.parse(localStorage.getItem("publickey") as string)
+                        if (!publicKey) {
+                            publicKey = await getPublicKey();
+                            localStorage.setItem('publicKey', JSON.stringify(publicKey))
+                        }
                     }
                     const result = await encryptData(JSON.stringify(data), publicKey)
                     console.log("encryption result: ", result)

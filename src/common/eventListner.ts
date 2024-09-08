@@ -70,7 +70,11 @@ export const useRegisterEvent = () => {
             const individualProfileData = data.individualProfile
             const scores = individualProfileData.scores
 
-            const publicKey = await getPublicKey()
+            let publicKey = JSON.parse(localStorage.getItem("publickey") as string)
+            if (!publicKey) {
+                publicKey = await getPublicKey();
+                localStorage.setItem('publicKey', JSON.stringify(publicKey))
+            }
             const encryptedIndividualProfile = await encryptData(JSON.stringify(data), publicKey)
             console.log("Individual profile encryption: ", encryptedIndividualProfile)
             await autoConnect()
@@ -94,9 +98,13 @@ export const useRegisterEvent = () => {
                 if (smartProfileResponse.success) {
                     console.log("Data of smart profile: ", smartProfileResponse)
                     const litSignature = localStorage.getItem("signature")
-                    let publicKey;
+                    let publicKey 
                     if (!litSignature) {
-                        publicKey = await getPublicKey()
+                        publicKey = JSON.parse(localStorage.getItem("publickey") as string)
+                        if (!publicKey) {
+                            publicKey = await getPublicKey();
+                            localStorage.setItem('publicKey', JSON.stringify(publicKey))
+                        }
                     }
                     const result = await encryptData(JSON.stringify(smartProfileResponse), publicKey)
                     console.log("encryption result: ", result)
