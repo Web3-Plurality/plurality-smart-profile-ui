@@ -47,7 +47,7 @@ const SocialProfiles = ({
     }, [activeStates]);
 
     const smartProfileData = localStorage.getItem('smartProfileData')
-    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_profiles : []
+    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
     return (
         <div className="circle">
             <div className='mid-icon'>
