@@ -4,29 +4,34 @@ import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { litNodeClient } from './lit';
 
-const currentPkp = localStorage.getItem('pkpKey')
+export const getAccessControlConditions = async () : Promise<AccessControlConditions> => {
+  const currentPkp = localStorage.getItem('pkpKey')
 
-// Lit encrption & decrption
-const accessControlConditions: AccessControlConditions = [
-  {
-    contractAddress: "",
-    standardContractType: "",
-    chain: "ethereum", // todo: this needs to be ethereum otherwise throws an error! Need to see
-    method: "",
-    parameters: [":userAddress"],
-    returnValueTest: {
-      comparator: "=",
-      value: currentPkp ? JSON.parse(currentPkp).ethAddress : ''
+  // Lit encrption & decrption
+  const accessControlConditions: AccessControlConditions = [
+    {
+      contractAddress: "",
+      standardContractType: "",
+      chain: "ethereum", // todo: this needs to be ethereum otherwise throws an error! Need to see
+      method: "",
+      parameters: [":userAddress"],
+      returnValueTest: {
+        comparator: "=",
+        value: currentPkp ? JSON.parse(currentPkp).ethAddress : ''
+      },
     },
-  },
-];
+  ];
+  return accessControlConditions;
+};
 
-export const litEncryptData = async (message: string, litNodeClientOptn = litNodeClient):
+
+export const litEncryptData = async (message: string):
   Promise<{ ciphertext: string; dataToEncryptHash: string } | undefined> => {
-  await litNodeClientOptn.connect()
-
   try {
+    await litNodeClient.connect();
+    const accessControlConditions = await getAccessControlConditions();
     // Encrypt the message
+
     const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptString(
       {
         accessControlConditions,
@@ -34,7 +39,7 @@ export const litEncryptData = async (message: string, litNodeClientOptn = litNod
         // chain: 'ethereum',
         // sessionSigs: sessionSigs
       },
-      litNodeClientOptn,
+      litNodeClient,
     );
 
     // Return the ciphertext and dataToEncryptHash
@@ -48,8 +53,11 @@ export const litEncryptData = async (message: string, litNodeClientOptn = litNod
   }
 }
 
-export const litDecryptData = async (sessionSigs: SessionSigsMap, ciphertext: string, dataToEncryptHash: string, litNodeClientOptn = litNodeClient) => {
+export const litDecryptData = async (sessionSigs: SessionSigsMap, ciphertext: string, dataToEncryptHash: string) => {
   try {
+    await litNodeClient.connect();
+    const accessControlConditions = await getAccessControlConditions();
+
     // Decrypt the message
     const decryptedMessage = await LitJsSdk.decryptToString(
       {
@@ -59,14 +67,14 @@ export const litDecryptData = async (sessionSigs: SessionSigsMap, ciphertext: st
         chain: 'ethereum',
         sessionSigs: sessionSigs
       },
-      litNodeClientOptn,
+      litNodeClient,
     );
-    // Return the ciphertext and dataToEncryptHash
+    // Return the decrypted message
     return {
       decryptedMessage
     };
   } catch (err) {
-    alert(err);
+    //alert(err);
     console.error(err);
   }
 }

@@ -39,7 +39,7 @@ const generatePkpWalletInstance = async () => {
             controllerSessionSigs: JSON.parse(sessionSigs),
             pkpPubKey: JSON.parse(pkp).publicKey,
             litNodeClient: litNodeClient,
-            provider: new ethers.providers.JsonRpcProvider("https://yellowstone-rpc.litprotocol.com/"),
+            //provider: new ethers.providers.JsonRpcProvider("https://yellowstone-rpc.litprotocol.com/"),
             debug: true
         });
         await pkpWallet.init();

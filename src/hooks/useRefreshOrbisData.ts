@@ -87,7 +87,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                         handleStepper(step)
                     } else {
                         console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
-                        const decryptedData = await decryptData(response.rows[0].encrypted_profile_data, '')
+                        const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         const objData = {
                             streamId: response.rows[0].stream_id,
                             data: { smartProfile: decryptedData }
@@ -98,7 +98,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     }
                 } else {
                     console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
-                    const decryptedData = await decryptData(response.rows[0].encrypted_profile_data, '')
+                    const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     const objData = {
                         streamId: response.rows[0].stream_id,
                         data: { smartProfile: decryptedData }

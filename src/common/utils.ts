@@ -119,21 +119,26 @@ export const encryptData = async (dataToEncrypt: string, publicKey: string) => {
     }
 }
 
-export const decryptData = async (cipher: string, cipherHash: string) => {
+export const decryptData = async (encryptedData: string) => {
     let decryptionResult;
     const sessionSigs = localStorage.getItem("signature")
     if (sessionSigs) {
         console.log("Using Lit decryption")
-        const result = await litDecryptData(JSON.parse(sessionSigs), cipher, cipherHash)
-        if (result && typeof result === 'object') {
-            decryptionResult = JSON.parse(result.decryptedMessage);
-            console.log("Dataa: ", decryptionResult);
-        } else {
-            throw new Error("Invalid result from Lit decryption");
+        if(encryptedData){
+            const result = await litDecryptData(JSON.parse(sessionSigs), JSON.parse(encryptedData).ciphertext, JSON.parse(encryptedData).dataToEncryptHash);
+            if (result && typeof result === 'object') {
+                decryptionResult = JSON.parse(result.decryptedMessage);
+                console.log("Dataa: ", decryptionResult);
+            } else {
+                throw new Error("Invalid result from Lit decryption");
+            }
+        }
+        else {
+            console.log("Encrypted data from lit missing at decryption ");
         }
     } else {
         console.log("Using metamask decryption")
-        const result = await metamaskDecryptData(cipher)
+        const result = await metamaskDecryptData(encryptedData)
         decryptionResult = JSON.parse(result)
         console.log("Dataa: ", decryptionResult)
     }
