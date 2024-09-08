@@ -48,7 +48,7 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
             <Menu.Item key="1">
                 {shortenAddress(address)} <CopyOutlined />
             </Menu.Item>
-            <Menu.Item key="2">Digital Wardrobe</Menu.Item>
+            {/* <Menu.Item key="2">Digital Wardrobe</Menu.Item> */}
 
             <Menu.Item key="3">Profile Settings</Menu.Item>
             <Menu.Item key="4">Logout</Menu.Item>
