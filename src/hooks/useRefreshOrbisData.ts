@@ -58,7 +58,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                             localStorage.setItem('publicKey', JSON.stringify(publicKey))
                         }
                     }
-                    const result = await encryptData(JSON.stringify(data), publicKey)
+                    const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
                     console.log("encryption result: ", result)
                     //const decryptedData = decryptData(JSON.stringify(result), '')
                     //console.log("encryption result: ", decryptedData)
@@ -69,7 +69,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     if (insertionResult) {
                         const objData = {
                             streamId: insertionResult?.id,
-                            data
+                            data: { smartProfile: data.smartProfile }
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         setLoading(false)
@@ -90,7 +90,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         const objData = {
                             streamId: response.rows[0].stream_id,
-                            data: { smartProfile: decryptedData }
+                            data: { smartProfile: decryptedData } 
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         setLoading(false)
@@ -101,7 +101,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     const objData = {
                         streamId: response.rows[0].stream_id,
-                        data: { smartProfile: decryptedData }
+                        data: { smartProfile: decryptedData } 
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
                     setLoading(false)

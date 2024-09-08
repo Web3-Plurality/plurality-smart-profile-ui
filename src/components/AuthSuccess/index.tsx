@@ -15,7 +15,7 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     // const { getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'socialConnect')
 
     return (
-        <CustomButtom text={`Lets's Go`} handleClick={() => handleStepper('socialConnect')} isDisable={!isAuthenticated} />
+        <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} isDisable={!isAuthenticated} />
     )
 }
 

@@ -93,7 +93,7 @@ const Login = () => {
                         localStorage.setItem('publicKey', JSON.stringify(publicKey))
                     }
                 }
-                const result = await encryptData(JSON.stringify(data), publicKey)
+                const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
                 console.log("encryption result: ", result)
 
                 //const decryptedData = decryptData(JSON.stringify(result), '')
@@ -104,7 +104,7 @@ const Login = () => {
                 if (insertionResult) {
                     const objData = {
                         streamId: insertionResult?.id,
-                        data
+                        data: { smartProfile: data.smartProfile }
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
                     handleStepper('metaverseHub')

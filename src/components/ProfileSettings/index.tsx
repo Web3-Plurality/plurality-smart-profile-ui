@@ -109,7 +109,7 @@ const ProfileSettings = () => {
                 if (insertionResult) {
                     const objData = {
                         streamId: insertionResult?.id,
-                        data: { smartProfile }
+                        data: { smartProfile: smartProfile }
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
                     // setUser({

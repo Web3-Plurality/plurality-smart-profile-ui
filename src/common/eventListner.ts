@@ -75,7 +75,7 @@ export const useRegisterEvent = () => {
                 publicKey = await getPublicKey();
                 localStorage.setItem('publicKey', JSON.stringify(publicKey))
             }
-            const encryptedIndividualProfile = await encryptData(JSON.stringify(data), publicKey)
+            const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
             console.log("Individual profile encryption: ", encryptedIndividualProfile)
             await autoConnect()
             const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
@@ -106,7 +106,7 @@ export const useRegisterEvent = () => {
                             localStorage.setItem('publicKey', JSON.stringify(publicKey))
                         }
                     }
-                    const result = await encryptData(JSON.stringify(smartProfileResponse), publicKey)
+                    const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
                     console.log("encryption result: ", result)
                     //const decryptedData = decryptData(JSON.stringify(result), '')
                     //console.log("encryption result: ", decryptedData)
@@ -117,7 +117,7 @@ export const useRegisterEvent = () => {
                     if (insertionResult) {
                         const objData = {
                             streamId: insertionResult?.id,
-                            data: smartProfileResponse
+                            data: { smartProfile: smartProfileResponse.smartProfile }
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         // setLoading(false)
