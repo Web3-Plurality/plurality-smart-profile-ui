@@ -36,7 +36,12 @@ const ProfileSettings = () => {
     const { address: metamaskAddress } = useAccount();
 
     const handleInputChnage = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>) => {
+        const maxSize = 45 * 1024 * 1024
         const { name, value, files } = event.target
+        if (files[0] && files[0].size > maxSize) {
+            alert("Maximal size of bio image exceeds 45 MB");
+            event.target.value = profilePic;
+        }
         if (name === 'username') {
             setUsername(value)
         } else if (name === 'profilePic' && files) {
