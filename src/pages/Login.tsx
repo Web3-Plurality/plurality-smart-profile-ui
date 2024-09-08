@@ -95,7 +95,7 @@ const Login = () => {
                 //const decryptedData = decryptData(JSON.stringify(result), '')
                 //console.log("encryption result: ", decryptedData)
 
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify([]))
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {
@@ -183,7 +183,7 @@ const Login = () => {
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_profiles : []
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
                 // const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
                 setActiveIndex(index);

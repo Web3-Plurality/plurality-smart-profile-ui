@@ -28,7 +28,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
         if (orbisData) {
             const activePlatforms = socialConnectButtons?.filter(button =>
                 orbisData.some(platform =>
-                    platform.platform.toLowerCase() === button.displayName.toLowerCase()
+                    platform.platform.toLowerCase().replace(/\s+/g, '') === button.displayName.toLowerCase().replace(/\s+/g, '')
                 )
             );
             console.log("yesss", JSON.parse(rows?.[0]?.platforms))
@@ -59,7 +59,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     //const decryptedData = decryptData(JSON.stringify(result), '')
                     //console.log("encryption result: ", decryptedData)
 
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_profiles))
+                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
                     console.log("insertion result: ", insertionResult)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {

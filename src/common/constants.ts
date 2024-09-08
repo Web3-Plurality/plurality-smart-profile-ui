@@ -90,7 +90,7 @@ export const socialConnectButtons = [
     {
         id: 0,
         iconName: "tiktok",
-        displayName: 'Tiktok',
+        displayName: 'TikTok',
         icon: tiktokIcon,
         active: false,
         activeIcon: tiktokIconColored
@@ -100,13 +100,13 @@ export const socialConnectButtons = [
         iconName: "insta",
         displayName: 'Instagram',
         icon: instaIcon,
-        active: false,
+        active: true,
         activeIcon: instaIconColored
     },
     {
         id: 2,
         iconName: "snapchat",
-        displayName: 'SnapChat',
+        displayName: 'Snapchat',
         icon: snapchatIcon,
         active: false,
         activeIcon: snapchatIconColored
@@ -140,7 +140,7 @@ export const socialConnectButtons = [
         iconName: "spatial",
         displayName: 'Spatial',
         icon: spatialIcon,
-        active: false,
+        active: true,
         activeIcon: spatialIconColored
     },
     // {
@@ -154,7 +154,7 @@ export const socialConnectButtons = [
     {
         id: 6,
         iconName: "artificialRome",
-        displayName: 'ArtificialRome',
+        displayName: 'Artificial Rome',
         icon: artificialRomeIconColored,
         active: true,
         activeIcon: artificialRomeIconColored,
@@ -169,12 +169,11 @@ export const socialConnectButtons = [
     },
 ]
 
-
 export const metaverseHubButtons = [
     {
         id: 0,
         iconName: "tiktok",
-        displayName: 'Tiktok',
+        displayName: 'TikTok',
         icon: tiktokIcon,
         active: false,
         activeIcon: tiktokIconColored,
@@ -184,13 +183,13 @@ export const metaverseHubButtons = [
         iconName: "insta",
         displayName: 'Instagram',
         icon: instaIcon,
-        active: false,
+        active: true,
         activeIcon: instaIconColored,
     },
     {
         id: 2,
         iconName: "snapchat",
-        displayName: 'SnapChat',
+        displayName: 'Snapchat',
         icon: snapchatIcon,
         active: false,
         activeIcon: snapchatIconColored,
@@ -216,13 +215,13 @@ export const metaverseHubButtons = [
         iconName: "spatial",
         displayName: 'Spatial',
         icon: spatialIcon,
-        active: false,
+        active: true,
         activeIcon: spatialIconColored,
     },
     {
         id: 6,
         iconName: "artificialRome",
-        displayName: 'ArtificialRome',
+        displayName: 'Artificial Rome',
         icon: artificialRomeIconColored,
         active: true,
         activeIcon: artificialRomeIconColored,
@@ -230,7 +229,7 @@ export const metaverseHubButtons = [
     {
         id: 7,
         iconName: "aiDressing ",
-        displayName: 'AIDressing',
+        displayName: 'DRESSX',
         icon: aidressingIconColored,
         active: true,
         activeIcon: aidressingIconColored,
