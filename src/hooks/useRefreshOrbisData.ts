@@ -52,11 +52,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     const litSignature = localStorage.getItem("signature")
                     let publicKey;
                     if (!litSignature) {
-                        publicKey = JSON.parse(localStorage.getItem("publickey") as string)
-                        if (!publicKey) {
-                            publicKey = await getPublicKey();
-                            localStorage.setItem('publicKey', JSON.stringify(publicKey))
-                        }
+                        publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
                     console.log("encryption result: ", result)
@@ -90,7 +86,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         const objData = {
                             streamId: response.rows[0].stream_id,
-                            data: { smartProfile: decryptedData } 
+                            data: { smartProfile: decryptedData }
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         setLoading(false)
@@ -101,7 +97,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     const objData = {
                         streamId: response.rows[0].stream_id,
-                        data: { smartProfile: decryptedData } 
+                        data: { smartProfile: decryptedData }
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
                     setLoading(false)

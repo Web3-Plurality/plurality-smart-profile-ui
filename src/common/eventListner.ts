@@ -53,6 +53,7 @@ export const useRegisterEvent = () => {
     }
 
     const fetchUserInfo = async (appName: string, auth: string) => {
+        console.log("DATAAAA 1111")
         const AppRoute = RouteMapper(appName)
         const infoUrl = `${BASE_URL}${AppRoute}/info`
         const token = localStorage.getItem('token')
@@ -64,63 +65,61 @@ export const useRegisterEvent = () => {
                     Authorization: `Bearer ${token}`
                 }
             })
-            if (data.message === 'success')
-                console.log(data)
+            console.log("DATAAAA 22222", data)
+            if (data.message === 'success') {
 
-            const individualProfileData = data.individualProfile
-            const scores = individualProfileData.scores
 
-            let publicKey = JSON.parse(localStorage.getItem("publickey") as string)
-            if (!publicKey) {
-                publicKey = await getPublicKey();
-                localStorage.setItem('publicKey', JSON.stringify(publicKey))
-            }
-            const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
-            console.log("Individual profile encryption: ", encryptedIndividualProfile)
-            await autoConnect()
-            const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
+                const individualProfileData = data.individualProfile
+                const scores = individualProfileData.scores
+                const litSignature = localStorage.getItem("signature")
 
-            if (individualresult) {
-                const token = localStorage.getItem('token')
-                const localSmartProfile = localStorage.getItem('smartProfileData')
-                let payload;
-
-                if (localSmartProfile) {
-                    payload = JSON.parse(localSmartProfile).data.smartProfile
+                let publicKey;
+                if (!litSignature) {
+                    publicKey = await getPublicKey();
                 }
+                const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
+                console.log("Individual profile encryption: ", encryptedIndividualProfile)
+                await autoConnect()
+                const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
 
-                const { data: smartProfileResponse } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
+                if (individualresult) {
+                    const token = localStorage.getItem('token')
+                    const localSmartProfile = localStorage.getItem('smartProfileData')
+                    let payload;
+
+                    if (localSmartProfile) {
+                        payload = JSON.parse(localSmartProfile).data.smartProfile
                     }
-                })
 
-                if (smartProfileResponse.success) {
-                    console.log("Data of smart profile: ", smartProfileResponse)
-                    const litSignature = localStorage.getItem("signature")
-                    let publicKey 
-                    if (!litSignature) {
-                        publicKey = JSON.parse(localStorage.getItem("publickey") as string)
-                        if (!publicKey) {
+                    const { data: smartProfileResponse } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    })
+
+                    if (smartProfileResponse.success) {
+                        console.log("Data of smart profile: ", smartProfileResponse)
+                        const litSignature = localStorage.getItem("signature")
+                        let publicKey
+                        if (!litSignature) {
                             publicKey = await getPublicKey();
-                            localStorage.setItem('publicKey', JSON.stringify(publicKey))
                         }
-                    }
-                    const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
-                    console.log("encryption result: ", result)
-                    //const decryptedData = decryptData(JSON.stringify(result), '')
-                    //console.log("encryption result: ", decryptedData)
-                    await autoConnect()
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
-                    console.log("insertion result: ", insertionResult)
-                    // save smart profile in local storage along with the returned stream id
-                    if (insertionResult) {
-                        const objData = {
-                            streamId: insertionResult?.id,
-                            data: { smartProfile: smartProfileResponse.smartProfile }
+                        const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
+                        console.log("encryption result: ", result)
+                        //const decryptedData = decryptData(JSON.stringify(result), '')
+                        //console.log("encryption result: ", decryptedData)
+                        await autoConnect()
+                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
+                        console.log("insertion result: ", insertionResult)
+                        // save smart profile in local storage along with the returned stream id
+                        if (insertionResult) {
+                            const objData = {
+                                streamId: insertionResult?.id,
+                                data: { smartProfile: smartProfileResponse.smartProfile }
+                            }
+                            localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                            // setLoading(false)
                         }
-                        localStorage.setItem('smartProfileData', JSON.stringify(objData))
-                        // setLoading(false)
                     }
                 }
             }

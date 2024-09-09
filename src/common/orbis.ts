@@ -93,9 +93,13 @@ export async function connectOrbisDidPkh() {
         } else {
             return "";
         }
-    } catch (e) {
-        console.error("Error connecting user:", e);
-        return "";
+    } catch (err: unknown) {
+        if (err && typeof err === 'object') {
+            const errorWithCode = err as { code: number };
+            if (errorWithCode.code === 4001) {
+                return 'error'
+            }
+        }
     }
 }
 

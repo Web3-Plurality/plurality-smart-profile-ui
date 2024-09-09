@@ -7,7 +7,7 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     const widgetHeader = document.getElementById('w-header');
     widgetHeader?.classList.remove('toogleShow')
 
-    const isAuthenticated = localStorage.getItem("userDid")
+    // const isAuthenticated = localStorage.getItem("userDid")
 
     // const { getPublicKey } = useMetamaskPublicKey()
 
@@ -15,7 +15,7 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     // const { getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'socialConnect')
 
     return (
-        <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} isDisable={!isAuthenticated} />
+        <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} />
     )
 }
 

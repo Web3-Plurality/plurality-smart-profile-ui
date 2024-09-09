@@ -32,7 +32,8 @@ import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
 import axios from 'axios';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
-import { insertSmartProfile } from '../common/orbis';
+import { connectOrbisDidPkh, insertSmartProfile } from '../common/orbis';
+import { AuthUserInformation } from '@useorbis/db-sdk';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -87,11 +88,7 @@ const Login = () => {
                 const litSignature = localStorage.getItem("signature")
                 let publicKey;
                 if (!litSignature) {
-                    publicKey = JSON.parse(localStorage.getItem("publickey") as string)
-                    if (!publicKey) {
-                        publicKey = await getPublicKey();
-                        localStorage.setItem('publicKey', JSON.stringify(publicKey))
-                    }
+                    publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
                 console.log("encryption result: ", result)
@@ -117,7 +114,9 @@ const Login = () => {
     const {
         generateMetamaskToken,
         error: metmaskLoginError,
-        setError
+        setError,
+        ceramicError,
+        setCeramicError
         // isLoading: nonceLoading
     } = useMetamaskToken()
 
@@ -179,7 +178,10 @@ const Login = () => {
         const isIndexValid = index < socialConnectButtons.length - 2;
 
         const handleMetaverseHubClick = () => {
-            if (activeStates[index] || !isIndexValid) {
+            const smartProfileData = localStorage.getItem('smartProfileData')
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
                 handleStepper('socialConfirmation');
                 setSelectedSocial(profiles[index].displayName);
             } else {
@@ -193,10 +195,9 @@ const Login = () => {
 
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
-            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_profiles : []
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
             const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
-                // const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
                 setActiveIndex(index);
                 console.log("clickedIconDisplayName", clickedIconDisplayName);
                 registerEvent(clickedIconDisplayName);
@@ -262,8 +263,7 @@ const Login = () => {
 
     const handleMetamaskConnect = async () => {
         try {
-            if ((localStorage.getItem('tool') as string) !== 'metamask')
-            {
+            if ((localStorage.getItem('tool') as string) !== 'metamask') {
                 localStorage.clear();
             }
             if (setUser) setUser("user");
@@ -275,8 +275,7 @@ const Login = () => {
     };
 
     const handleLitConnect = async () => {
-        if ((localStorage.getItem('tool') as string) !== 'lit')
-        {
+        if ((localStorage.getItem('tool') as string) !== 'lit') {
             localStorage.clear();
         }
         handleStepper('login')
@@ -327,19 +326,36 @@ const Login = () => {
         navigate('/', { replace: true });
     }
 
+
+
+
     const handleOk = async () => {
-        generateMetamaskToken()
-        setError(false)
+        if (ceramicError) {
+            setCeramicError(false)
+            const result: AuthUserInformation | "" = await connectOrbisDidPkh();
+            if (result?.did) {
+                localStorage.setItem('userDid', JSON.stringify(result?.did))
+            } else {
+                setError(true)
+            }
+        } else {
+            generateMetamaskToken()
+            setError(false)
+        }
+
     }
     const handleCancel = async () => {
         await handleLogout()
         setError(false)
+        setCeramicError(false)
     }
+
+
 
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError}
+                isVisible={metmaskLoginError || ceramicError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />

@@ -16,6 +16,8 @@ const statement = "I am the owner of this address";
 export const useMetamaskToken = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [ceramicError, setCeramicError] = useState(false);
+
 
 
     const { address } = useAccount();
@@ -98,6 +100,8 @@ export const useMetamaskToken = () => {
                 const result: AuthUserInformation | "" = await connectOrbisDidPkh();
                 if (result?.did) {
                     localStorage.setItem('userDid', JSON.stringify(result?.did))
+                } else {
+                    setCeramicError(true)
                 }
                 console.log("Result: ", result, result.did)
             }
@@ -110,6 +114,8 @@ export const useMetamaskToken = () => {
         generateMetamaskToken,
         isLoading,
         error,
-        setError
+        ceramicError,
+        setError,
+        setCeramicError
     };
 };

@@ -4,12 +4,17 @@ import { useAccount } from "wagmi";
 export const useMetamaskPublicKey = () => {
     const { address } = useAccount();
 
+    const publicKey = localStorage.getItem('publicKey')
+
+
+
     const getPublicKey = async () => {
         try {
             if (!address) {
                 console.error("No accounts found. Please connect your MetaMask account.");
                 return;
             }
+            if (publicKey) return publicKey
 
             // Request the encryption public key for the active account
             const encryptionPublicKey = await window.ethereum.request({
@@ -17,7 +22,7 @@ export const useMetamaskPublicKey = () => {
                 params: [address], // Use the active account address
             });
 
-            console.log("Encryption Public Key:", encryptionPublicKey);
+            localStorage.setItem('publicKey', encryptionPublicKey)
             return encryptionPublicKey;
 
         } catch (error: any) {

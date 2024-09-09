@@ -38,7 +38,7 @@ const ProfileSettings = () => {
     const handleInputChnage = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>) => {
         const maxSize = 45 * 1024 * 1024
         const { name, value, files } = event.target
-        if (files[0] && files[0].size > maxSize) {
+        if (files && files[0] && files[0].size > maxSize) {
             alert("Maximal size of bio image exceeds 45 MB");
             event.target.value = profilePic;
         }
@@ -92,11 +92,7 @@ const ProfileSettings = () => {
                 const litSignature = localStorage.getItem("signature")
                 let publicKey;
                 if (!litSignature) {
-                    publicKey = JSON.parse(localStorage.getItem("publickey") as string)
-                    if (!publicKey) {
-                        publicKey = await getPublicKey();
-                        localStorage.setItem('publicKey', JSON.stringify(publicKey))
-                    }
+                    publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
                 console.log("encryption result: ", result)

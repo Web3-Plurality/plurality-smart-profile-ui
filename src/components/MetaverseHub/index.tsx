@@ -3,6 +3,7 @@ import { useStep } from '../../context/StepContext';
 import { useMetamaskPublicKey } from '../../hooks/useMetamaskPublicKey';
 import useRefreshOrbisData from '../../hooks/useRefreshOrbisData';
 import SocialProfiles from '../SocialProfiles';
+import Loading from '../LitComponents/Loading';
 
 interface SocialConnectProps {
     activeStates: boolean[]
@@ -12,11 +13,21 @@ interface SocialConnectProps {
 const MetaverseHub = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     const { getPublicKey } = useMetamaskPublicKey()
     const { handleStepper } = useStep();
-    const { getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'metaverseHub')
+    const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'metaverseHub')
 
     useEffect(() => {
         getSmartProfileFromOrbis()
     }, [])
+
+    if (loading) {
+        const widgetHeader = document.getElementById('w-header');
+        widgetHeader?.classList.add('toogleShow')
+        return <Loading copy={'Looking up your accounts...'} />;
+    } else {
+        const widgetHeader = document.getElementById('w-header');
+        widgetHeader?.classList.remove('toogleShow')
+    }
+
 
     return (
         <SocialProfiles
