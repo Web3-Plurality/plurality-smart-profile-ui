@@ -77,10 +77,18 @@ export async function connectOrbisDidPkh() {
     try {
         const sessionSigs = localStorage.getItem("signature");
         if (sessionSigs) {
+
+            console.log("Creating pkp wallet for orbis");
+            const pkpWallet = await generatePkpWalletInstance();
+            console.log(pkpWallet);
+            auth = new OrbisEVMAuth(pkpWallet!);
+            console.log(auth);
+
+            
             // const sigedData = await createSigature();
-            const userId = JSON.parse(localStorage.getItem("userData") as string).id
+            /*const userId = JSON.parse(localStorage.getItem("userData") as string).id
             const hasedUser = await createHash(userId as string);
-            auth = await OrbisKeyDidAuth.fromSeed(hasedUser);
+            auth = await OrbisKeyDidAuth.fromSeed(hasedUser);*/
         } else {
             auth = new OrbisEVMAuth(window.ethereum);
         }
