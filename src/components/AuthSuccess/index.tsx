@@ -6,7 +6,13 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     const widgetHeader = document.getElementById('w-header');
     widgetHeader?.classList.remove('toogleShow')
 
-    // const isAuthenticated = localStorage.getItem("userDid")
+    const userDid = localStorage.getItem("userDid")
+    let isDisbaled;
+
+    const litSession = localStorage.getItem('sessionSigs')
+    if (!litSession) {
+        isDisbaled = userDid
+    }
 
     // const { getPublicKey } = useMetamaskPublicKey()
 
@@ -14,7 +20,7 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     // const { getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'socialConnect')
 
     return (
-        <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} />
+        <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} isDisable={!isDisbaled} />
     )
 }
 

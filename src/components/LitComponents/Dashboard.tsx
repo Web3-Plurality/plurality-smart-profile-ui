@@ -24,6 +24,14 @@ export default function Dashboard({
         })()
     }, [])
 
+    const userDid = localStorage.getItem("userDid")
+    let isDisbaled;
+
+
+    if (userDid) {
+        isDisbaled = false
+    }
+
     return (
         <div className="dashboard-container">
             <h1>Ready for the open web</h1>
@@ -32,7 +40,7 @@ export default function Dashboard({
             </div>
             <div className="divider"></div>
             <div className="message-card">
-                <CustomButtom text='Next' handleClick={() => handleStepper('success')} />
+                <CustomButtom text='Next' isDisable={isDisbaled} handleClick={() => handleStepper('success')} />
             </div>
         </div>
     );
