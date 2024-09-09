@@ -41,6 +41,7 @@ const Header = () => {
         localStorage.setItem("tool", tool || '')
         handleStepper("initial")
         navigate('/', { replace: true });
+        window.location.reload();
     }
 
 
