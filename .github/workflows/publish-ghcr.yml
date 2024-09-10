@@ -34,10 +34,10 @@ jobs:
           npm install
       
       # These values are here on experimental basis - only for testnet for production we would move to a secure backend signer service
-      - name: Prepare Environment files
-        run: |
-          cp .env.production.example .env.production
-          echo "VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY=${{ secrets.LIT_DAPP_OWNER_WALLET_PRIVATE_KEY }}" >> .env.production
+      # - name: Prepare Environment files
+        # run: |
+        #  cp .env.production.example .env.production
+        #  echo "VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY=${{ secrets.LIT_DAPP_OWNER_WALLET_PRIVATE_KEY }}" >> .env.production
 
       - name: Semantic Release
         run: npx semantic-release
