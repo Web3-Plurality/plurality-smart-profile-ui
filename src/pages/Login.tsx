@@ -134,15 +134,6 @@ const Login = () => {
     }, [eventMessage, app]);
 
     useEffect(() => {
-        // TODO
-        // We need to set newActiveStates here
-        const smartProfileData = localStorage.getItem('smartProfileData')
-        //???
-    }, []);
-
-
-
-    useEffect(() => {
         const token = localStorage.getItem('token')
         if (isConnected && !token) {
             generateMetamaskToken()
@@ -331,13 +322,17 @@ const Login = () => {
 
     const handleOk = async () => {
         if (ceramicError) {
-            setCeramicError(false)
-            const result: AuthUserInformation | "" = await connectOrbisDidPkh();
-            if (result?.did) {
+            const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
+            if (result === "error") {
+                // Handle error case if needed
+                console.error("Error connecting to Orbis");
+            } else if (result && result.did) {
                 localStorage.setItem('userDid', JSON.stringify(result?.did))
+                setCeramicError(false)
             } else {
-                setError(true)
+                setCeramicError(true)
             }
+            console.log("Result: ", result)
         } else {
             generateMetamaskToken()
             setError(false)
@@ -350,8 +345,6 @@ const Login = () => {
         setCeramicError(false)
     }
 
-
-
     return (
         <>
             <LogoutModal
@@ -359,15 +352,6 @@ const Login = () => {
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />
-            {/* <Modal
-                open={metmaskLoginError}
-                onOk={handleOk}
-                onCancel={handleCancel}
-                okText="Yes"
-                cancelText="NO"
-            >
-                <p>Are you sure? In this case you will be logged out</p>
-            </Modal> */}
             <WidgetLayout
                 currentStep={currentStep === 'success'}
                 showBackButton={isBackButton}
@@ -383,7 +367,6 @@ const Login = () => {
                 socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
                 isLoading={isLoading}
                 infoLoading={infoLoading}
-                // orbisLoading={orbisLoading}
                 selectedSocial={selectedSocial}
                 sumbitDataToOrbis={getLatestSmartProfile}
 

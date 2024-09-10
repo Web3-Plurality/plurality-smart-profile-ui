@@ -97,13 +97,17 @@ export const useMetamaskToken = () => {
             if (success) {
                 setUser(user)
                 localStorage.setItem('token', data.token)
-                const result: AuthUserInformation | "" = await connectOrbisDidPkh();
-                if (result?.did) {
+                const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
+                if (result === "error") {
+                    // Handle error case if needed
+                    console.error("Error connecting to Orbis");
+                } else if (result && result.did) {
                     localStorage.setItem('userDid', JSON.stringify(result?.did))
+                    setCeramicError(false)
                 } else {
                     setCeramicError(true)
                 }
-                console.log("Result: ", result, result.did)
+                console.log("Result: ", result)
             }
         } catch (err) {
             console.error("Error posting signature response:", err);

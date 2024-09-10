@@ -1,7 +1,7 @@
 import { OrbisConnectResult, OrbisDB } from "@useorbis/db-sdk";
 import { OrbisEVMAuth, OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { ethers } from "ethers";
+
 import {
     CEREMAIC_URL,
     ORBIS_ENV,
@@ -13,7 +13,6 @@ import {
     PROFILE_TYPE_STREAM_ID
 } from "./constants";
 import { litNodeClient } from "./lit";
-import { litEncryptData } from "./crypto";
 
 type ValidationResult = { valid: true } | { valid: false; error: string };
 
@@ -39,7 +38,7 @@ const generatePkpWalletInstance = async () => {
             controllerSessionSigs: JSON.parse(sessionSigs),
             pkpPubKey: JSON.parse(pkp).publicKey,
             litNodeClient: litNodeClient,
-            //provider: new ethers.providers.JsonRpcProvider("https://yellowstone-rpc.litprotocol.com/"),
+            // provider: new ethers.providers.JsonRpcProvider("https://yellowstone-rpc.litprotocol.com/"),
             debug: true
         });
         await pkpWallet.init();
@@ -47,28 +46,28 @@ const generatePkpWalletInstance = async () => {
     }
 }
 
-async function createHash(data: string) {
-    const encoder = new TextEncoder();
-    const dataBuffer = encoder.encode(data);
+// async function createHash(data: string) {
+//     const encoder = new TextEncoder();
+//     const dataBuffer = encoder.encode(data);
 
-    // Generate a SHA-256 hash
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', dataBuffer);
+//     // Generate a SHA-256 hash
+//     const hashBuffer = await window.crypto.subtle.digest('SHA-256', dataBuffer);
 
-    // Convert the hash to a hex string
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+//     // Convert the hash to a hex string
+//     const hashArray = Array.from(new Uint8Array(hashBuffer));
+//     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    return hashHex;
-}
+//     return hashHex;
+// }
 
-const createSigature = async () => {
-    // const email = localStorage.getItem("user") as string
-    const userId = JSON.parse(localStorage.getItem("userData") as string).id
+// const createSigature = async () => {
+//     // const email = localStorage.getItem("user") as string
+//     const userId = JSON.parse(localStorage.getItem("userData") as string).id
 
-    const wallet = await generatePkpWalletInstance()
-    const signature = await wallet?.signMessage(userId);
-    return signature
-}
+//     const wallet = await generatePkpWalletInstance()
+//     const signature = await wallet?.signMessage(userId);
+//     return signature
+// }
 
 // Will connect user to OrbisDB  Phantom or Metamask 
 export async function connectOrbisDidPkh() {
@@ -84,7 +83,7 @@ export async function connectOrbisDidPkh() {
             auth = new OrbisEVMAuth(pkpWallet!);
             console.log(auth);
 
-            
+
             // const sigedData = await createSigature();
             /*const userId = JSON.parse(localStorage.getItem("userData") as string).id
             const hasedUser = await createHash(userId as string);
@@ -103,6 +102,7 @@ export async function connectOrbisDidPkh() {
         }
     } catch (err: unknown) {
         if (err && typeof err === 'object') {
+            console.log("Error", err)
             const errorWithCode = err as { code: number };
             if (errorWithCode.code === 4001) {
                 return 'error'

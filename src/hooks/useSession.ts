@@ -7,7 +7,6 @@ import { SessionSigs } from '@lit-protocol/types';
 import { useAuth } from '../context/AuthContext';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { connectOrbisDidPkh } from '../common/orbis';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
