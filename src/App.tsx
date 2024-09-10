@@ -25,6 +25,7 @@ const client = createConfig({
   connectors: [
     metaMask({
       extensionOnly: true,
+      preferDesktop: true,
       injectProvider: true
     }),
     // safe({

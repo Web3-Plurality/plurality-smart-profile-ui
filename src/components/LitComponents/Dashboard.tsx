@@ -12,12 +12,14 @@ export default function Dashboard({
     currentAccount,
     handleStepper
 }: DashboardProps) {
-    const isAuthenticated = localStorage.getItem("userDid")
     useEffect(() => {
         (async () => {
-            const result: AuthUserInformation | "" = await connectOrbisDidPkh();
-            if (result?.did) {
-                localStorage.setItem('userDid', JSON.stringify(result?.did))
+            const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
+            if (result === "error") {
+                // Handle error case if needed
+                console.error("Error connecting to Orbis");
+            } else if (result && result.did) {
+                localStorage.setItem('userDid', JSON.stringify(result.did))
             }
         })()
     }, [])

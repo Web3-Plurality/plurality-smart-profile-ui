@@ -17,7 +17,6 @@ interface WidgetLayoutProps {
     showHeaderLogo: boolean,
     isLoading: boolean,
     infoLoading: boolean,
-    orbisLoading: boolean,
     selectedSocial: string,
     handleBack: () => void,
     sumbitDataToOrbis: () => void
@@ -34,10 +33,8 @@ const WidgetLayout = ({
     showHeaderLogo,
     isLoading,
     infoLoading,
-    orbisLoading,
     selectedSocial,
     handleBack,
-    sumbitDataToOrbis
 }: WidgetLayoutProps) => {
     const { stepHistory, handleStepper } = useStep();
     const currentStep1 = stepHistory[stepHistory.length - 1]
@@ -51,7 +48,7 @@ const WidgetLayout = ({
                     <Loading copy={`Connecting Your ${selectedSocial} Account...`} />
                 ) : infoLoading ? (
                     <Loading copy={`Getting Your Profile Info...`} />
-                ) : orbisLoading ? <Loading copy={`Submitting Your Data...`} />
+                )
                     : (
                         <>
                             <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>

@@ -3,7 +3,6 @@ import { CopyOutlined } from '@ant-design/icons';
 import { UserAvatar } from '../Avatar';
 
 import './styles.css'
-import { useAuth } from '../../context/AuthContext';
 
 interface DrawerProps {
     handleLogout: () => void;
@@ -17,8 +16,6 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
         navigator.clipboard.writeText(address);
         message.success('Address copied!');
     };
-
-    const { user } = useAuth()
 
     const handleMenuClick = (key: string) => {
         if (key === '1') {

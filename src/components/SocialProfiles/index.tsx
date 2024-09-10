@@ -1,8 +1,18 @@
 import { useEffect } from 'react';
-import { socialConnectButtons, metaverseHubButtons } from '../../common/constants';
+import { socialConnectButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
 import HeaderLogo from './../../assets/svgIcons/app-logo.png'
 import './styles.css'
+
+
+type Platform = {
+    active: boolean,
+    activeIcon: string,
+    displayName: string,
+    icon: string,
+    iconName: string,
+    id: number
+}
 
 type MetaverseProps = {
     metaverse?: boolean,
@@ -11,7 +21,6 @@ type MetaverseProps = {
 }
 
 const SocialProfiles = ({
-    metaverse,
     activeStates,
     handleIconClick,
 }: MetaverseProps) => {
@@ -27,13 +36,13 @@ const SocialProfiles = ({
     const socailIcons = localStorage.getItem("platforms")
     const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : ''
 
-    const updateLocalStoragePlatforms = (activeStates) => {
+    const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
         // Get current platforms from local storage
         const platforms = localStorage.getItem("platforms");
         const parsedPlatforms = platforms ? JSON.parse(platforms) : [];
 
         // Update the active state based on `activeStates`
-        const updatedPlatforms = parsedPlatforms.map(platform => ({
+        const updatedPlatforms = parsedPlatforms.map((platform: Platform) => ({
             ...platform,
             active: platform.active ? true : activeStates[platform.id] || false
         }));
@@ -53,7 +62,7 @@ const SocialProfiles = ({
             <div className='mid-icon'>
                 <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
-            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }) => {
+            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }) => {
                 // Calculate position for each icon
                 const x = circleRadius * Math.cos(angle * id);
                 const y = circleRadius * Math.sin(angle * id);

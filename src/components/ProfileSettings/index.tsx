@@ -16,7 +16,7 @@ import { encryptData } from "../../common/utils"
 import { autoConnect, insertSmartProfile } from "../../common/orbis"
 
 const ProfileSettings = () => {
-    const { user: userData, setUser } = useAuth()
+    const { user: userData } = useAuth()
     const { getPublicKey } = useMetamaskPublicKey()
     const { handleBack } = useStep();
     const [loading, setLoading] = useState(false)

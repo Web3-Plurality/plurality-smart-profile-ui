@@ -1,4 +1,3 @@
-import { useMetamaskPublicKey } from '../../hooks/useMetamaskPublicKey';
 import CustomButtom from '../CustomButton'
 // import useRefreshOrbisData from '../../hooks/useRefreshOrbisData';
 

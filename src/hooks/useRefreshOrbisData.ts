@@ -4,7 +4,12 @@ import { autoConnect, insertSmartProfile, select, selectSmartProfiles } from "..
 import axios from "axios";
 import { decryptData, encryptData } from "../common/utils";
 
-const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (val: string) => void, step: string) => {
+type Platform = {
+    platform: string,
+    authentication: boolean
+}
+
+const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, handleStepper: (val: string) => void, step: string) => {
     const [socialIcons, setSocialIcons] = useState(() => {
         const platforms = localStorage.getItem('platforms');
         return platforms ? JSON.parse(platforms) : null;
@@ -23,11 +28,20 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<any>, handleStepper: (v
     const getSmartProfileFromOrbis = async () => {
         // if (socialIcons) return
         setLoading(true)
-        const { rows } = await select();
-        const orbisData = JSON.parse(rows?.[0]?.platforms)
+        const selectResult = await select();
+        if (!selectResult) {
+            throw new Error("Failed to fetch data from select()");
+        }
+
+        const { rows } = selectResult;
+        if (!rows || !rows.length) {
+            throw new Error("No rows returned from select()");
+        }
+
+        const orbisData = JSON.parse(rows?.[0]?.platforms || [])
         if (orbisData) {
             const activePlatforms = socialConnectButtons?.filter(button =>
-                orbisData.some(platform =>
+                orbisData.some((platform: Platform) =>
                     platform.platform.toLowerCase().replace(/\s+/g, '') === button.displayName.toLowerCase().replace(/\s+/g, '')
                 )
             );
