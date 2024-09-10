@@ -65,6 +65,7 @@ const WidgetLayout = ({
 
                             {!showHeaderLogo && <div
                                 className='back-btn'
+                                id="w-footer"
                                 role='button'
                                 tabIndex={0}
                                 onClick={
