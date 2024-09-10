@@ -7,13 +7,20 @@ import { SessionSigs } from '@lit-protocol/types';
 import { useAuth } from '../context/AuthContext';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useDisconnect } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
+import { useStep } from '../context/StepContext';
+import { message } from 'antd';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+  const navigate = useNavigate()
 
   const { setUser } = useAuth()
+  const { disconnectAsync } = useDisconnect();
+  const { handleStepper } = useStep();
 
 
   /**
@@ -72,8 +79,11 @@ export default function useSession() {
         localStorage.setItem("token", data.token)
         setUser(data.user)
         return data.token
+      } else {
+        handleLogout();
       }
     } catch (err) {
+      handleLogout();
       console.log("Something went wrong!")
     }
   }
@@ -87,11 +97,33 @@ export default function useSession() {
       const { data } = await axios.get(url, { headers })
       if (data.success) {
         return data.capacityDelegationAuthSig
+      } else {
+        handleLogout();
       }
     } catch (err) {
+      handleLogout();
       console.log("Something went wrong!")
     }
   }
+
+  async function handleLogout() {
+    const litSignature = localStorage.getItem("signature")
+    if (!litSignature) {
+      try {
+        await disconnectAsync();
+      } catch (err) {
+          console.error(err);
+      }
+    }
+    const smartprofileData = localStorage.getItem("smartProfileData")
+    const tool = localStorage.getItem("tool")
+    localStorage.clear();
+    localStorage.setItem("smartProfileData", smartprofileData || '')
+    localStorage.setItem("tool", tool || '')
+    handleStepper("initial")
+    navigate('/', { replace: true });
+    message.error("Something went wrong, please contact the team")
+}
 
   return {
     initSession,

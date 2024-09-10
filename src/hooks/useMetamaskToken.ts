@@ -3,10 +3,13 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { providers } from 'ethers';
 import { SiweMessage } from 'siwe';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { useAuth } from '../context/AuthContext';
 import { connectOrbisDidPkh } from '../common/orbis';
 import { AuthUserInformation } from '@useorbis/db-sdk';
+import { useNavigate } from 'react-router-dom';
+import { useStep } from '../context/StepContext';
+import { message } from 'antd';
 
 // Define constants and provider outside the hook
 const domain = window.location.host;
@@ -18,10 +21,13 @@ export const useMetamaskToken = () => {
     const [error, setError] = useState(false);
     const [ceramicError, setCeramicError] = useState(false);
 
-
-
     const { address } = useAccount();
     const { setUser } = useAuth()
+
+    const navigate = useNavigate()
+
+    const { disconnectAsync } = useDisconnect();
+    const { handleStepper } = useStep();
 
 
 
@@ -108,11 +114,33 @@ export const useMetamaskToken = () => {
                 } else {
                     setCeramicError(true)
                 }
+            } else {
+                handleLogout();
             }
         } catch (err) {
+            handleLogout();
             console.error("Error posting signature response:", err);
         }
     }, [address]);
+
+    async function handleLogout() {
+        const litSignature = localStorage.getItem("signature")
+        if (!litSignature) {
+          try {
+            await disconnectAsync();
+          } catch (err) {
+              console.error(err);
+          }
+        }
+        const smartprofileData = localStorage.getItem("smartProfileData")
+        const tool = localStorage.getItem("tool")
+        localStorage.clear();
+        localStorage.setItem("smartProfileData", smartprofileData || '')
+        localStorage.setItem("tool", tool || '')
+        handleStepper("initial")
+        navigate('/', { replace: true });
+        message.error("Something went wrong, please contact the team")
+    }
 
     return {
         generateMetamaskToken,
