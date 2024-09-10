@@ -79,7 +79,7 @@ const WidgetLayout = ({
                     )}
 
             </div>
-            <div className='footer'>
+            <div className='footer' role='button' tabIndex={0} onClick={() => window.open('https://plurality.network/', '_blank', 'noopener,noreferrer')}>
                 <span>Powered By</span>
                 <img src={footerLogo} alt='' />
             </div>
