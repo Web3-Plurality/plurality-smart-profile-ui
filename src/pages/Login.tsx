@@ -326,6 +326,7 @@ const Login = () => {
             if (result === "error") {
                 // Handle error case if needed
                 console.error("Error connecting to Orbis");
+                setCeramicError(true)
             } else if (result && result.did) {
                 localStorage.setItem('userDid', JSON.stringify(result?.did))
                 setCeramicError(false)

@@ -16,11 +16,6 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
         isDisbaled = false
     }
 
-    // const { getPublicKey } = useMetamaskPublicKey()
-
-
-    // const { getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'socialConnect')
-
     return (
         <CustomButtom text={`Let's Go`} handleClick={() => handleStepper('socialConnect')} isDisable={!isDisbaled} />
     )

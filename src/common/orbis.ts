@@ -1,7 +1,6 @@
 import { OrbisConnectResult, OrbisDB } from "@useorbis/db-sdk";
 import { OrbisEVMAuth, OrbisKeyDidAuth } from "@useorbis/db-sdk/auth";
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-
 import {
     CEREMAIC_URL,
     ORBIS_ENV,
