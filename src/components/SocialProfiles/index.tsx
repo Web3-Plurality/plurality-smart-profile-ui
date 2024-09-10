@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { socialConnectButtons, metaverseHubButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
 import HeaderLogo from './../../assets/svgIcons/app-logo.png'
@@ -15,20 +16,44 @@ const SocialProfiles = ({
     handleIconClick,
 }: MetaverseProps) => {
 
-    const numIcons = metaverse ? metaverseHubButtons.length : socialConnectButtons.length;
+    // const numIcons = metaverse ? metaverseHubButtons.length : socialConnectButtons.length;
+    const numIcons = socialConnectButtons.length
     const circleRadius = 153;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
 
-    const profiles = metaverse ? metaverseHubButtons : socialConnectButtons
+    // const profiles = metaverse ? metaverseHubButtons : socialConnectButtons
+    const socailIcons = localStorage.getItem("platforms")
+    const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : ''
 
+    const updateLocalStoragePlatforms = (activeStates) => {
+        // Get current platforms from local storage
+        const platforms = localStorage.getItem("platforms");
+        const parsedPlatforms = platforms ? JSON.parse(platforms) : [];
+
+        // Update the active state based on `activeStates`
+        const updatedPlatforms = parsedPlatforms.map(platform => ({
+            ...platform,
+            active: platform.active ? true : activeStates[platform.id] || false
+        }));
+
+        // Save the updated platforms back to local storage
+        localStorage.setItem("platforms", JSON.stringify(updatedPlatforms));
+    };
+
+    useEffect(() => {
+        updateLocalStoragePlatforms(activeStates);
+    }, [activeStates]);
+
+    const smartProfileData = localStorage.getItem('smartProfileData')
+    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
     return (
         <div className="circle">
             <div className='mid-icon'>
                 <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
-            {profiles.map(({ id, icon, activeIcon }) => {
+            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }) => {
                 // Calculate position for each icon
                 const x = circleRadius * Math.cos(angle * id);
                 const y = circleRadius * Math.sin(angle * id);
@@ -45,7 +70,11 @@ const SocialProfiles = ({
                         }}
                         onClick={() => handleIconClick(id)}
                     >
-                        <CustomIcon path={activeStates[id] ? activeIcon : icon} />
+                        <CustomIcon
+                            path={activeStates[id] ||
+                                parsedSocailIcons[id].active ||
+                                connectedPlatforms?.includes(iconName)
+                                ? activeIcon : icon} />
                     </div>
                 );
             })}

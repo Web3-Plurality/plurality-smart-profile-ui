@@ -34,19 +34,31 @@ const Header = () => {
         } catch (err) {
             console.error(err);
         }
+        const smartprofileData = localStorage.getItem("smartProfileData")
+        const tool = localStorage.getItem("tool")
         localStorage.clear();
+        localStorage.setItem("smartProfileData", smartprofileData || '')
+        localStorage.setItem("tool", tool || '')
         handleStepper("initial")
         navigate('/', { replace: true });
+        window.location.reload();
     }
 
+
+    const userOrbisData = localStorage.getItem('smartProfileData')
+    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
+
+    const name = parssedUserOrbisData?.data?.smartProfile?.username
+    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
 
 
     return (
         <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
-                    <span>{user?.username || 'John Doe'}</span>
+                    <span>{name || 'John Doe'}</span>
                     <div className='icon-box'>
+                        <span>{score || 0}</span>
                         <CustomIcon path={BadgeIcon} />
                     </div>
                 </div>

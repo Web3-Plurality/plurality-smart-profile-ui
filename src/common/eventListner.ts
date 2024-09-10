@@ -1,19 +1,16 @@
 import { useState } from 'react'
-import { RouteMapper } from './utils'
+import { encryptData, RouteMapper } from './utils'
 import { BASE_URL } from './constants'
 import axios from 'axios'
-import { metamaskEncryptData, metamaskDecryptData } from './crypto'
-import { insert, connectOrbisDidPkh } from './orbis';
-import { litEncryptData, litDecryptData } from './crypto'
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey'
+import { autoConnect, insertIndividualProfile, insertSmartProfile } from './orbis'
 
 export const useRegisterEvent = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [app, setApp] = useState('')
-    const [cipher, setCipher] = useState('')
-    const [cipherHash, setCipherHash] = useState('')
+
 
     const { getPublicKey } = useMetamaskPublicKey()
 
@@ -55,117 +52,84 @@ export const useRegisterEvent = () => {
         }
     }
 
-    const ecryptData = async (dataToEncrypt: string) => {
-        let encryptionResult: string;
-        const sessionSigs = localStorage.getItem("signature")
-        if (sessionSigs) {
-            console.log("Using Lit encryption")
-            const result = await litEncryptData(dataToEncrypt)
-            if (result) {
-                setCipher(result?.ciphertext)
-                setCipherHash(result?.dataToEncryptHash)
-            }
-            encryptionResult = JSON.stringify(result)
-            console.log("Dataa: ", encryptionResult)
-        } else {
-            console.log("Using metamask encryption")
-            const publickey = await getPublicKey()
-            console.log("the public key is:", publickey)
-            const result = metamaskEncryptData(publickey, dataToEncrypt)
-            if (result) setCipher(result?.ciphertext)
-            encryptionResult = JSON.stringify(result)
-            console.log("Dataa: ", encryptionResult)
-        }
-
-        /// TO DO: sepearte logic
-        await connectOrbisDidPkh();
-        await insert(encryptionResult);
-    }
-
-    const decryptData = async () => {
-        let decryptionResult;
-        const sessionSigs = JSON.parse(localStorage.getItem("signature") ?? '')
-        if (sessionSigs) {
-            console.log("Using Lit decryption")
-            const result = await litDecryptData(sessionSigs, cipher, cipherHash)
-            if (result && typeof result === 'object') {
-                decryptionResult = JSON.parse(result.decryptedMessage);
-                console.log("Dataa: ", decryptionResult);
-            } else {
-                throw new Error("Invalid result from Lit decryption");
-            }
-        } else {
-            console.log("Using metamask decryption")
-            const result = await metamaskDecryptData(cipher)
-            decryptionResult = JSON.parse(result)
-            console.log("Dataa: ", decryptionResult)
-        }
-        return decryptionResult
-    }
-
     const fetchUserInfo = async (appName: string, auth: string) => {
+        console.log("DATAAAA 1111")
         const AppRoute = RouteMapper(appName)
         const infoUrl = `${BASE_URL}${AppRoute}/info`
+        const token = localStorage.getItem('token')
         try {
             setIsLoading(true)
-            const response = await axios.get(infoUrl, {
+            const { data } = await axios.get(infoUrl, {
                 headers: {
-                    'x-token-id': auth
+                    'x-token-id': auth,
+                    Authorization: `Bearer ${token}`
                 }
             })
-            console.log(response.data)
-            //// dont encrypt here
-            ecryptData(JSON.stringify(response.data))
+            console.log("DATAAAA 22222", data)
+            if (data.message === 'success') {
+
+
+                const individualProfileData = data.individualProfile
+                const scores = individualProfileData.scores
+                const litSignature = localStorage.getItem("signature")
+
+                let publicKey;
+                if (!litSignature) {
+                    publicKey = await getPublicKey();
+                }
+                const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
+                console.log("Individual profile encryption: ", encryptedIndividualProfile)
+                await autoConnect()
+                const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
+
+                if (individualresult) {
+                    const token = localStorage.getItem('token')
+                    const localSmartProfile = localStorage.getItem('smartProfileData')
+                    let payload;
+
+                    if (localSmartProfile) {
+                        payload = JSON.parse(localSmartProfile).data.smartProfile
+                    }
+
+                    const { data: smartProfileResponse } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    })
+
+                    if (smartProfileResponse.success) {
+                        console.log("Data of smart profile: ", smartProfileResponse)
+                        const litSignature = localStorage.getItem("signature")
+                        let publicKey
+                        if (!litSignature) {
+                            publicKey = await getPublicKey();
+                        }
+                        const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
+                        console.log("encryption result: ", result)
+                        //const decryptedData = decryptData(JSON.stringify(result), '')
+                        //console.log("encryption result: ", decryptedData)
+                        await autoConnect()
+                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
+                        console.log("insertion result: ", insertionResult)
+                        // save smart profile in local storage along with the returned stream id
+                        if (insertionResult) {
+                            const objData = {
+                                streamId: insertionResult?.id,
+                                data: { smartProfile: smartProfileResponse.smartProfile }
+                            }
+                            localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                            // setLoading(false)
+                        }
+                    }
+                }
+            }
         } catch (err) {
             setError('Error')
-            decryptData()
         } finally {
             setIsLoading(false)
         }
     }
 
-    //   // TODO replace this with the data we get from BE
-    //   const dataToEncrypt = "this is my msg"
-    //   console.log("the msg to encypt is", dataToEncrypt)
-    //   const sessionSigs = JSON.parse(localStorage.getItem("signature") ?? '')
-    //   // TODO why this sessionSigs is always undefined even if I log in via Lit???
-    //   if (sessionSigs) {
-    //       console.log("Using Lit encrption:", sessionSigs)
-
-    //       const encryptionResult = await litEncryptData(sessionSigs, dataToEncrypt)
-    //       if (encryptionResult) {
-    //           const { ciphertext, dataToEncryptHash } = encryptionResult
-    //           console.log("the ciphertext is", ciphertext)
-    //           const decrptedText = await litDecryptData(sessionSigs, ciphertext, dataToEncryptHash)
-    //           console.log("decrpted text:", decrptedText)
-
-    //           // connect to orbis
-    //           await connectOrbisDidPkh();
-    //           // push ciphertext to Obris
-    //           // TODO we need to think abut how to put ciphertext and dataToEncrptHash into orbis
-    //           await insert(JSON.stringify(ciphertext));
-    //       }
-
-    //   } else {
-    //       console.log("Using metamask encrtion")
-
-    //       const publickey = await getPublicKey()
-    //       console.log("the public key is:", publickey)
-    //       const ciphertext = metamaskEncryptData(publickey, dataToEncrypt)
-    //       console.log("the ciphertext is", ciphertext)
-    //       const decrptedText = await metamaskDecryptData(ciphertext)
-    //       console.log("decrpted text:", decrptedText)
-
-    //       // connect to orbis
-    //       await connectOrbisDidPkh();
-    //       // push ciphertext to Obris
-    //       await insert(JSON.stringify(ciphertext));
-    //   }
-
-    //   // we can see that the ciphertext is been posted
-    //   const allrows = await select();
-    //   // verifiy it from console
-    //   console.log(allrows)
 
 
     return {

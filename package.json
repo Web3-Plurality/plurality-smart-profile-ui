@@ -22,7 +22,7 @@
     "@stytch/react": "^18.1.0",
     "@stytch/vanilla-js": "^4.13.0",
     "@tanstack/react-query": "^5.51.1",
-    "@useorbis/db-sdk": "^0.0.52-alpha",
+    "@useorbis/db-sdk": "0.0.54-alpha",
     "antd": "^5.17.4",
     "axios": "^1.7.3",
     "classnames": "^2.5.1",

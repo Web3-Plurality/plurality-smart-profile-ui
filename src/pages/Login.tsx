@@ -16,6 +16,7 @@ import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
 import Dashboard from '../components/LitComponents/Dashboard';
 import ProfileSettings from '../components/ProfileSettings';
 import {
+    encryptData,
     getDescription,
     getTitleText,
     showBackButton,
@@ -24,12 +25,15 @@ import {
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import MetaverseHub from '../components/MetaverseHub';
-import { useOrbisHandler } from '../hooks/useOrbishandler';
-import { metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
+import axios from 'axios';
+import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
+import { connectOrbisDidPkh, insertSmartProfile } from '../common/orbis';
+import { AuthUserInformation } from '@useorbis/db-sdk';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
@@ -54,6 +58,8 @@ const Login = () => {
     const [, setUser] = useState<string>('')
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
+    const { getPublicKey } = useMetamaskPublicKey()
+
 
     const {
         message: eventMessage,
@@ -62,15 +68,55 @@ const Login = () => {
         registerEvent,
     } = useRegisterEvent()
 
-    const {
-        sumbitDataToOrbis,
-        isLoading: orbisLoading
-    } = useOrbisHandler()
+    // const {
+    //     sumbitDataToOrbis,
+    //     isLoading: orbisLoading
+    // } = useOrbisHandler()
+
+    const getLatestSmartProfile = async () => {
+        const presentSmartProfileData = localStorage.getItem('smartProfileData')
+        const token = localStorage.getItem('token')
+        if (presentSmartProfileData) {
+            const { data } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: JSON.parse(presentSmartProfileData) }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            if (data.success) {
+                console.log("Data of smart profile: ", data)
+                const litSignature = localStorage.getItem("signature")
+                let publicKey;
+                if (!litSignature) {
+                    publicKey = await getPublicKey();
+                }
+                const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
+                console.log("encryption result: ", result)
+
+                //const decryptedData = decryptData(JSON.stringify(result), '')
+                //console.log("encryption result: ", decryptedData)
+
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
+                // save smart profile in local storage along with the returned stream id
+                if (insertionResult) {
+                    const objData = {
+                        streamId: insertionResult?.id,
+                        data: { smartProfile: data.smartProfile }
+                    }
+                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    handleStepper('metaverseHub')
+                }
+
+            }
+        }
+    }
 
     const {
         generateMetamaskToken,
         error: metmaskLoginError,
-        setError
+        setError,
+        ceramicError,
+        setCeramicError
         // isLoading: nonceLoading
     } = useMetamaskToken()
 
@@ -86,6 +132,13 @@ const Login = () => {
             setIsLoading(false)
         }
     }, [eventMessage, app]);
+
+    useEffect(() => {
+        // TODO
+        // We need to set newActiveStates here
+        const smartProfileData = localStorage.getItem('smartProfileData')
+        //???
+    }, []);
 
 
 
@@ -125,7 +178,10 @@ const Login = () => {
         const isIndexValid = index < socialConnectButtons.length - 2;
 
         const handleMetaverseHubClick = () => {
-            if (activeStates[index] || !isIndexValid) {
+            const smartProfileData = localStorage.getItem('smartProfileData')
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
                 handleStepper('socialConfirmation');
                 setSelectedSocial(profiles[index].displayName);
             } else {
@@ -138,10 +194,14 @@ const Login = () => {
         };
 
         const handleSocialConnectClick = () => {
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase();
-            setActiveIndex(index);
-            console.log("clickedIconDisplayName", clickedIconDisplayName);
-            registerEvent(clickedIconDisplayName);
+            const smartProfileData = localStorage.getItem('smartProfileData')
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            if (!connectedPlatforms.includes(clickedIconDisplayName)) {
+                setActiveIndex(index);
+                console.log("clickedIconDisplayName", clickedIconDisplayName);
+                registerEvent(clickedIconDisplayName);
+            }
         };
 
         if (isMetaverseHub) {
@@ -172,7 +232,7 @@ const Login = () => {
     }
 
 
-    const allowContinue = (activeStates.filter((item) => item)).length > 0
+    const allowContinue = (activeStates.filter((item) => item && activeStates.indexOf(item) !== 6 && activeStates.indexOf(item) !== 7)).length > 0
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
@@ -203,6 +263,9 @@ const Login = () => {
 
     const handleMetamaskConnect = async () => {
         try {
+            if ((localStorage.getItem('tool') as string) !== 'metamask') {
+                localStorage.clear();
+            }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
 
@@ -211,12 +274,18 @@ const Login = () => {
         }
     };
 
+    const handleLitConnect = async () => {
+        if ((localStorage.getItem('tool') as string) !== 'lit') {
+            localStorage.clear();
+        }
+        handleStepper('login')
+    }
 
     const conditionalRendrer = () => {
         const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
             case 'initial':
-                return <AuthFlow handleStepper={handleStepper} handleMetamaskConnect={handleMetamaskConnect} />
+                return <AuthFlow handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
             case 'login':
                 return <EmailLogin handleMethodId={handleMethodId} />;
             case 'otp':
@@ -250,24 +319,43 @@ const Login = () => {
         } catch (err) {
             console.error(err);
         }
+        const smartprofileData = localStorage.getItem("smartProfileData")
         localStorage.clear();
+        localStorage.setItem("smartProfileData", smartprofileData || '')
         handleStepper("initial")
         navigate('/', { replace: true });
     }
 
+
+
+
     const handleOk = async () => {
-        generateMetamaskToken()
-        setError(false)
+        if (ceramicError) {
+            setCeramicError(false)
+            const result: AuthUserInformation | "" = await connectOrbisDidPkh();
+            if (result?.did) {
+                localStorage.setItem('userDid', JSON.stringify(result?.did))
+            } else {
+                setError(true)
+            }
+        } else {
+            generateMetamaskToken()
+            setError(false)
+        }
+
     }
     const handleCancel = async () => {
         await handleLogout()
         setError(false)
+        setCeramicError(false)
     }
+
+
 
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError}
+                isVisible={metmaskLoginError || ceramicError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />
@@ -295,9 +383,9 @@ const Login = () => {
                 socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
                 isLoading={isLoading}
                 infoLoading={infoLoading}
-                orbisLoading={orbisLoading}
+                // orbisLoading={orbisLoading}
                 selectedSocial={selectedSocial}
-                sumbitDataToOrbis={sumbitDataToOrbis}
+                sumbitDataToOrbis={getLatestSmartProfile}
 
             >
                 {conditionalRendrer()}

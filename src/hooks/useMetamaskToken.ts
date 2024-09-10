@@ -5,6 +5,8 @@ import { providers } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { useAccount } from 'wagmi';
 import { useAuth } from '../context/AuthContext';
+import { connectOrbisDidPkh } from '../common/orbis';
+import { AuthUserInformation } from '@useorbis/db-sdk';
 
 // Define constants and provider outside the hook
 const domain = window.location.host;
@@ -14,6 +16,8 @@ const statement = "I am the owner of this address";
 export const useMetamaskToken = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [ceramicError, setCeramicError] = useState(false);
+
 
 
     const { address } = useAccount();
@@ -45,6 +49,7 @@ export const useMetamaskToken = () => {
                 const userAddress = await signer.getAddress();
                 const message = await createSiweMessage(userAddress, nonce);
                 const signature = await signer.signMessage(message);
+                localStorage.setItem('tool', 'metamask');
                 return { message, signature };
             } catch (err: unknown) {
                 if (err && typeof err === 'object') {
@@ -92,6 +97,13 @@ export const useMetamaskToken = () => {
             if (success) {
                 setUser(user)
                 localStorage.setItem('token', data.token)
+                const result: AuthUserInformation | "" = await connectOrbisDidPkh();
+                if (result?.did) {
+                    localStorage.setItem('userDid', JSON.stringify(result?.did))
+                } else {
+                    setCeramicError(true)
+                }
+                console.log("Result: ", result, result.did)
             }
         } catch (err) {
             console.error("Error posting signature response:", err);
@@ -102,6 +114,8 @@ export const useMetamaskToken = () => {
         generateMetamaskToken,
         isLoading,
         error,
-        setError
+        ceramicError,
+        setError,
+        setCeramicError
     };
 };
