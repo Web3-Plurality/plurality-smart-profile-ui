@@ -64,14 +64,14 @@ export const backButtonSteps = new Set([
 
 export const SocialProfileUrls = {
     Instagram: 'https://www.instagram.com/ar/1246108036298968',
-    SnapChat: 'https://www.roblox.com/games/12563183319/Outfit-Shopping-Mall-DRESSX-MANGO',
-    Tiktok: 'https://www.fortnite.com/@gcg_games/3511-4821-9572',
+    Snapchat: 'https://www.roblox.com/games/12563183319/Outfit-Shopping-Mall-DRESSX-MANGO',
+    TikTok: 'https://www.fortnite.com/@gcg_games/3511-4821-9572',
     Roblox: 'https://www.roblox.com/games/12563183319/Outfit-Shopping-Mall-DRESSX-MANGO',
     Fortnite: 'https://www.fortnite.com/@gcg_games/3511-4821-9572',
-    AIDressing: 'https://dressx.me/',
+    DRESSX: 'https://dressx.me/',
     Decentraland: 'https://decentraland.org/',
     Spatial: 'https://www.spatial.io/s/BOSS-Immersive-Showroom-641e08bd6127ed8eaff70faa?share=3302646144092575883',
-    ArtificialRome: 'https://artificialrome.com/case/legacy-of-tomorrow'
+    "Artificial Rome": 'https://artificialrome.com/case/legacy-of-tomorrow'
 }
 
 export const digitalWardrobeImages = [
