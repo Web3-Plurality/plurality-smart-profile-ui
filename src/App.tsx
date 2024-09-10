@@ -15,22 +15,27 @@ import { http, createConfig } from '@wagmi/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CallBackUrl from './pages/CallBackUrl';
 import AuthStart from './pages/AuthStart';
+import { message } from 'antd';
 
 const stytch = new StytchUIClient(
   import.meta.env.VITE_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
 );
 
+
 const client = createConfig({
   chains: [goerli, mainnet, optimism],
   connectors: [
     metaMask({
-      extensionOnly: true,
       preferDesktop: true,
-      injectProvider: true
+      modals: {
+        install: ({ terminate }) => {
+          message.error("MetaMask is not available for this device, please continue with email")
+          return {
+            unmount: terminate,
+          };
+        },
+      },
     }),
-    // safe({
-    //   shimDisconnect: true,
-    // })
   ],
   transports: {
     [mainnet.id]: http(),
@@ -38,6 +43,7 @@ const client = createConfig({
     [optimism.id]: http(),
   },
 });
+
 
 const queryClient = new QueryClient()
 
