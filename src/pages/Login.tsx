@@ -84,14 +84,12 @@ const Login = () => {
             })
 
             if (data.success) {
-                console.log("Data of smart profile: ", data)
                 const litSignature = localStorage.getItem("signature")
                 let publicKey;
                 if (!litSignature) {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                console.log("encryption result: ", result)
 
                 //const decryptedData = decryptData(JSON.stringify(result), '')
                 //console.log("encryption result: ", decryptedData)
@@ -190,7 +188,6 @@ const Login = () => {
             const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
-                console.log("clickedIconDisplayName", clickedIconDisplayName);
                 registerEvent(clickedIconDisplayName);
             }
         };
@@ -229,11 +226,9 @@ const Login = () => {
     const isBackButton = showBackButton(currentStep)
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
-        console.log("Ensure MetaMask connection called");
 
         // Check if MetaMask is installed
         if (typeof window.ethereum !== 'undefined') {
-            console.log("MetaMask is installed");
 
             // Check if MetaMask is connected
             if (!metamaskAddress || !isConnected) {
@@ -326,13 +321,13 @@ const Login = () => {
             if (result === "error") {
                 // Handle error case if needed
                 console.error("Error connecting to Orbis");
+                setCeramicError(true)
             } else if (result && result.did) {
                 localStorage.setItem('userDid', JSON.stringify(result?.did))
                 setCeramicError(false)
             } else {
                 setCeramicError(true)
             }
-            console.log("Result: ", result)
         } else {
             generateMetamaskToken()
             setError(false)

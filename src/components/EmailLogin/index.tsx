@@ -41,7 +41,6 @@ const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     }
 
     const onChange: CheckboxProps['onChange'] = (e) => {
-        console.log(`checked = ${e.target.checked}`);
         setAcceptance(e.target.checked);
     };
 

@@ -25,11 +25,15 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
 
     if (loading) {
         const widgetHeader = document.getElementById('w-header');
+        const widgetFooter = document.getElementById('w-footer');
         widgetHeader?.classList.add('toogleShow')
-        return <Loading copy={'Looking up your accounts...'} />;
+        widgetFooter?.classList.add('toogleShow')
+        return <Loading copy={'Looking up your profiles...'} />;
     } else {
         const widgetHeader = document.getElementById('w-header');
+        const widgetFooter = document.getElementById('w-footer');
         widgetHeader?.classList.remove('toogleShow')
+        widgetFooter?.classList.remove('toogleShow')
     }
 
     return (

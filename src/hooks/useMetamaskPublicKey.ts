@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccount } from "wagmi";
+import { useStep } from "../context/StepContext";
 
 export const useMetamaskPublicKey = () => {
     const { address } = useAccount();
 
     const publicKey = localStorage.getItem('publicKey')
+    const { handleStepper } = useStep();
 
 
 
@@ -26,10 +28,10 @@ export const useMetamaskPublicKey = () => {
             return encryptionPublicKey;
 
         } catch (error: any) {
-            console.log("Error", error)
-            if (error.code === 4001) {
+            if (error.code === -32603) {
                 // User rejected the request
                 console.log("Please connect to MetaMask.");
+                handleStepper('success')
             } else {
                 console.error("An error occurred while getting the encryption public key:", error);
             }

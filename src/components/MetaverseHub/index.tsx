@@ -22,7 +22,7 @@ const MetaverseHub = ({ activeStates, handleIconClick }: SocialConnectProps) => 
     if (loading) {
         const widgetHeader = document.getElementById('w-header');
         widgetHeader?.classList.add('toogleShow')
-        return <Loading copy={'Looking up your accounts...'} />;
+        return <Loading copy={'Looking up your profiles...'} />;
     } else {
         const widgetHeader = document.getElementById('w-header');
         widgetHeader?.classList.remove('toogleShow')
