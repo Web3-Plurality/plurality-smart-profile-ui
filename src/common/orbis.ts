@@ -76,12 +76,8 @@ export async function connectOrbisDidPkh() {
         const sessionSigs = localStorage.getItem("signature");
         if (sessionSigs) {
 
-            console.log("Creating pkp wallet for orbis");
             const pkpWallet = await generatePkpWalletInstance();
-            console.log(pkpWallet);
             auth = new OrbisEVMAuth(pkpWallet!);
-            console.log(auth);
-
 
             // const sigedData = await createSigature();
             /*const userId = JSON.parse(localStorage.getItem("userData") as string).id
@@ -94,14 +90,12 @@ export async function connectOrbisDidPkh() {
         const authResult: OrbisConnectResult = await orbisdb.connectUser({ auth });
 
         if (authResult?.user) {
-            console.log("authResult?.user", authResult, authResult.user)
             return authResult.user;
         } else {
             return "";
         }
     } catch (err: unknown) {
         if (err && typeof err === 'object') {
-            console.log("Error", err)
             const errorWithCode = err as { code: number };
             if (errorWithCode.code === 4001) {
                 return 'error'
@@ -120,11 +114,9 @@ export async function connectOrbisDidKey() {
         const authResult: OrbisConnectResult = await orbisdb.connectUser({ auth })
         if (authResult?.user) {
             // Log the result
-            console.log({ authResult })
             return authResult.user;
             //setUser(authResult.user);
         }
-        console.log("authResult:", authResult);
         return "";
     } catch (e) {
         console.log("Error connecting user:", e);
@@ -136,7 +128,6 @@ export async function connectOrbisDidKey() {
 export async function autoConnect() {
     try {
         const currentUser: OrbisConnectResult | boolean = await orbisdb.getConnectedUser();
-        console.log(currentUser);
         if (currentUser) {
             return currentUser.user;
             //setUser(currentUser.user);
@@ -208,8 +199,6 @@ export async function insert(msg: string) {
     catch (error) {
         console.log(error);
     }
-    // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(insertStatement.runs)
 }
 
 export async function bulkInsert() {
@@ -240,7 +229,6 @@ export async function bulkInsert() {
         console.log(error);
     }
     // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(insertStatement.runs)
 }
 
 export async function update(stream_id: string) {
@@ -262,7 +250,6 @@ export async function update(stream_id: string) {
     }
 
     // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(updateStatement.runs)
 }
 
 export async function partialUpdate() {
@@ -284,7 +271,6 @@ export async function partialUpdate() {
         console.log(error);
     }
     // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(updateStatement.runs)
 }
 
 export async function select() {
@@ -333,7 +319,6 @@ export async function selectSmartProfiles() {
         // columns: Array<string>
         // rows: Array<T | Record<string, any>>
         const { columns, rows } = result
-        console.log({ columns, rows });
         return { columns, rows };
     }
     catch (error) {
@@ -369,8 +354,6 @@ export async function insertSmartProfile(encrypted_profile_data: string, scores:
     catch (error) {
         console.log(error);
     }
-    // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(insertStatement.runs)
 }
 
 export async function insertIndividualProfile(encrypted_profile_data: string, scores: string, version = '1', platformName: string) {
@@ -401,6 +384,4 @@ export async function insertIndividualProfile(encrypted_profile_data: string, sc
     catch (error) {
         console.log(error);
     }
-    // All runs of a statement are stored within the statement, in case you want to reuse the same statmenet
-    console.log(insertStatement.runs)
 }

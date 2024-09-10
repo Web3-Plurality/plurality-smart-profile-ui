@@ -26,7 +26,6 @@ export const useMetamaskPublicKey = () => {
             return encryptionPublicKey;
 
         } catch (error: any) {
-            console.log("Error", error)
             if (error.code === 4001) {
                 // User rejected the request
                 console.log("Please connect to MetaMask.");

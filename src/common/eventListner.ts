@@ -21,7 +21,6 @@ export const useRegisterEvent = () => {
                 const { message, app, id, auth } = JSON.parse(event?.data);
                 setMessage(message);
                 setApp(app);
-                console.log('Message: ', event.data)
                 if (message === "received") {
                     fetchUserInfo(app, auth)
                 } else {
@@ -53,7 +52,6 @@ export const useRegisterEvent = () => {
     }
 
     const fetchUserInfo = async (appName: string, auth: string) => {
-        console.log("DATAAAA 1111")
         const AppRoute = RouteMapper(appName)
         const infoUrl = `${BASE_URL}${AppRoute}/info`
         const token = localStorage.getItem('token')
@@ -65,7 +63,6 @@ export const useRegisterEvent = () => {
                     Authorization: `Bearer ${token}`
                 }
             })
-            console.log("DATAAAA 22222", data)
             if (data.message === 'success') {
 
 
@@ -78,7 +75,6 @@ export const useRegisterEvent = () => {
                     publicKey = await getPublicKey();
                 }
                 const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
-                console.log("Individual profile encryption: ", encryptedIndividualProfile)
                 await autoConnect()
                 const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
 
@@ -98,19 +94,16 @@ export const useRegisterEvent = () => {
                     })
 
                     if (smartProfileResponse.success) {
-                        console.log("Data of smart profile: ", smartProfileResponse)
                         const litSignature = localStorage.getItem("signature")
                         let publicKey
                         if (!litSignature) {
                             publicKey = await getPublicKey();
                         }
                         const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
-                        console.log("encryption result: ", result)
                         //const decryptedData = decryptData(JSON.stringify(result), '')
                         //console.log("encryption result: ", decryptedData)
                         await autoConnect()
                         const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
-                        console.log("insertion result: ", insertionResult)
                         // save smart profile in local storage along with the returned stream id
                         if (insertionResult) {
                             const objData = {

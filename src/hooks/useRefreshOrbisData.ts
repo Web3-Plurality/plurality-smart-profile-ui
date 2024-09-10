@@ -45,13 +45,12 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                     platform.platform.toLowerCase().replace(/\s+/g, '') === button.displayName.toLowerCase().replace(/\s+/g, '')
                 )
             );
-            console.log("yesss", JSON.parse(rows?.[0]?.platforms))
             setSocialIcons(activePlatforms)
 
             //////////////////////////////////////////
             await autoConnect()
             const response = await selectSmartProfiles();
-            console.log("Rows (first time select smart profile): ", response)
+
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
                 const token = localStorage.getItem('token')
@@ -62,19 +61,16 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                 })
 
                 if (data.success) {
-                    console.log("Data of smart profile: ", data)
                     const litSignature = localStorage.getItem("signature")
                     let publicKey;
                     if (!litSignature) {
                         publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                    console.log("encryption result: ", result)
                     //const decryptedData = decryptData(JSON.stringify(result), '')
                     //console.log("encryption result: ", decryptedData)
 
                     const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
-                    console.log("insertion result: ", insertionResult)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
                         const objData = {
@@ -96,7 +92,6 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         setLoading(false)
                         handleStepper(step)
                     } else {
-                        console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         const objData = {
                             streamId: response.rows[0].stream_id,
@@ -107,7 +102,6 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         handleStepper(step)
                     }
                 } else {
-                    console.log("Need to decrypt: ", response.rows[0].encrypted_profile_data)
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     const objData = {
                         streamId: response.rows[0].stream_id,

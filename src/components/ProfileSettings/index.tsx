@@ -86,21 +86,16 @@ const ProfileSettings = () => {
 
             const { success, smartProfile } = data
             if (success) {
-
-
-                console.log("Data of smart profile: ", smartProfile)
                 const litSignature = localStorage.getItem("signature")
                 let publicKey;
                 if (!litSignature) {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
-                console.log("encryption result: ", result)
                 //const decryptedData = decryptData(JSON.stringify(result), '')
                 //console.log("encryption result: ", decryptedData)
                 await autoConnect()
                 const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
-                console.log("insertion result: ", insertionResult)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {

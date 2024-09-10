@@ -4,7 +4,7 @@ import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { litNodeClient } from './lit';
 
-export const getAccessControlConditions = async () : Promise<AccessControlConditions> => {
+export const getAccessControlConditions = async (): Promise<AccessControlConditions> => {
   const currentPkp = localStorage.getItem('pkpKey')
 
   // Lit encrption & decrption
@@ -87,7 +87,6 @@ export const metamaskEncryptData = (publicKey: string, message: string, version:
     data: message,
     version: version
   });
-  console.log("Encrypted Data", encryptedData)
   return encryptedData
 }
 
@@ -98,6 +97,5 @@ export const metamaskDecryptData = async (encryptedData: string) => {
     method: 'eth_decrypt',
     params: [`0x${Buffer.from(encryptedData, "utf8").toString("hex")}`, accounts[0]],
   });
-  console.log("Decrypted Data", decrypt)
   return decrypt
 }

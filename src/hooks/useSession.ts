@@ -44,8 +44,6 @@ export default function useSession() {
           expiration: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString()
         });
 
-        console.log("✅ Got PKP Session Sigs");
-
         setSessionSigs(sessionSigs);
         localStorage.setItem('signature', JSON.stringify(sessionSigs))
 
@@ -87,7 +85,6 @@ export default function useSession() {
         'Authorization': `Bearer ${token}`,
       };
       const { data } = await axios.get(url, { headers })
-      console.log("Dataa", data)
       if (data.success) {
         return data.capacityDelegationAuthSig
       }

@@ -108,12 +108,9 @@ export const RouteMapper = (app: string) => {
 export const encryptData = async (dataToEncrypt: string, publicKey: string | undefined) => {
     const sessionSigs = localStorage.getItem("signature")
     if (sessionSigs) {
-        console.log("Using Lit encryption")
         const result = await litEncryptData(dataToEncrypt)
         return result
     } else {
-        console.log("Using metamask encryption")
-        console.log("the public key is:", publicKey)
         if (publicKey) {
             const result = metamaskEncryptData(publicKey, dataToEncrypt)
             return result
@@ -125,24 +122,17 @@ export const decryptData = async (encryptedData: string) => {
     let decryptionResult;
     const sessionSigs = localStorage.getItem("signature")
     if (sessionSigs) {
-        console.log("Using Lit decryption")
         if (encryptedData) {
             const result = await litDecryptData(JSON.parse(sessionSigs), JSON.parse(encryptedData).ciphertext, JSON.parse(encryptedData).dataToEncryptHash);
             if (result && typeof result === 'object') {
                 decryptionResult = JSON.parse(result.decryptedMessage);
-                console.log("Dataa: ", decryptionResult);
             } else {
                 throw new Error("Invalid result from Lit decryption");
             }
         }
-        else {
-            console.log("Encrypted data from lit missing at decryption ");
-        }
     } else {
-        console.log("Using metamask decryption")
         const result = await metamaskDecryptData(encryptedData)
         decryptionResult = JSON.parse(result)
-        console.log("Dataa: ", decryptionResult)
     }
     return decryptionResult
 }

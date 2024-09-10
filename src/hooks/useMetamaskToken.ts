@@ -108,7 +108,6 @@ export const useMetamaskToken = () => {
                 } else {
                     setCeramicError(true)
                 }
-                console.log("Result: ", result)
             }
         } catch (err) {
             console.error("Error posting signature response:", err);
