@@ -34,7 +34,7 @@ export default function Dashboard({
     if (isLoading) {
         const widgetHeader = document.getElementById('w-header');
         widgetHeader?.classList.add('toogleShow')
-        return <Loading copy={'Setting up your account...'} />;
+        return <Loading copy={'Setting up your profiles...'} />;
     } else {
         const widgetHeader = document.getElementById('w-header');
         widgetHeader?.classList.remove('toogleShow')
