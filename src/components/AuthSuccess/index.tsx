@@ -12,6 +12,8 @@ const AuthSuccess = ({ handleStepper }: { handleStepper: (val: string) => void }
     const litSession = localStorage.getItem('sessionSigs')
     if (!litSession) {
         isDisbaled = userDid
+    } else {
+        isDisbaled = false
     }
 
     // const { getPublicKey } = useMetamaskPublicKey()
