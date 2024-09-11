@@ -127,12 +127,17 @@ export const decryptData = async (encryptedData: string) => {
             if (result && typeof result === 'object') {
                 decryptionResult = JSON.parse(result.decryptedMessage);
             } else {
-                throw new Error("Invalid result from Lit decryption");
+                throw new Error("Invalid result fom Lit decryption");
             }
         }
     } else {
         const result = await metamaskDecryptData(encryptedData)
+        if (result.code && result.code === -32603) {
+            return result
+        }
+        console.log("Resulst", result)
         decryptionResult = JSON.parse(result)
+
     }
     return decryptionResult
 }
