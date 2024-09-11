@@ -100,8 +100,6 @@ export const useRegisterEvent = () => {
                             publicKey = await getPublicKey();
                         }
                         const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
-                        //const decryptedData = decryptData(JSON.stringify(result), '')
-                        //console.log("encryption result: ", decryptedData)
                         await autoConnect()
                         const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
                         // save smart profile in local storage along with the returned stream id

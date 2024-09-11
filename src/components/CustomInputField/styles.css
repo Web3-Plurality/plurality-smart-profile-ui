@@ -47,3 +47,13 @@ input[type="file"] {
     box-sizing: border-box;
     resize: none;
 }
+
+@media (max-width: 575.98px) {
+    .input-field {
+        width: 270px;
+    }
+
+    .text-area-container {
+        width: 300px;
+    }
+}

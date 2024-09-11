@@ -45,3 +45,15 @@
     color: red;
     margin: 10px 0;
 }
+
+
+@media (max-width: 575.98px) {
+    .checkbox-container {
+        width: 85%;
+    }
+
+    .checkbox-container span {
+        font-size: 10px;
+        color: gray;
+    }
+}

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccount } from "wagmi";
 import { useStep } from "../context/StepContext";
+import { message } from "antd";
 
 export const useMetamaskPublicKey = () => {
     const { address } = useAccount();
@@ -33,6 +34,8 @@ export const useMetamaskPublicKey = () => {
                 console.log("Please connect to MetaMask.");
                 handleStepper('success')
             } else {
+                handleStepper('success')
+                message.error('Something went wrong!')
                 console.error("An error occurred while getting the encryption public key:", error);
             }
         }

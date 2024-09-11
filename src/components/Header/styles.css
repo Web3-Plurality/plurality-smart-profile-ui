@@ -32,3 +32,22 @@
 .icon-box span {
     margin-top: 5px;
 }
+
+.mobile-header-wrapper {
+    position: absolute;
+    top: 27px;
+    right: 2px;
+}
+
+@media (max-width: 1280px) {
+    .header-wrapper {
+        right: 230px;
+    }
+}
+
+@media (max-width: 835px) {
+    .header-wrapper {
+        display: none;
+        right: 100px;
+    }
+}

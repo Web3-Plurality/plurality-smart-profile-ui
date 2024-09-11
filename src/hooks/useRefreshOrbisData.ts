@@ -26,7 +26,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
     }, [socialIcons]);
 
     const getSmartProfileFromOrbis = async () => {
-        // if (socialIcons) return
+        if (loading) return
         setLoading(true)
         const selectResult = await select();
         if (!selectResult) {
@@ -67,9 +67,6 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                    //const decryptedData = decryptData(JSON.stringify(result), '')
-                    //console.log("encryption result: ", decryptedData)
-
                     const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
@@ -93,6 +90,10 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         handleStepper(step)
                     } else {
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
+                        if (decryptedData.code === -32603) {
+                            handleStepper('success')
+                            return
+                        }
                         const objData = {
                             streamId: response.rows[0].stream_id,
                             data: { smartProfile: decryptedData }
@@ -103,6 +104,10 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                     }
                 } else {
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
+                    if (decryptedData.code === -32603) {
+                        handleStepper('success')
+                        return
+                    }
                     const objData = {
                         streamId: response.rows[0].stream_id,
                         data: { smartProfile: decryptedData }

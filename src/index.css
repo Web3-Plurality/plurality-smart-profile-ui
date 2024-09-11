@@ -136,6 +136,10 @@
  }
 
  .dashboard-container {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
    max-height: calc(100vh - 2rem);
    border-radius: 0.5rem;
    padding: 1.5rem;
@@ -199,7 +203,6 @@
  }
 
  .details-card {
-   display: flex;
    padding: 1rem;
    border-radius: 0.5rem;
    background-color: var(--primary-light);
@@ -298,4 +301,34 @@
    align-items: center;
    z-index: 9999;
    /* Ensure it overlays everything */
+ }
+
+ /* Media Queries */
+
+ @media (max-width: 575.98px) {
+   .widget {
+     width: 330px;
+     min-height: 450px;
+     margin-top: 40px;
+   }
+
+   .widget h1 {
+     font-size: 25px;
+   }
+
+   .widget p {
+     font-size: 15px;
+   }
+
+   .dashboard-container h1 {
+     font-size: 23px;
+   }
+
+   .details-card {
+     width: 260px !important;
+   }
+
+   .details-card p {
+     word-break: break-all;
+   }
  }

@@ -41,3 +41,9 @@
 .emailText {
     transform: translateY(2px);
 }
+
+@media (max-width: 575.98px) {
+    .social-btn {
+        min-width: 300px;
+    }
+}

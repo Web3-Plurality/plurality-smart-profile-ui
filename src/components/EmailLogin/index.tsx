@@ -14,7 +14,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const EmailLogin = ({ handleMethodId }: EmailLoginProps) => {
     const [email, setEmail] = useState('');
-    const [acceptance, setAcceptance] = useState(false);
+    const [acceptance, setAcceptance] = useState(true);
     const widgetHeader = document.getElementById('w-header');
 
     const {

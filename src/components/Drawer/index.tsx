@@ -1,16 +1,19 @@
 import { Dropdown, Menu, Space, message } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { UserAvatar } from '../Avatar';
+import settingsIcon from './../../assets/svgIcons/settings.svg'
 
 import './styles.css'
+
 
 interface DrawerProps {
     handleLogout: () => void;
     handleStepper: (val: string) => void;
     address: `0x${string}` | string
+    isSmallScreen?: boolean
 }
 
-const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
+const Drawer = ({ handleLogout, handleStepper, address, isSmallScreen }: DrawerProps) => {
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);
@@ -56,9 +59,11 @@ const Drawer = ({ handleLogout, handleStepper, address }: DrawerProps) => {
         <Space direction="vertical">
             <Space wrap>
                 <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-                    <div className="avatar">
-                        {/* <UserAvatar address={address} size={46} /> */}
-                        {userAvatar ? <img src={userAvatar} /> : <UserAvatar address={address} size={46} />}
+                    <div>
+                        {isSmallScreen && <img src={settingsIcon} className='mobile-header-icon' />}
+                        {!isSmallScreen && <div className="avatar">
+                            {userAvatar ? <img src={userAvatar} /> : <UserAvatar address={address} size={46} />}
+                        </div>}
                     </div>
                 </Dropdown>
             </Space>

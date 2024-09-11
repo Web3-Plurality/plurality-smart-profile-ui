@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 //encryption&decryption
 import { encrypt } from '@metamask/eth-sig-util'
 import { AccessControlConditions, SessionSigsMap } from '@lit-protocol/types';
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { litNodeClient } from './lit';
+import { message } from 'antd';
 
 export const getAccessControlConditions = async (): Promise<AccessControlConditions> => {
   const currentPkp = localStorage.getItem('pkpKey')
@@ -93,9 +95,21 @@ export const metamaskEncryptData = (publicKey: string, message: string, version:
 export const metamaskDecryptData = async (encryptedData: string) => {
   await window.ethereum.enable();
   const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-  const decrypt = await window.ethereum.request({
-    method: 'eth_decrypt',
-    params: [`0x${Buffer.from(encryptedData, "utf8").toString("hex")}`, accounts[0]],
-  });
-  return decrypt
+  try {
+    const decrypt = await window.ethereum.request({
+      method: 'eth_decrypt',
+      params: [`0x${Buffer.from(encryptedData, "utf8").toString("hex")}`, accounts[0]],
+    });
+    return decrypt
+  } catch (err: any) {
+    if (err.code === -32603) {
+      return err
+      // // User rejected the request
+      // console.log("Please connect to MetaMask.");
+      // handleStepper('success')
+    } else {
+      message.error('Something went wrong!')
+      console.error("An error occurred while getting the encryption public key:", err);
+    }
+  }
 }

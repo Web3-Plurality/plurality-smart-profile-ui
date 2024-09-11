@@ -90,10 +90,6 @@ const Login = () => {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-
-                //const decryptedData = decryptData(JSON.stringify(result), '')
-                //console.log("encryption result: ", decryptedData)
-
                 const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
