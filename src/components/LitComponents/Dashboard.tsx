@@ -44,7 +44,8 @@ export default function Dashboard({
         <div className="dashboard-container">
             <h1>Ready for the open web</h1>
             <div className="details-card">
-                <p>My address: {currentAccount?.toLowerCase()}</p>
+                <span>My address: </span>
+                <p>{currentAccount?.toLowerCase()}</p>
             </div>
             <div className="divider"></div>
             <div className="message-card">
