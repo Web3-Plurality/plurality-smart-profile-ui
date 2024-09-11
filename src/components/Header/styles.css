@@ -38,3 +38,9 @@
     top: 27px;
     right: 2px;
 }
+
+@media (max-width: 834px) {
+    .header-wrapper {
+        display: none;
+    }
+}

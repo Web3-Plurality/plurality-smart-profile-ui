@@ -26,12 +26,23 @@ const SocialProfiles = ({
     const circleRef = useRef<HTMLDivElement>(null);
     const [circleRadius, setCircleRadius] = useState(153);
 
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
+
+    useEffect(() => {
+        const handleResize = () => setIsSmallScreen(window.innerWidth <= 834);
+
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
-            setCircleRadius(width / 2 - 30); // Adjust radius if necessary
+            const radSize = isSmallScreen ? 2 : 2.1
+            setCircleRadius(width / radSize - 30); // Adjust radius if necessary
         }
-    }, [circleRef.current?.offsetWidth]);
+    }, [circleRef.current?.offsetWidth, isSmallScreen]);
 
     const numIcons = socialConnectButtons.length;
 
@@ -75,8 +86,8 @@ const SocialProfiles = ({
                         className={`icon icon${id}`}
                         style={{
                             position: "absolute",
-                            left: `calc(50% + ${x}px - 23px)`,
-                            top: `calc(50% + ${y}px - 20px)`,
+                            left: `calc(50% + ${x}px - ${isSmallScreen ? '23px' : '27px'})`,
+                            top: `calc(50% + ${y}px - ${isSmallScreen ? '20px' : '25px'})`,
                             cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(id)}

@@ -41,10 +41,10 @@ const WidgetLayout = ({
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
 
-    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 767.98);
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
 
     useEffect(() => {
-        const handleResize = () => setIsSmallScreen(window.innerWidth <= 767.98);
+        const handleResize = () => setIsSmallScreen(window.innerWidth <= 834);
 
         window.addEventListener('resize', handleResize);
 
