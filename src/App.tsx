@@ -16,6 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CallBackUrl from './pages/CallBackUrl';
 import AuthStart from './pages/AuthStart';
 import { message } from 'antd';
+import { useEffect, useState } from 'react';
 
 const stytch = new StytchUIClient(
   import.meta.env.VITE_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
@@ -47,7 +48,19 @@ const client = createConfig({
 
 const queryClient = new QueryClient()
 
+
+
 function App() {
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 767.98);
+
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth <= 767.98);
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <AuthProvider>
       <StepProvider>
@@ -55,7 +68,7 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <StytchProvider stytch={stytch}>
               <Router>
-                <Header />
+                {!isSmallScreen && <Header />}
                 <Routes>
                   <Route path="/" element={<Login />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />
@@ -68,7 +81,6 @@ function App() {
         </WagmiProvider>
       </StepProvider>
     </AuthProvider>
-
   );
 }
 

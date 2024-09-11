@@ -299,3 +299,25 @@
    z-index: 9999;
    /* Ensure it overlays everything */
  }
+
+ /* Media Queries */
+
+ @media (max-width: 575.98px) {
+   .widget {
+     width: 330px;
+     min-height: 450px;
+     margin-top: 40px;
+   }
+
+   .widget h1 {
+     font-size: 25px;
+   }
+
+   .widget p {
+     font-size: 15px;
+   }
+
+   .dashboard-container h1 {
+     font-size: 23px;
+   }
+ }

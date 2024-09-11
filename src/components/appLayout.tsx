@@ -1,10 +1,11 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import footerLogo from '../assets/images/footer-logo.png'
 import HeaderLogo from '../assets/svgIcons/app-logo.png';
 import classNames from 'classnames';
 import WidgetHeader from './WidgetHeader';
 import { useStep } from '../context/StepContext';
 import Loading from './LitComponents/Loading';
+import MobileHeader from './Header/mobileHeader';
 
 interface WidgetLayoutProps {
     children: ReactNode,
@@ -40,6 +41,16 @@ const WidgetLayout = ({
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
 
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 767.98);
+
+    useEffect(() => {
+        const handleResize = () => setIsSmallScreen(window.innerWidth <= 767.98);
+
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
 
     return (
         <div className="wrapper">
@@ -52,8 +63,8 @@ const WidgetLayout = ({
                     : (
                         <>
                             <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
-
                                 {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
+                                {isSmallScreen && <MobileHeader isSmallScreen={isSmallScreen} />}
                                 <WidgetHeader title={title} description={description} currentStep={currentStep} />
                                 {children}
                             </div>

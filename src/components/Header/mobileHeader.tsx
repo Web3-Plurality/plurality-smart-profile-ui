@@ -2,15 +2,15 @@ import { useAccount, useDisconnect } from 'wagmi';
 import classNames from 'classnames';
 import { showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
-import CustomIcon from '../CustomIcon'
+// import CustomIcon from '../CustomIcon'
 import Drawer from '../Drawer';
-import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
+// import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
 
 const isIframe = window.location !== window.parent.location
 
-const Header = () => {
+const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
     const navigate = useNavigate()
 
     const { stepHistory, handleStepper } = useStep();
@@ -42,31 +42,32 @@ const Header = () => {
     }
 
 
-    const userOrbisData = localStorage.getItem('smartProfileData')
-    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
+    // const userOrbisData = localStorage.getItem('smartProfileData')
+    // const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
-    const name = parssedUserOrbisData?.data?.smartProfile?.username
-    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
+    // const name = parssedUserOrbisData?.data?.smartProfile?.username
+    // const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
 
 
     return (
-        <div className={classNames('header-wrapper header-hidden', { iframeHeader: isIframe })}>
+        <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
-                <div className='user-info'>
+                {/* <div className='user-info'>
                     <span>{name || 'John Doe'}</span>
                     <div className='icon-box'>
                         <span>{score || 0}</span>
                         <CustomIcon path={BadgeIcon} />
                     </div>
-                </div>
+                </div> */}
                 <Drawer
                     handleLogout={handleLogout}
                     handleStepper={handleStepper}
                     address={metamaskAddress || litAddress}
+                    isSmallScreen={isSmallScreen}
                 />
             </div>
         </div>
     )
 }
 
-export default Header
+export default MobileHeader

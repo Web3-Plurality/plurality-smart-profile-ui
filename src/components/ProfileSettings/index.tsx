@@ -92,8 +92,6 @@ const ProfileSettings = () => {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
-                //const decryptedData = decryptData(JSON.stringify(result), '')
-                //console.log("encryption result: ", decryptedData)
                 await autoConnect()
                 const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
                 // save smart profile in local storage along with the returned stream id
@@ -103,19 +101,9 @@ const ProfileSettings = () => {
                         data: { smartProfile: smartProfile }
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
-                    // setUser({
-                    //     id: userData?.id || '',
-                    //     email: userData?.email || null,
-                    //     address: userData?.address || null,
-                    //     subscribe: userData?.subscribe || false,
-                    //     profileImg: user.profileImg || '',
-                    //     username: user.username || '',
-                    //     bio: user.bio || ''
-                    // })
-                    // message.success("Profile updated successfully!")
+                    message.success("Profile updated successfully!")
 
                     setLoading(false)
-
                     handleBack()
                 }
             }

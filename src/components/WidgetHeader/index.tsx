@@ -1,6 +1,5 @@
 import classNames from 'classnames'
 import './styles.css'
-
 interface WidgetHeaderProps {
     title: string,
     currentStep: boolean,
@@ -12,10 +11,14 @@ const defaultProps = {
 }
 
 const WidgetHeader = ({ title, currentStep, description }: WidgetHeaderProps) => {
+
     return (
         <div id="w-header" className="widget-header">
-            <h1 className={classNames({ isdescription: description, success: currentStep })}>{title}</h1>
+            <h1 className={classNames({ isdescription: description, success: currentStep })}>
+                {title}
+            </h1>
             {description && <p className={classNames({ successDescription: currentStep })}>{description}</p>}
+
         </div >
     )
 }

@@ -1,9 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { socialConnectButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
-import HeaderLogo from './../../assets/svgIcons/app-logo.png'
-import './styles.css'
-
+import HeaderLogo from './../../assets/svgIcons/app-logo.png';
+import './styles.css';
 
 type Platform = {
     active: boolean,
@@ -16,7 +15,7 @@ type Platform = {
 
 type MetaverseProps = {
     metaverse?: boolean,
-    handleIconClick: (id: number) => void
+    handleIconClick: (id: number) => void,
     activeStates: boolean[]
 }
 
@@ -24,30 +23,33 @@ const SocialProfiles = ({
     activeStates,
     handleIconClick,
 }: MetaverseProps) => {
+    const circleRef = useRef<HTMLDivElement>(null);
+    const [circleRadius, setCircleRadius] = useState(153);
 
-    // const numIcons = metaverse ? metaverseHubButtons.length : socialConnectButtons.length;
-    const numIcons = socialConnectButtons.length
-    const circleRadius = 153;
+    useEffect(() => {
+        if (circleRef.current) {
+            const width = circleRef.current.offsetWidth;
+            setCircleRadius(width / 2 - 30); // Adjust radius if necessary
+        }
+    }, [circleRef.current?.offsetWidth]);
+
+    const numIcons = socialConnectButtons.length;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
 
-    // const profiles = metaverse ? metaverseHubButtons : socialConnectButtons
-    const socailIcons = localStorage.getItem("platforms")
-    const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : ''
+    const socailIcons = localStorage.getItem("platforms");
+    const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
-        // Get current platforms from local storage
         const platforms = localStorage.getItem("platforms");
         const parsedPlatforms = platforms ? JSON.parse(platforms) : [];
 
-        // Update the active state based on `activeStates`
         const updatedPlatforms = parsedPlatforms.map((platform: Platform) => ({
             ...platform,
             active: platform.active ? true : activeStates[platform.id] || false
         }));
 
-        // Save the updated platforms back to local storage
         localStorage.setItem("platforms", JSON.stringify(updatedPlatforms));
     };
 
@@ -55,15 +57,15 @@ const SocialProfiles = ({
         updateLocalStoragePlatforms(activeStates);
     }, [activeStates]);
 
-    const smartProfileData = localStorage.getItem('smartProfileData')
-    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+    const smartProfileData = localStorage.getItem('smartProfileData');
+    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : [];
+
     return (
-        <div className="circle">
+        <div ref={circleRef} className="circle">
             <div className='mid-icon'>
                 <img className="app-logo-center" src={HeaderLogo} alt='' />
             </div>
             {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }) => {
-                // Calculate position for each icon
                 const x = circleRadius * Math.cos(angle * id);
                 const y = circleRadius * Math.sin(angle * id);
 
@@ -73,8 +75,8 @@ const SocialProfiles = ({
                         className={`icon icon${id}`}
                         style={{
                             position: "absolute",
-                            left: `calc(50% + ${x}px - 27px)`,
-                            top: `calc(50% + ${y}px - 25px)`,
+                            left: `calc(50% + ${x}px - 23px)`,
+                            top: `calc(50% + ${y}px - 20px)`,
                             cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(id)}
@@ -88,8 +90,7 @@ const SocialProfiles = ({
                 );
             })}
         </div>
-    )
+    );
 }
 
-export default SocialProfiles
-
+export default SocialProfiles;

@@ -42,3 +42,10 @@
     color: red;
     font-size: 0.9rem;
 }
+
+@media (max-width: 575.98px) {
+    .otp-field>input {
+        width: 1.2rem !important;
+        height: 2.5rem;
+    }
+}
