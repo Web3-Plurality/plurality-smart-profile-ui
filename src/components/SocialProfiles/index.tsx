@@ -26,14 +26,20 @@ const SocialProfiles = ({
     const circleRef = useRef<HTMLDivElement>(null);
     const [circleRadius, setCircleRadius] = useState(153);
 
-    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 576);
+    const [isTabScreen, setIstabScreen] = useState(window.innerWidth <= 834);
 
     useEffect(() => {
-        const handleResize = () => setIsSmallScreen(window.innerWidth <= 834);
+        const handleResize = () => setIsSmallScreen(window.innerWidth <= 576);
+        const handleResizeTab = () => setIstabScreen(window.innerWidth <= 834)
 
         window.addEventListener('resize', handleResize);
+        window.addEventListener('resizeTab', handleResizeTab);
 
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resizeTab', handleResize);
+        }
     }, []);
 
     useEffect(() => {
@@ -86,8 +92,8 @@ const SocialProfiles = ({
                         className={`icon icon${id}`}
                         style={{
                             position: "absolute",
-                            left: `calc(50% + ${x}px - ${isSmallScreen ? '23px' : '27px'})`,
-                            top: `calc(50% + ${y}px - ${isSmallScreen ? '20px' : '25px'})`,
+                            left: `calc(50% + ${x}px - ${isSmallScreen ? '23px' : isTabScreen ? '29px' : '27px'})`,
+                            top: `calc(50% + ${y}px - ${isSmallScreen ? '20px' : isTabScreen ? '25px' : '25px'})`,
                             cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(id)}
