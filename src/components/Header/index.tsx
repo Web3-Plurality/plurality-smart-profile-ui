@@ -50,7 +50,7 @@ const Header = () => {
 
 
     return (
-        <div className={classNames('header-wrapper header-hidden', { iframeHeader: isIframe })}>
+        <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>{name || 'John Doe'}</span>
