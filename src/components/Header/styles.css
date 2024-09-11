@@ -40,13 +40,12 @@
 }
 
 @media (max-width: 1280px) {
-    .mobile-header-wrapper  {
-        display: none;
+    .header-wrapper {
         right: 230px;
     }
 }
 
-@media (max-width: 834px) {
+@media (max-width: 835px) {
     .header-wrapper {
         display: none;
         right: 100px;
