@@ -22,6 +22,16 @@
     gap: 16px;
 }
 
+.user-detail-mobile {
+    display: flex;
+    /* align-items: center;
+    gap: 16px; */
+}
+
+.user-detail-mobile .icon-box {
+    margin-top: 20px;
+}
+
 .icon-box {
     display: flex;
     justify-content: flex-end;
@@ -35,8 +45,24 @@
 
 .mobile-header-wrapper {
     position: absolute;
-    top: 27px;
+    top: 23px;
     right: 2px;
+}
+
+.mobile-scores {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    padding: 2px;
+    gap: 3px
+}
+
+.mobile-scores img {
+    margin-bottom: 3px;
+    position: relative;
+    margin-left: 2px;
+
 }
 
 @media (max-width: 1280px) {
