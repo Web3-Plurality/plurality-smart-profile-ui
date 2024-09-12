@@ -59,10 +59,10 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
                     isSmallScreen={isSmallScreen}
                 />
             </div>
-            <div className='mobile-scores'>
+            {currentStep !== "profileSettings" && (<div className='mobile-scores'>
                 <span>{score || 0}</span>
                 <CustomIcon path={BadgeIcon} />
-            </div>
+            </div>)}
         </div>
     )
 }
