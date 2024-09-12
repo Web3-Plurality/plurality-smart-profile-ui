@@ -65,6 +65,10 @@
 
 }
 
+.options-wrapper {
+    margin: auto;
+}
+
 @media (max-width: 1280px) {
     .header-wrapper {
         right: 230px;
@@ -75,5 +79,9 @@
     .header-wrapper {
         display: none;
         right: 100px;
+    }
+
+    .options-wrapper {
+        margin-left: 30px;
     }
 }

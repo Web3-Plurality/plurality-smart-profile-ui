@@ -20,3 +20,19 @@
     height: 40px;
     margin-top: -5px;
 }
+
+@media (max-width: 835px) {
+    .mobile-header-icon {
+        width: 30px;
+        height: 40px;
+        margin-top: 3px;
+    }
+}
+
+@media (max-width: 576px) {
+    .mobile-header-icon {
+        width: 30px;
+        height: 40px;
+        margin-top: -5px;
+    }
+}
