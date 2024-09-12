@@ -40,7 +40,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const navigate = useNavigate()
     const warningMessageRef = useRef<MessageType | null>(null);
-
+    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [selectedSocial, setSelectedSocial] = useState('')
@@ -72,6 +72,17 @@ const Login = () => {
     //     sumbitDataToOrbis,
     //     isLoading: orbisLoading
     // } = useOrbisHandler()
+
+    useEffect(() => {
+        const handleResize = () => setIsSmallScreen(window.innerWidth <= 576);
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resizeTab', handleResize);
+        }
+    }, []);
 
     const getLatestSmartProfile = async () => {
         const presentSmartProfileData = localStorage.getItem('smartProfileData')
@@ -222,7 +233,6 @@ const Login = () => {
     const isBackButton = showBackButton(currentStep)
 
     const ensureMetamaskConnection = async (): Promise<boolean> => {
-
         // Check if MetaMask is installed
         if (typeof window.ethereum !== 'undefined') {
 
@@ -244,6 +254,14 @@ const Login = () => {
 
 
     const handleMetamaskConnect = async () => {
+        if (isSmallScreen) {
+            if (warningMessageRef.current) {
+                warningMessageRef.current();
+                warningMessageRef.current = null;
+            }
+            warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
+            return;
+        }
         try {
             if ((localStorage.getItem('tool') as string) !== 'metamask') {
                 localStorage.clear();

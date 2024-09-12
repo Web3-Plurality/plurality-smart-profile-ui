@@ -56,7 +56,7 @@ const Drawer = ({ handleLogout, handleStepper, address, isSmallScreen }: DrawerP
     );
 
     return (
-        <Space direction="vertical">
+        <Space direction="vertical" className='options-wrapper'>
             <Space wrap>
                 <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
                     <div>
