@@ -154,7 +154,7 @@ export const socialConnectButtons = [
     {
         id: 6,
         iconName: "artificialRome",
-        displayName: 'Artificial Rome',
+        displayName: 'ArtificialRome',
         icon: artificialRomeIconColored,
         active: true,
         activeIcon: artificialRomeIconColored,

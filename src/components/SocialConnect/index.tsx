@@ -17,9 +17,9 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
 
     useEffect(() => {
         const prevStep = stepHistory[stepHistory.length - 2];
-        if (prevStep !== "socialConnect") {
-            getSmartProfileFromOrbis()
-        }
+            if (prevStep !== "socialConnect") {
+                getSmartProfileFromOrbis(localStorage.getItem("streamId")!)
+            }
 
     }, [])
 

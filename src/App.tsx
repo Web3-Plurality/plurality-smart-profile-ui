@@ -71,6 +71,8 @@ function App() {
                 {!isSmallScreen && <Header />}
                 <Routes>
                   <Route path="/" element={<Login />} />
+                  <Route path="/rsm" element={<Login />} />
+                  <Route path="/profile-connect" element={<Login />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />
                   <Route path="/auth-start" element={<AuthStart />} />
                   <Route path="*" element={<NotFound />} />

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { socialConnectButtons } from '../../common/constants';
+// import { socialConnectButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
 import HeaderLogo from './../../assets/svgIcons/app-logo.png';
 import './styles.css';
@@ -50,7 +50,8 @@ const SocialProfiles = ({
         }
     }, [circleRef.current?.offsetWidth, isSmallScreen]);
 
-    const numIcons = socialConnectButtons.length;
+    // const numIcons = socialConnectButtons.length;
+    const numIcons = JSON.parse(localStorage.getItem("platforms")!).length;
 
     // Calculate the angle between each icon
     const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians

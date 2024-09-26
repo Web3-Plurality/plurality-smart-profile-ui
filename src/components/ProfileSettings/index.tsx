@@ -93,7 +93,9 @@ const ProfileSettings = () => {
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
                 await autoConnect()
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
+          
+                let stream_id = localStorage.getItem("streamId")!
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {

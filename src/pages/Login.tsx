@@ -25,14 +25,14 @@ import {
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import MetaverseHub from '../components/MetaverseHub';
-import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { BASE_URL, metaverseHubButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
 import axios from 'axios';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
-import { connectOrbisDidPkh, insertSmartProfile } from '../common/orbis';
+import { connectOrbisDidPkh, insertSmartProfile, select } from '../common/orbis';
 import { AuthUserInformation } from '@useorbis/db-sdk';
 
 const Login = () => {
@@ -42,7 +42,11 @@ const Login = () => {
     const warningMessageRef = useRef<MessageType | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
+
+    const [socialButtons, setSocialButtons] = useState<any>([])
+    // I am actually not sure if we can reference a state inside another state??
+    const [activeStates, setActiveStates] = useState(socialButtons?.map(button => button.active));
+
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
@@ -59,6 +63,7 @@ const Login = () => {
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
     const { getPublicKey } = useMetamaskPublicKey()
+    const location = useLocation();
 
 
     const {
@@ -101,7 +106,9 @@ const Login = () => {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
+                
+                let stream_id = localStorage.getItem("streamId")!
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {
@@ -126,6 +133,29 @@ const Login = () => {
     } = useMetamaskToken()
 
 
+    useEffect(() => {
+         // We need tp use this uuid to load the logo
+         const queryParams = new URLSearchParams(location.search);
+         const uuid = queryParams.get('uuid');
+ 
+         const fetchData = async() => {
+             const rsmUrl = `${import.meta.env.VITE_APP_API_BASE_URL}/rsm?uuid=${uuid}`
+             const { data } = await axios.get(rsmUrl)
+             // store the streamID, log and links in localstorage
+             localStorage.setItem('streamId', data.data.streamId)
+             localStorage.setItem('logo', data.data.logo)
+             localStorage.setItem('links', data.data.links)
+ 
+             //firstly initilize the roulette constant
+             const selectedResult = await select(data.data.streamId)
+             setSocialButtons(selectedResult?.neededPlatforms);
+            // store those in localhsot
+             localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
+         }
+ 
+         fetchData()
+         
+    }, []);
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -167,16 +197,18 @@ const Login = () => {
     }, [metamaskAddress])
 
     const handleIconClick = (index: number) => {
-        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialConnectButtons;
+        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
 
         const isMetaverseHub = currentStep === 'metaverseHub';
         // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
-        const isIndexValid = index < socialConnectButtons.length - 2;
+        const isIndexValid = index < socialButtons?.length - 2;
+
 
         const handleMetaverseHubClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+
             if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
                 handleStepper('socialConfirmation');
                 setSelectedSocial(profiles[index].displayName);
@@ -192,10 +224,12 @@ const Login = () => {
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
+            } else {
+                console.log("already connected! If this is a rsm workflow we need to open a new tab")
             }
         };
 
@@ -227,7 +261,7 @@ const Login = () => {
     }
 
 
-    const allowContinue = (activeStates.filter((item) => item && activeStates.indexOf(item) !== 6 && activeStates.indexOf(item) !== 7)).length > 0
+    const allowContinue = (activeStates?.filter((item) => item && activeStates?.indexOf(item) !== 6 && activeStates?.indexOf(item) !== 7)).length > 0
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
