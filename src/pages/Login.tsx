@@ -228,13 +228,13 @@ const Login = () => {
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
-            } else if (uuid) {
+            } else if (window.location.pathname === '/rsm') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
-                console.log('Parsed', parsedUrls)
-                // if(parsedUrls.includes(selectedSocial.toLocaleLowerCase()))
-                // // const url = SocialProfileUrls[selectedProfile as keyof typeof SocialProfileUrls];
-                // window.open(url, '_blank');
+                const url = parsedUrls.filter(
+                    (item: any) => item.platformName.toLowercase() === selectedSocial.toLocaleLowerCase())
+                console.log('Parsed', url)
+                window.open(url, '_blank');
             }
         };
 
