@@ -28,7 +28,7 @@ import MetaverseHub from '../components/MetaverseHub';
 import { BASE_URL, metaverseHubButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
 import axios from 'axios';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
@@ -39,9 +39,11 @@ const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
     const { disconnectAsync } = useDisconnect();
     const navigate = useNavigate()
+    const queryParams = new URLSearchParams(location.search);
+    const uuid = queryParams.get('uuid');
     const warningMessageRef = useRef<MessageType | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
-    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(!!uuid)
 
     const [socialButtons, setSocialButtons] = useState<any>([])
     // I am actually not sure if we can reference a state inside another state??
@@ -63,8 +65,6 @@ const Login = () => {
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
     const { getPublicKey } = useMetamaskPublicKey()
-    const location = useLocation();
-
 
     const {
         message: eventMessage,
@@ -106,7 +106,7 @@ const Login = () => {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                
+
                 let stream_id = localStorage.getItem("streamId")!
                 const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                 // save smart profile in local storage along with the returned stream id
@@ -134,28 +134,28 @@ const Login = () => {
 
 
     useEffect(() => {
-         // We need tp use this uuid to load the logo
-         const queryParams = new URLSearchParams(location.search);
-         const uuid = queryParams.get('uuid');
- 
-         const fetchData = async() => {
-             const rsmUrl = `${import.meta.env.VITE_APP_API_BASE_URL}/rsm?uuid=${uuid}`
-             const { data } = await axios.get(rsmUrl)
-             // store the streamID, log and links in localstorage
-             localStorage.setItem('streamId', data.data.streamId)
-             localStorage.setItem('logo', data.data.logo)
-             localStorage.setItem('links', data.data.links)
- 
-             //firstly initilize the roulette constant
-             const selectedResult = await select(data.data.streamId)
-             setSocialButtons(selectedResult?.neededPlatforms);
-            // store those in localhsot
-             localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
-         }
- 
-         fetchData()
-         
-    }, []);
+        // We need tp use this uuid to load the logo
+        if (uuid) {
+            setIsLoading(true)
+            const fetchData = async () => {
+                const rsmUrl = `${BASE_URL}/rsm?uuid=${uuid}`
+                const { data } = await axios.get(rsmUrl)
+                // store the streamID, log and links in localstorage
+                localStorage.setItem('streamId', data.data.streamId)
+                localStorage.setItem('logo', data.data.logo)
+                localStorage.setItem('links', data.data.links)
+
+                //firstly initilize the roulette constant
+                const selectedResult = await select(data.data.streamId)
+                setSocialButtons(selectedResult?.neededPlatforms);
+                // store those in localhsot
+                localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
+                setIsLoading(false)
+            }
+
+            fetchData()
+        }
+    }, [uuid]);
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -228,8 +228,13 @@ const Login = () => {
             if (!connectedPlatforms.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
-            } else {
-                console.log("already connected! If this is a rsm workflow we need to open a new tab")
+            } else if (uuid) {
+                const storedUrls = localStorage.getItem('links')
+                const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
+                console.log('Parsed', parsedUrls)
+                // if(parsedUrls.includes(selectedSocial.toLocaleLowerCase()))
+                // // const url = SocialProfileUrls[selectedProfile as keyof typeof SocialProfileUrls];
+                // window.open(url, '_blank');
             }
         };
 

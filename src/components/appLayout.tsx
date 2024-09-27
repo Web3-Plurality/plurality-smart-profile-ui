@@ -51,6 +51,7 @@ const WidgetLayout = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const platformLogo = localStorage.getItem('logo')
 
     return (
         <div className="wrapper">
@@ -63,7 +64,7 @@ const WidgetLayout = ({
                     : (
                         <>
                             <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
-                                {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
+                                {showHeaderLogo && <img className="app-logo" src={platformLogo ? platformLogo : HeaderLogo} alt='' />}
                                 {isSmallScreen && <MobileHeader isSmallScreen={isSmallScreen} />}
                                 <WidgetHeader title={title} description={description} currentStep={currentStep} />
                                 {children}
