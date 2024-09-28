@@ -231,10 +231,9 @@ const Login = () => {
             } else if (window.location.pathname === '/rsm') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
-                const url = parsedUrls.filter(
-                    (item: any) => item.platformName.toLowercase() === selectedSocial.toLocaleLowerCase())
-                console.log('Parsed', url)
-                window.open(url, '_blank');
+                const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowercase() === selectedSocial.toLocaleLowerCase())
+                console.log('selected profile', selectedItem?.url)
+                window.open(selectedItem?.url, '_blank');
             }
         };
 
