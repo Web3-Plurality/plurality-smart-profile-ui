@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 // import { socialConnectButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
-import HeaderLogo from './../../assets/svgIcons/app-logo.png';
 import './styles.css';
+import { getPlatformImage } from '../../common/utils';
 
 type Platform = {
     active: boolean,
@@ -51,13 +51,13 @@ const SocialProfiles = ({
     }, [circleRef.current?.offsetWidth, isSmallScreen]);
 
     // const numIcons = socialConnectButtons.length;
-    const numIcons = JSON.parse(localStorage.getItem("platforms")!).length;
-
-    // Calculate the angle between each icon
-    const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
-
     const socailIcons = localStorage.getItem("platforms");
     const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
+
+    // Calculate the angle between each icon
+    const angle = (360 / parsedSocailIcons.length) * (Math.PI / 180); // Convert degrees to radians
+
+
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
         const platforms = localStorage.getItem("platforms");
@@ -78,10 +78,12 @@ const SocialProfiles = ({
     const smartProfileData = localStorage.getItem('smartProfileData');
     const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : [];
 
+    const plaformImg = getPlatformImage()
+
     return (
         <div ref={circleRef} className="circle">
             <div className='mid-icon'>
-                <img className="app-logo-center" src={HeaderLogo} alt='' />
+                <img className="app-logo-center" src={plaformImg} alt='' />
             </div>
             {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }) => {
                 const x = circleRadius * Math.cos(angle * id);

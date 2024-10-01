@@ -1,6 +1,6 @@
 import { useAccount, useDisconnect } from 'wagmi';
 import classNames from 'classnames';
-import { showHeader } from '../../common/utils';
+import { isProfileConnectPlatform, isRsmPlatform, showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
 import CustomIcon from '../CustomIcon'
 import Drawer from '../Drawer';
@@ -33,11 +33,18 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
         const tool = localStorage.getItem("tool")
+        const uuid = localStorage.getItem("uuid")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
         localStorage.setItem("tool", tool || '')
+        let path = '/'
+        if (isRsmPlatform()) {
+            path = `/rsm?uuid=${uuid}`;
+        } else if (isProfileConnectPlatform()) {
+            path = `/profile-connect?uuid=${uuid}`;
+        }
         handleStepper("initial")
-        navigate('/', { replace: true });
+        navigate(path, { replace: true });
         window.location.reload();
     }
 

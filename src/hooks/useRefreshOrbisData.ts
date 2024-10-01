@@ -37,6 +37,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
         if (!rows || !rows.length) {
             throw new Error("No rows returned from select()");
         }
+        console.log(JSON.parse(rows?.[0]?.platforms))
 
         const orbisData = JSON.parse(rows?.[0]?.platforms || [])
         if (orbisData) {

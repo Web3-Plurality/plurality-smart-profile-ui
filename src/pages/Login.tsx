@@ -19,13 +19,14 @@ import {
     encryptData,
     getDescription,
     getTitleText,
+    isProfileConnectPlatform,
+    isRsmPlatform,
     showBackButton,
     showHeader
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import MetaverseHub from '../components/MetaverseHub';
-import { BASE_URL, metaverseHubButtons } from '../common/constants';
+import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
@@ -107,7 +108,7 @@ const Login = () => {
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
 
-                let stream_id = localStorage.getItem("streamId")!
+                const stream_id = localStorage.getItem("streamId")!
                 const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
@@ -137,6 +138,7 @@ const Login = () => {
         // We need tp use this uuid to load the logo
         if (uuid) {
             setIsLoading(true)
+            localStorage.setItem('uuid', uuid)
             const fetchData = async () => {
                 const rsmUrl = `${BASE_URL}/rsm?uuid=${uuid}`
                 const { data } = await axios.get(rsmUrl)
@@ -152,8 +154,11 @@ const Login = () => {
                 localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
                 setIsLoading(false)
             }
-
             fetchData()
+        } else {
+            setSocialButtons(socialConnectButtons);
+            // store those in localhsot
+            localStorage.setItem("platforms", JSON.stringify(socialConnectButtons))
         }
     }, [uuid]);
 
@@ -222,28 +227,43 @@ const Login = () => {
         };
 
         const handleSocialConnectClick = () => {
+            console.log("Here")
             const smartProfileData = localStorage.getItem('smartProfileData')
+            const platforms = localStorage.getItem('platforms')
+            const parsedPlatforms = platforms ? JSON.parse(platforms) : []
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
             const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
-            if (!connectedPlatforms.includes(clickedIconDisplayName)) {
+            const activePlatforms: string[] = []
+            parsedPlatforms?.forEach((platform) => {
+                if (platform.active) {
+                    activePlatforms.push(platform.displayName.toLowerCase().replace(/\s+/g, ''))
+                }
+            })
+            if (!connectedPlatforms.includes(clickedIconDisplayName) && !activePlatforms?.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
             } else if (window.location.pathname === '/rsm') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
-                const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowercase() === selectedSocial.toLocaleLowerCase())
-                console.log('selected profile', selectedItem?.url)
+                const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+                console.log("Here", clickedIconDisplayName, parsedUrls)
+                const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowerCase() === clickedIconDisplayName)
                 window.open(selectedItem?.url, '_blank');
             }
         };
 
         if (isMetaverseHub) {
             handleMetaverseHubClick();
-        } else if (!activeStates[index]) {
-            handleSocialConnectClick();
         } else {
-            setSelectedSocial(profiles[index].displayName);
+            handleSocialConnectClick();
         }
+        // if (isMetaverseHub) {
+        //     handleMetaverseHubClick();
+        // } else if (!activeStates[index]) {
+        //     handleSocialConnectClick();
+        // } else {
+        //     // setSelectedSocial(profiles[index].displayName);
+        // }
     };
 
 
@@ -263,9 +283,6 @@ const Login = () => {
         handleStepper('initial');
         message.error('Something went wrong. Please try again.');
     }
-
-
-    const allowContinue = (activeStates?.filter((item) => item && activeStates?.indexOf(item) !== 6 && activeStates?.indexOf(item) !== 7)).length > 0
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
@@ -302,7 +319,18 @@ const Login = () => {
         }
         try {
             if ((localStorage.getItem('tool') as string) !== 'metamask') {
-                localStorage.clear();
+                const streamId = localStorage.getItem('streamId')
+                const logo = localStorage.getItem('logo')
+                const links = localStorage.getItem('links')
+                const platforms = localStorage.getItem("platforms")
+                const uuid = localStorage.getItem("uuid")
+
+                localStorage.clear()
+                localStorage.setItem('streamId', streamId || '')
+                localStorage.setItem('logo', logo || '')
+                localStorage.setItem('links', links || '')
+                localStorage.setItem('platforms', platforms || '')
+                localStorage.setItem('uuid', uuid || '')
             }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
@@ -314,7 +342,18 @@ const Login = () => {
 
     const handleLitConnect = async () => {
         if ((localStorage.getItem('tool') as string) !== 'lit') {
-            localStorage.clear();
+            const streamId = localStorage.getItem('streamId')
+            const logo = localStorage.getItem('logo')
+            const links = localStorage.getItem('links')
+            const platforms = localStorage.getItem("platforms")
+            const uuid = localStorage.getItem("uuid")
+
+            localStorage.clear()
+            localStorage.setItem('streamId', streamId || '')
+            localStorage.setItem('logo', logo || '')
+            localStorage.setItem('links', links || '')
+            localStorage.setItem('platforms', platforms || '')
+            localStorage.setItem('uuid', uuid || '')
         }
         handleStepper('login')
     }
@@ -336,8 +375,6 @@ const Login = () => {
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'socialConfirmation':
                 return <SocialConfirmation handleStepper={handleStepper} selectedProfile={selectedSocial} previousStep={previousStep} />
-            case 'metaverseHub':
-                return <MetaverseHub handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'digitalWardrobe':
                 return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
             case 'digitalWardrobeConnect':
@@ -358,10 +395,19 @@ const Login = () => {
             console.error(err);
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
+        const uuid = localStorage.getItem("uuid")
+        const tool = localStorage.getItem("tool")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
+        localStorage.setItem("tool", tool || '')
+        let path = '/'
+        if (isRsmPlatform()) {
+            path = `/rsm?uuid=${uuid}`;
+        } else if (isProfileConnectPlatform()) {
+            path = `/profile-connect?uuid=${uuid}`;
+        }
         handleStepper("initial")
-        navigate('/', { replace: true });
+        navigate(path, { replace: true });
     }
 
 
@@ -403,7 +449,6 @@ const Login = () => {
                 currentStep={currentStep === 'success'}
                 showBackButton={isBackButton}
                 handleBack={handleBack}
-                // handlefooterClick={ }
                 title={getTitleText(stepHistory)}
                 description={getDescription(stepHistory)}
                 showHeaderLogo={
@@ -411,7 +456,6 @@ const Login = () => {
                     currentStep !== 'metaverseHub'
                 }
                 showBackgroundImage={currentStep === 'socialConfirmation'}
-                socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
                 isLoading={isLoading}
                 infoLoading={infoLoading}
                 selectedSocial={selectedSocial}

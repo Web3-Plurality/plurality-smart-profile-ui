@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom"
 import useSession from "../../hooks/useSession"
 
 import './styles.css'
+import { isProfileConnectPlatform, isRsmPlatform } from "../../common/utils"
 
 
 
@@ -21,6 +22,8 @@ interface EmailLoginProps {
 
 const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginProps) => {
     const navigate = useNavigate();
+    const uuid = localStorage.getItem('uuid')
+    console.log(uuid)
     const {
         authMethod,
         authWithStytch,
@@ -47,7 +50,11 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
     const error = authError || accountsError || sessionError;
 
     const goToSignUp = () => {
-        navigate(window.location.pathname, { replace: true });
+        let path = window.location.pathname
+        if (isRsmPlatform() || isProfileConnectPlatform()) {
+            path = `${window.location.pathname}?uuid=${uuid}`
+        }
+        navigate(path, { replace: true });
         createAccount(authMethod!);
     }
 
@@ -61,7 +68,11 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
     useEffect(() => {
         // If user is authenticated, fetch accounts
         if (authMethod) {
-            navigate(window.location.pathname, { replace: true });
+            let path = window.location.pathname
+            if (isRsmPlatform() || isProfileConnectPlatform()) {
+                path = `${window.location.pathname}?uuid=${uuid}`
+            }
+            navigate(path, { replace: true });
             fetchAccounts(authMethod);
         }
     }, [authMethod, fetchAccounts, navigate])

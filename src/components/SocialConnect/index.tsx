@@ -14,12 +14,15 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
     const { getPublicKey } = useMetamaskPublicKey()
     const { handleStepper, stepHistory } = useStep();
     const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, handleStepper, 'socialConnect')
+    const stremIdFromLocalStorage = localStorage.getItem("streamId")
+    const streamIdFromEnv = import.meta.env.VITE_APP_PROFILE_TYPE_STREAM_ID
+    const finalStreamId = stremIdFromLocalStorage ? stremIdFromLocalStorage : streamIdFromEnv
 
     useEffect(() => {
         const prevStep = stepHistory[stepHistory.length - 2];
-            if (prevStep !== "socialConnect") {
-                getSmartProfileFromOrbis(localStorage.getItem("streamId")!)
-            }
+        if (prevStep !== "socialConnect") {
+            getSmartProfileFromOrbis(finalStreamId)
+        }
 
     }, [])
 

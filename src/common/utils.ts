@@ -14,6 +14,7 @@ import {
     TIKTOK_ROUTE
 } from './constants'
 import { litDecryptData, litEncryptData, metamaskDecryptData, metamaskEncryptData } from './crypto';
+import HeaderLogo from './../assets/svgIcons/app-logo.png';
 
 // Component Title Mapper
 export const getTitleText = (prevSteps: string[]) => {
@@ -140,4 +141,17 @@ export const decryptData = async (encryptedData: string) => {
 
     }
     return decryptionResult
+}
+
+export const getPlatformImage = () => {
+    const platformLogo = localStorage.getItem('logo')
+    return platformLogo ? platformLogo : HeaderLogo
+}
+
+export const isRsmPlatform = () => {
+    return window.location.pathname === '/rsm'
+}
+
+export const isProfileConnectPlatform = () => {
+    return window.location.pathname === '/profile-connect'
 }
