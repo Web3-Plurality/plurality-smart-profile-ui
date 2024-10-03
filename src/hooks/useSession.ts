@@ -118,13 +118,13 @@ export default function useSession() {
     }
     const smartprofileData = localStorage.getItem("smartProfileData")
     const tool = localStorage.getItem("tool")
-    const uuid = localStorage.getItem("uuid")
+    const clientId = localStorage.getItem("clientId")
     localStorage.clear();
     localStorage.setItem("smartProfileData", smartprofileData || '')
     localStorage.setItem("tool", tool || '')
     let path = '/'
     if (isRsmPlatform()) {
-      path = `/rsm?uuid=${uuid}`;
+      path = `/rsm?clientId=${clientId}`;
     }
     handleStepper("initial")
     navigate(path, { replace: true });

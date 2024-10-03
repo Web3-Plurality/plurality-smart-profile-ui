@@ -41,10 +41,10 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const navigate = useNavigate()
     const queryParams = new URLSearchParams(location.search);
-    const uuid = queryParams.get('uuid');
+    const clientId = queryParams.get('clientId');
     const warningMessageRef = useRef<MessageType | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
-    const [isLoading, setIsLoading] = useState<boolean>(!!uuid)
+    const [isLoading, setIsLoading] = useState<boolean>(!!clientId)
 
     const [socialButtons, setSocialButtons] = useState<any>([])
     // I am actually not sure if we can reference a state inside another state??
@@ -135,12 +135,12 @@ const Login = () => {
 
 
     useEffect(() => {
-        // We need tp use this uuid to load the logo
-        if (uuid) {
+        // We need tp use this clientId to load the logo
+        if (clientId) {
             setIsLoading(true)
-            localStorage.setItem('uuid', uuid)
+            localStorage.setItem('clientId', clientId)
             const fetchData = async () => {
-                const rsmUrl = `${BASE_URL}/rsm?uuid=${uuid}`
+                const rsmUrl = `${BASE_URL}/rsm?clientId=${clientId}`
                 const { data } = await axios.get(rsmUrl)
                 // store the streamID, log and links in localstorage
                 localStorage.setItem('streamId', data.data.streamId)
@@ -160,7 +160,7 @@ const Login = () => {
             // store those in localhsot
             localStorage.setItem("platforms", JSON.stringify(socialConnectButtons))
         }
-    }, [uuid]);
+    }, [clientId]);
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -323,14 +323,14 @@ const Login = () => {
                 const logo = localStorage.getItem('logo')
                 const links = localStorage.getItem('links')
                 const platforms = localStorage.getItem("platforms")
-                const uuid = localStorage.getItem("uuid")
+                const clientId = localStorage.getItem("clientId")
 
                 localStorage.clear()
                 localStorage.setItem('streamId', streamId || '')
                 localStorage.setItem('logo', logo || '')
                 localStorage.setItem('links', links || '')
                 localStorage.setItem('platforms', platforms || '')
-                localStorage.setItem('uuid', uuid || '')
+                localStorage.setItem('clientId', clientId || '')
             }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
@@ -346,14 +346,14 @@ const Login = () => {
             const logo = localStorage.getItem('logo')
             const links = localStorage.getItem('links')
             const platforms = localStorage.getItem("platforms")
-            const uuid = localStorage.getItem("uuid")
+            const clientId = localStorage.getItem("clientId")
 
             localStorage.clear()
             localStorage.setItem('streamId', streamId || '')
             localStorage.setItem('logo', logo || '')
             localStorage.setItem('links', links || '')
             localStorage.setItem('platforms', platforms || '')
-            localStorage.setItem('uuid', uuid || '')
+            localStorage.setItem('clientId', clientId || '')
         }
         handleStepper('login')
     }
@@ -395,16 +395,16 @@ const Login = () => {
             console.error(err);
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
-        const uuid = localStorage.getItem("uuid")
+        const clientId = localStorage.getItem("clientId")
         const tool = localStorage.getItem("tool")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
         localStorage.setItem("tool", tool || '')
         let path = '/'
         if (isRsmPlatform()) {
-            path = `/rsm?uuid=${uuid}`;
+            path = `/rsm?clientId=${clientId}`;
         } else if (isProfileConnectPlatform()) {
-            path = `/profile-connect?uuid=${uuid}`;
+            path = `/profile-connect?clientId=${clientId}`;
         }
         handleStepper("initial")
         navigate(path, { replace: true });

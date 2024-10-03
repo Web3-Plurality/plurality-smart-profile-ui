@@ -22,8 +22,7 @@ interface EmailLoginProps {
 
 const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginProps) => {
     const navigate = useNavigate();
-    const uuid = localStorage.getItem('uuid')
-    console.log(uuid)
+    const clientId = localStorage.getItem('clientId')
     const {
         authMethod,
         authWithStytch,
@@ -52,7 +51,7 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
     const goToSignUp = () => {
         let path = window.location.pathname
         if (isRsmPlatform() || isProfileConnectPlatform()) {
-            path = `${window.location.pathname}?uuid=${uuid}`
+            path = `${window.location.pathname}?clientId=${clientId}`
         }
         navigate(path, { replace: true });
         createAccount(authMethod!);
@@ -70,7 +69,7 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
         if (authMethod) {
             let path = window.location.pathname
             if (isRsmPlatform() || isProfileConnectPlatform()) {
-                path = `${window.location.pathname}?uuid=${uuid}`
+                path = `${window.location.pathname}?clientId=${clientId}`
             }
             navigate(path, { replace: true });
             fetchAccounts(authMethod);
