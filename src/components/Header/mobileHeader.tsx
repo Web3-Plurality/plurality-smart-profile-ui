@@ -7,6 +7,7 @@ import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
+import { Rating } from 'react-simple-star-rating';
 
 const isIframe = window.location !== window.parent.location
 
@@ -54,7 +55,7 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
 
     // const name = parssedUserOrbisData?.data?.smartProfile?.username
     const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
-
+    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length + 1
 
     return (
         <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
@@ -67,8 +68,10 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
                 />
             </div>
             {currentStep !== "profileSettings" && (<div className='mobile-scores'>
-                <span>{score || 0}</span>
-                <CustomIcon path={BadgeIcon} />
+                {/* <span>{score || 0}</span>
+                <CustomIcon path={BadgeIcon} /> */}
+                {/* TODO: once backend is done we need a condition check Here */}
+                <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15}/>
             </div>)}
         </div>
     )

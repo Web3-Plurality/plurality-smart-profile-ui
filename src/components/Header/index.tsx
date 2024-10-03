@@ -7,6 +7,7 @@ import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
+import { Rating } from 'react-simple-star-rating';
 
 const isIframe = window.location !== window.parent.location
 
@@ -48,22 +49,25 @@ const Header = () => {
         window.location.reload();
     }
 
-
     const userOrbisData = localStorage.getItem('smartProfileData')
     const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
     const name = parssedUserOrbisData?.data?.smartProfile?.username
     const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
-
+    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length + 1
 
     return (
         <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>{name || 'John Doe'}</span>
-                    <div className='icon-box'>
+                    {/* <div className='icon-box'>
                         <span>{score || 0}</span>
                         <CustomIcon path={BadgeIcon} />
+                    </div> */}
+                    {/* // TODO once backend is done we need add a condition check here */}
+                    <div>
+                        <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15}/>
                     </div>
                 </div>
                 <Drawer
