@@ -56,19 +56,26 @@ const Header = () => {
     const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
     const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length + 1
 
+    const incentiveType = localStorage.getItem('incentives')
+
     return (
         <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>{name || 'John Doe'}</span>
-                    {/* <div className='icon-box'>
-                        <span>{score || 0}</span>
-                        <CustomIcon path={BadgeIcon} />
-                    </div> */}
-                    {/* // TODO once backend is done we need add a condition check here */}
-                    <div>
-                        <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15}/>
-                    </div>
+                    {incentiveType && incentiveType === 'Points' && (
+                        <div className='icon-box'>
+                            <span>{score || 0}</span>
+                            <CustomIcon path={BadgeIcon} />
+                        </div>
+                    )}
+
+                    {incentiveType && incentiveType === 'Stars' && (
+                        <div>
+                            <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15} />
+                        </div>
+                    )}
+
                 </div>
                 <Drawer
                     handleLogout={handleLogout}

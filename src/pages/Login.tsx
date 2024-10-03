@@ -140,12 +140,17 @@ const Login = () => {
             setIsLoading(true)
             localStorage.setItem('clientId', clientId)
             const fetchData = async () => {
-                const rsmUrl = `${BASE_URL}/rsm?clientId=${clientId}`
-                const { data } = await axios.get(rsmUrl)
+                const rsmUrl = `${BASE_URL}/rsm?uuid=${clientId}`
+                const { data } = await axios.get(rsmUrl, {
+                    headers: {
+                        'x-domain': window.location.origin
+                    }
+                })
                 // store the streamID, log and links in localstorage
                 localStorage.setItem('streamId', data.data.streamId)
                 localStorage.setItem('logo', data.data.logo)
                 localStorage.setItem('links', data.data.links)
+                localStorage.setItem('incentives', data.data.incentiveType)
 
                 //firstly initilize the roulette constant
                 const selectedResult = await select(data.data.streamId)
@@ -227,7 +232,6 @@ const Login = () => {
         };
 
         const handleSocialConnectClick = () => {
-            console.log("Here")
             const smartProfileData = localStorage.getItem('smartProfileData')
             const platforms = localStorage.getItem('platforms')
             const parsedPlatforms = platforms ? JSON.parse(platforms) : []
@@ -324,6 +328,7 @@ const Login = () => {
                 const links = localStorage.getItem('links')
                 const platforms = localStorage.getItem("platforms")
                 const clientId = localStorage.getItem("clientId")
+                const incentiveType = localStorage.getItem('incentives')
 
                 localStorage.clear()
                 localStorage.setItem('streamId', streamId || '')
@@ -331,6 +336,7 @@ const Login = () => {
                 localStorage.setItem('links', links || '')
                 localStorage.setItem('platforms', platforms || '')
                 localStorage.setItem('clientId', clientId || '')
+                localStorage.setItem('incentives', incentiveType || '')
             }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
@@ -347,6 +353,7 @@ const Login = () => {
             const links = localStorage.getItem('links')
             const platforms = localStorage.getItem("platforms")
             const clientId = localStorage.getItem("clientId")
+            const incentiveType = localStorage.getItem('incentives')
 
             localStorage.clear()
             localStorage.setItem('streamId', streamId || '')
@@ -354,6 +361,7 @@ const Login = () => {
             localStorage.setItem('links', links || '')
             localStorage.setItem('platforms', platforms || '')
             localStorage.setItem('clientId', clientId || '')
+            localStorage.setItem('incentives', incentiveType || '')
         }
         handleStepper('login')
     }
