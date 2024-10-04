@@ -51,7 +51,7 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
     const goToSignUp = () => {
         let path = window.location.pathname
         if (isRsmPlatform() || isProfileConnectPlatform()) {
-            path = `${window.location.pathname}?clientId=${clientId}`
+            path = `${window.location.pathname}?client_id=${clientId}`
         }
         navigate(path, { replace: true });
         createAccount(authMethod!);
@@ -69,7 +69,7 @@ const EmailVerification = ({ finalPayload, handleStepper, onError }: EmailLoginP
         if (authMethod) {
             let path = window.location.pathname
             if (isRsmPlatform() || isProfileConnectPlatform()) {
-                path = `${window.location.pathname}?clientId=${clientId}`
+                path = `${window.location.pathname}?client_id=${clientId}`
             }
             navigate(path, { replace: true });
             fetchAccounts(authMethod);

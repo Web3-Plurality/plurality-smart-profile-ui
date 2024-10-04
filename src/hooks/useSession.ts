@@ -124,7 +124,7 @@ export default function useSession() {
     localStorage.setItem("tool", tool || '')
     let path = '/'
     if (isRsmPlatform()) {
-      path = `/rsm?clientId=${clientId}`;
+      path = `/rsm?client_id=${clientId}`;
     }
     handleStepper("initial")
     navigate(path, { replace: true });

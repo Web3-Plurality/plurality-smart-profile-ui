@@ -437,9 +437,9 @@ const Login = () => {
         localStorage.setItem("tool", tool || '')
         let path = '/'
         if (isRsmPlatform()) {
-            path = `/rsm?clientId=${clientId}`;
+            path = `/rsm?client_id=${clientId}`;
         } else if (isProfileConnectPlatform()) {
-            path = `/profile-connect?clientId=${clientId}`;
+            path = `/profile-connect?client_id=${clientId}`;
         }
         handleStepper("initial")
         navigate(path, { replace: true });
