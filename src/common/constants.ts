@@ -4,9 +4,9 @@ import instaIcon from './../assets/images/insta-icon.png'
 import snapchatIcon from './../assets/images/snapchat-icon.png'
 import robloxIcon from './../assets/images/roblox-icon.png'
 import fortniteIcon from './../assets/images/fortnite-icon.png'
-// import decentralandIcon from './../assets//images/decentraland-icon.png'
+import decentralandIcon from './../assets//images/decentraland-icon.png'
 import spatialIcon from './../assets/images/spatial-icon.png'
-// import metaIcon from './../assets/images/meta-icon.png'
+import metaIcon from './../assets/images/meta-icon.png'
 
 // Connected Social icons
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
@@ -15,9 +15,9 @@ import snapchatIconColored from './../assets/images/snapchat-icon-colored.png'
 import robloxIconColored from './../assets/images/roblox-icon-colored.png'
 import fortniteIconColored from './../assets/images/fortnite-icon-colored.png'
 import aidressingIconColored from './../assets/images/ai-colored.png'
-// import decentralandIconColored from './../assets//images/decentraland-icon-colored.png'
+import decentralandIconColored from './../assets//images/decentraland-icon-colored.png'
 import spatialIconColored from './../assets/images/spatial-icon-colored.png'
-// import metaIconColored from './../assets/images/meta-icon-colored.png'
+import metaIconColored from './../assets/images/meta-icon-colored.png'
 import artificialRomeIconColored from './../assets/images/artificial-rome-colored.png'
 
 // Digital Wardrobe Images
@@ -127,14 +127,6 @@ export const socialConnectButtons = [
         active: false,
         activeIcon: fortniteIconColored
     },
-    // {
-    //     id: 5,
-    //     iconName: "decentraland ",
-    //     displayName: 'Decentraland',
-    //     icon: decentralandIcon,
-    //     active: false,
-    //     activeIcon: decentralandIconColored
-    // },
     {
         id: 5,
         iconName: "spatial",
@@ -143,14 +135,6 @@ export const socialConnectButtons = [
         active: true,
         activeIcon: spatialIconColored
     },
-    // {
-    //     id: 7,
-    //     iconName: "meta",
-    //     displayName: 'Meta',
-    //     icon: metaIcon,
-    //     active: false,
-    //     activeIcon: metaIconColored
-    // },
     {
         id: 6,
         iconName: "artificialRome",
@@ -167,6 +151,22 @@ export const socialConnectButtons = [
         active: true,
         activeIcon: aidressingIconColored,
     },
+    {
+        id: 8,
+        iconName: "decentraland ",
+        displayName: 'Decentraland',
+        icon: decentralandIcon,
+        active: false,
+        activeIcon: decentralandIconColored
+    },
+    {
+        id: 9,
+        iconName: "meta",
+        displayName: 'Meta',
+        icon: metaIcon,
+        active: false,
+        activeIcon: metaIconColored
+    }
 ]
 
 export const metaverseHubButtons = [
