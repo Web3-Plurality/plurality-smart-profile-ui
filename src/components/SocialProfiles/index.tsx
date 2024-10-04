@@ -85,14 +85,14 @@ const SocialProfiles = ({
             <div className='mid-icon'>
                 <img className="app-logo-center" src={plaformImg} alt='' />
             </div>
-            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }) => {
-                const x = circleRadius * Math.cos(angle * id);
-                const y = circleRadius * Math.sin(angle * id);
-
+            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }, index: number) => {
+                const x = circleRadius * Math.cos(angle * index);
+                const y = circleRadius * Math.sin(angle * index);
+                console.log(parsedSocailIcons[id]?.active, iconName, "icon")
                 return (
                     <div
                         key={id}
-                        className={`icon icon${id}`}
+                        className={`icon `}
                         style={{
                             position: "absolute",
                             left: `calc(50% + ${x}px - ${isSmallScreen ? '23px' : isTabScreen ? '29px' : '27px'})`,
@@ -102,10 +102,11 @@ const SocialProfiles = ({
                         onClick={() => handleIconClick(id)}
                     >
                         <CustomIcon
-                            path={activeStates[id] ||
-                                parsedSocailIcons[id]?.active ||
-                                connectedPlatforms?.includes(iconName)
-                                ? activeIcon : icon} />
+                            path={
+                                activeStates[id] ||
+                                    parsedSocailIcons[id]?.active ||
+                                    connectedPlatforms?.includes(iconName)
+                                    ? activeIcon : icon} />
                     </div>
                 );
             })}

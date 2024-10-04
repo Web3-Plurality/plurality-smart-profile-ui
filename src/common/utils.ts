@@ -11,7 +11,8 @@ import {
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
     SPATIAL_ROUTE,
-    TIKTOK_ROUTE
+    TIKTOK_ROUTE,
+    TWITTER_ROUTE
 } from './constants'
 import { litDecryptData, litEncryptData, metamaskDecryptData, metamaskEncryptData } from './crypto';
 import HeaderLogo from './../assets/svgIcons/app-logo.png';
@@ -36,7 +37,7 @@ export const getTitleText = (prevSteps: string[]) => {
         case 'otp':
             return 'Register Your Account';
         case 'success':
-            return `Welcome to ${platformName?JSON.parse(platformName):''}`;
+            return `Welcome to ${platformName ? JSON.parse(platformName) : ''}`;
         case 'socialConnect':
             return 'Connect Your Platforms';
         case 'metaverseHub':
@@ -65,7 +66,7 @@ export const getDescription = (prevSteps: string[]) => {
         case 'otp':
             return 'Enter the 6 digit code sent to your email';
         case 'success':
-            return platformDescription?JSON.parse(platformDescription):'';
+            return platformDescription ? JSON.parse(platformDescription) : ''
         case 'digitalWardrobe':
             return 'Collection';
         case 'digitalWardrobeConnect':
@@ -103,6 +104,8 @@ export const RouteMapper = (app: string) => {
             return SPATIAL_ROUTE
         case 'artificialRome':
             return ARTIFICIAL_ROME_ROUTE
+        case 'twitter':
+            return TWITTER_ROUTE
         default:
             return FACEBOOK_ROUTE
     }
