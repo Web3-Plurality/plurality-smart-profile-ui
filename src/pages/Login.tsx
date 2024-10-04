@@ -26,7 +26,7 @@ import {
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { BASE_URL, CLIENT_ID, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +41,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const navigate = useNavigate()
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id');
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
     const warningMessageRef = useRef<MessageType | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
     const [isLoading, setIsLoading] = useState<boolean>(!!clientId)

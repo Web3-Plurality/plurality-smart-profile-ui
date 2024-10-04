@@ -36,7 +36,7 @@ export const getTitleText = (prevSteps: string[]) => {
         case 'otp':
             return 'Register Your Account';
         case 'success':
-            return `Welcome to ${JSON.parse(platformName || '')}`;
+            return `Welcome to ${platformName?JSON.parse(platformName):''}`;
         case 'socialConnect':
             return 'Connect Your Platforms';
         case 'metaverseHub':
@@ -65,7 +65,7 @@ export const getDescription = (prevSteps: string[]) => {
         case 'otp':
             return 'Enter the 6 digit code sent to your email';
         case 'success':
-            return JSON.parse(platformDescription || '');
+            return platformDescription?JSON.parse(platformDescription):'';
         case 'digitalWardrobe':
             return 'Collection';
         case 'digitalWardrobeConnect':
