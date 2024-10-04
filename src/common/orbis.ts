@@ -292,14 +292,14 @@ export async function select(stream_id: string) {
         // set platforms this workflow needs
         for (const platform of socialConnectButtons) {
             // in order to minimize the changes, we use the contant as our maximal platforms, and we iterate over it based on the platforms we fetched from orbis
-            if(fetchedPlatforms.find((x) => x.platform === platform.displayName)) {
+            if (fetchedPlatforms.find((x) => x.platform === platform.displayName)) {
                 neededPlatforms.push(platform)
             }
         }
         // columns: Array<string>
         // rows: Array<T | Record<string, any>>
         const { columns, rows } = result
-        console.log({ columns, rows, neededPlatforms });
+        console.log("select first: ", { columns, rows, neededPlatforms });
         return { columns, rows, neededPlatforms };
     }
     catch (error) {
@@ -335,7 +335,7 @@ export async function selectSmartProfiles(stream_id: any) {
     }
 }
 
-export async function insertSmartProfile(encrypted_profile_data: string, scores: string, version = '1', connectedPlatforms: string, stream_id:string) {
+export async function insertSmartProfile(encrypted_profile_data: string, scores: string, version = '1', connectedPlatforms: string, stream_id: string) {
     const insertStatement = await orbisdb
         .insert(data.models.smart_profile)
         .value(

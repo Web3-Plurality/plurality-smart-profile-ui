@@ -165,7 +165,10 @@ const Login = () => {
                     const selectedResult = await select(data.data.streamId)
                     setSocialButtons(selectedResult?.neededPlatforms);
                     // store those in localhsot
+                    console.log(selectedResult)
                     localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
+                    localStorage.setItem("platformName", JSON.stringify(selectedResult?.rows[0].profile_name))
+                    localStorage.setItem("platformDescription", JSON.stringify(selectedResult?.rows[0].description))
                     setIsLoading(false)
                 } catch (fetchError) {
                     message.error('API request failed!');
@@ -345,6 +348,8 @@ const Login = () => {
                 const platforms = localStorage.getItem("platforms")
                 const clientId = localStorage.getItem("clientId")
                 const incentiveType = localStorage.getItem('incentives')
+                const platformName = localStorage.getItem('platformName')
+                const platformDescription = localStorage.getItem('platformDescription')
 
                 localStorage.clear()
                 localStorage.setItem('streamId', streamId || '')
@@ -353,6 +358,8 @@ const Login = () => {
                 localStorage.setItem('platforms', platforms || '')
                 localStorage.setItem('clientId', clientId || '')
                 localStorage.setItem('incentives', incentiveType || '')
+                localStorage.setItem('platformName', platformName || '')
+                localStorage.setItem('platformDescription', platformDescription || '')
             }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
@@ -370,6 +377,8 @@ const Login = () => {
             const platforms = localStorage.getItem("platforms")
             const clientId = localStorage.getItem("clientId")
             const incentiveType = localStorage.getItem('incentives')
+            const platformName = localStorage.getItem('platformName')
+            const platformDescription = localStorage.getItem('platformDescription')
 
             localStorage.clear()
             localStorage.setItem('streamId', streamId || '')
@@ -378,6 +387,8 @@ const Login = () => {
             localStorage.setItem('platforms', platforms || '')
             localStorage.setItem('clientId', clientId || '')
             localStorage.setItem('incentives', incentiveType || '')
+            localStorage.setItem('platformName', platformName || '')
+            localStorage.setItem('platformDescription', platformDescription || '')
         }
         handleStepper('login')
     }
