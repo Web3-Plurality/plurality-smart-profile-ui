@@ -103,7 +103,7 @@ const SocialProfiles = ({
                     >
                         <CustomIcon
                             path={activeStates[id] ||
-                                parsedSocailIcons[id].active ||
+                                parsedSocailIcons[id]?.active ||
                                 connectedPlatforms?.includes(iconName)
                                 ? activeIcon : icon} />
                     </div>

@@ -251,7 +251,8 @@ const Login = () => {
             const platforms = localStorage.getItem('platforms')
             const parsedPlatforms = platforms ? JSON.parse(platforms) : []
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            const filteredProfile = socialButtons.filter((button) => button.id === index)
+            const clickedIconDisplayName = filteredProfile[0].displayName.toLowerCase().replace(/\s+/g, '');
             const activePlatforms: string[] = []
             parsedPlatforms?.forEach((platform) => {
                 if (platform.active) {
