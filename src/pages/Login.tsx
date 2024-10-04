@@ -139,30 +139,45 @@ const Login = () => {
         if (clientId) {
             setIsLoading(true)
             localStorage.setItem('clientId', clientId)
+            const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
-                const rsmUrl = `${BASE_URL}/rsm?uuid=${clientId}`
-                const { data } = await axios.get(rsmUrl, {
-                    headers: {
-                        'x-domain': window.location.origin
+                try {
+                    const rsmUrl = `${BASE_URL}/rsm?uuid=${clientId}`
+                    const { data } = await axios.get(rsmUrl, {
+                        headers: {
+                            'x-domain': domain
+                        }
+                    })
+                    console.log("Data", data)
+                    if (!data.data) return
+                    if (data.error) {
+                        console.log("here 1")
+                        message.error(data.error)
+                        return
                     }
-                })
-                // store the streamID, log and links in localstorage
-                localStorage.setItem('streamId', data.data.streamId)
-                localStorage.setItem('logo', data.data.logo)
-                localStorage.setItem('links', data.data.links)
-                localStorage.setItem('incentives', data.data.incentiveType)
+                    // store the streamID, log and links in localstorage
+                    localStorage.setItem('streamId', data.data.streamId)
+                    localStorage.setItem('logo', data.data.logo)
+                    localStorage.setItem('links', data.data.links)
+                    localStorage.setItem('incentives', data.data.incentiveType)
 
-                //firstly initilize the roulette constant
-                const selectedResult = await select(data.data.streamId)
-                setSocialButtons(selectedResult?.neededPlatforms);
-                // store those in localhsot
-                localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
-                setIsLoading(false)
+                    //firstly initilize the roulette constant
+                    const selectedResult = await select(data.data.streamId)
+                    setSocialButtons(selectedResult?.neededPlatforms);
+                    // store those in localhsot
+                    localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
+                    setIsLoading(false)
+                } catch (fetchError) {
+                    message.error('API request failed!');
+                    console.error("Fetch error:", fetchError);
+                } finally {
+                    setIsLoading(false)
+                }
+
             }
             fetchData()
         } else {
             setSocialButtons(socialConnectButtons);
-            // store those in localhsot
             localStorage.setItem("platforms", JSON.stringify(socialConnectButtons))
         }
     }, [clientId]);
