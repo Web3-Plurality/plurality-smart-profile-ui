@@ -7,6 +7,7 @@ import fortniteIcon from './../assets/images/fortnite-icon.png'
 import decentralandIcon from './../assets//images/decentraland-icon.png'
 import spatialIcon from './../assets/images/spatial-icon.png'
 import metaIcon from './../assets/images/meta-icon.png'
+import twitterIcon from './../assets/images/twitter-icon.png'
 
 // Connected Social icons
 import tiktokIconColored from './../assets//images/tiktok-icon-colored.png'
@@ -19,6 +20,7 @@ import decentralandIconColored from './../assets//images/decentraland-icon-color
 import spatialIconColored from './../assets/images/spatial-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
 import artificialRomeIconColored from './../assets/images/artificial-rome-colored.png'
+import twitterIconColored from './../assets/images/twitter-icon-colored.png'
 
 // Digital Wardrobe Images
 import firstImage from './../assets/images/wardrobe/first.png'
@@ -172,9 +174,9 @@ export const socialConnectButtons = [
         id: 10,
         iconName: "twitter",
         displayName: 'Twitter',
-        icon: decentralandIcon,
+        icon: twitterIcon,
         active: false,
-        activeIcon: decentralandIconColored
+        activeIcon: twitterIconColored
     }
 ]
 

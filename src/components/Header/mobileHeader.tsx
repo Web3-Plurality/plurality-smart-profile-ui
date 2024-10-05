@@ -57,7 +57,7 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
 
     // const name = parssedUserOrbisData?.data?.smartProfile?.username
     const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
-    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length + 1
+    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length 
 
     return (
         <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
