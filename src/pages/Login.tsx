@@ -268,7 +268,7 @@ const Login = () => {
             } else if (window.location.pathname === '/rsm') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
-                const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+                const clickedIconDisplayName = socialButtons.find(x => x.id === index).displayName.toLowerCase().replace(/\s+/g, '');
                 console.log("Here", clickedIconDisplayName, parsedUrls)
                 const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowerCase() === clickedIconDisplayName)
                 window.open(selectedItem?.url, '_blank');

@@ -88,7 +88,8 @@ const SocialProfiles = ({
             {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }, index: number) => {
                 const x = circleRadius * Math.cos(angle * index);
                 const y = circleRadius * Math.sin(angle * index);
-                console.log(parsedSocailIcons[id]?.active, iconName, "icon")
+                // enable this only for debugging
+                // console.log(parsedSocailIcons[id]?.active, iconName, "icon")
                 return (
                     <div
                         key={id}
@@ -104,7 +105,7 @@ const SocialProfiles = ({
                         <CustomIcon
                             path={
                                 activeStates[id] ||
-                                    parsedSocailIcons[id]?.active ||
+                                    parsedSocailIcons.find(x => x.id === id)?.active ||
                                     connectedPlatforms?.includes(iconName)
                                     ? activeIcon : icon} />
                     </div>
