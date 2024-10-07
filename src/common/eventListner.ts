@@ -101,7 +101,9 @@ export const useRegisterEvent = () => {
                         }
                         const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
                         await autoConnect()
-                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms))
+
+                        let stream_id = localStorage.getItem("streamId")!
+                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms), stream_id)
                         // save smart profile in local storage along with the returned stream id
                         if (insertionResult) {
                             const objData = {

@@ -1,16 +1,15 @@
 import { ReactNode, useEffect, useState } from 'react';
 import footerLogo from '../assets/images/footer-logo.png'
-import HeaderLogo from '../assets/svgIcons/app-logo.png';
 import classNames from 'classnames';
 import WidgetHeader from './WidgetHeader';
 import { useStep } from '../context/StepContext';
 import Loading from './LitComponents/Loading';
 import MobileHeader from './Header/mobileHeader';
+import { getPlatformImage } from '../common/utils';
 
 interface WidgetLayoutProps {
     children: ReactNode,
     title: string,
-    socialsFooter: string
     currentStep: boolean,
     showBackgroundImage: boolean,
     description: string,
@@ -26,7 +25,6 @@ interface WidgetLayoutProps {
 const WidgetLayout = ({
     children,
     title,
-    socialsFooter,
     currentStep,
     showBackgroundImage,
     description,
@@ -37,7 +35,7 @@ const WidgetLayout = ({
     selectedSocial,
     handleBack,
 }: WidgetLayoutProps) => {
-    const { stepHistory, handleStepper } = useStep();
+    const { stepHistory } = useStep();
     const currentStep1 = stepHistory[stepHistory.length - 1]
     const isDigitalWardrobe = currentStep1 === 'digitalWardrobeConnect' || currentStep1 === 'digitalWardrobe';
 
@@ -51,6 +49,7 @@ const WidgetLayout = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const plaformImg = getPlatformImage()
 
     return (
         <div className="wrapper">
@@ -63,7 +62,7 @@ const WidgetLayout = ({
                     : (
                         <>
                             <div className={classNames('widget-content', { showHeaderLogo: !showHeaderLogo, digitalWardrobeConnect: isDigitalWardrobe })}>
-                                {showHeaderLogo && <img className="app-logo" src={HeaderLogo} alt='' />}
+                                {showHeaderLogo && <img className="app-logo" src={plaformImg} alt='' />}
                                 {isSmallScreen && <MobileHeader isSmallScreen={isSmallScreen} />}
                                 <WidgetHeader title={title} description={description} currentStep={currentStep} />
                                 {children}
@@ -73,19 +72,6 @@ const WidgetLayout = ({
                                 className={classNames('back-btn', { hideBtn: !showBackButton })}>
                                 Back
                             </div>
-
-                            {!showHeaderLogo && <div
-                                className='back-btn'
-                                id="w-footer"
-                                role='button'
-                                tabIndex={0}
-                                onClick={
-                                    currentStep1 === 'metaverseHub' ? () => handleStepper("socialConnect") :
-                                        socialsFooter === 'Continue' ? () => handleStepper('socialConfirmation') :
-                                            () => handleStepper('socialConfirmation')}
-                            >
-                                {currentStep1 === 'metaverseHub' ? "Connect more platforms" : socialsFooter}
-                            </div>}
                         </>
                     )}
 

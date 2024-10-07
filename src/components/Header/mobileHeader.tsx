@@ -1,12 +1,13 @@
 import { useAccount, useDisconnect } from 'wagmi';
 import classNames from 'classnames';
-import { showHeader } from '../../common/utils';
+import { isProfileConnectPlatform, isRsmPlatform, showHeader } from '../../common/utils';
 import { useStep } from '../../context/StepContext';
 import CustomIcon from '../CustomIcon'
 import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
+import { Rating } from 'react-simple-star-rating';
 
 const isIframe = window.location !== window.parent.location
 
@@ -33,11 +34,18 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
         const tool = localStorage.getItem("tool")
+        const clientId = localStorage.getItem("clientId")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
         localStorage.setItem("tool", tool || '')
+        let path = '/'
+        if (isRsmPlatform()) {
+            path = `/rsm?client_id=${clientId}`;
+        } else if (isProfileConnectPlatform()) {
+            path = `/profile-connect?client_id=${clientId}`;
+        }
         handleStepper("initial")
-        navigate('/', { replace: true });
+        navigate(path, { replace: true });
         window.location.reload();
     }
 
@@ -45,9 +53,11 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
     const userOrbisData = localStorage.getItem('smartProfileData')
     const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
+    const incentiveType = localStorage.getItem('incentives')
+
     // const name = parssedUserOrbisData?.data?.smartProfile?.username
     const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
-
+    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length 
 
     return (
         <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
@@ -60,8 +70,14 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
                 />
             </div>
             {currentStep !== "profileSettings" && (<div className='mobile-scores'>
-                <span>{score || 0}</span>
-                <CustomIcon path={BadgeIcon} />
+                {incentiveType && incentiveType === 'Points' && (
+                    <>
+                        <span>{score || 0}</span>
+                        <CustomIcon path={BadgeIcon} />
+                    </>
+                )}
+                {incentiveType && incentiveType === 'Stars' && <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15} />}
+
             </div>)}
         </div>
     )

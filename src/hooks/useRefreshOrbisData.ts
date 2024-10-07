@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BASE_URL, socialConnectButtons } from "../common/constants";
+import { BASE_URL } from "../common/constants";
 import { autoConnect, insertSmartProfile, select, selectSmartProfiles } from "../common/orbis";
 import axios from "axios";
 import { decryptData, encryptData } from "../common/utils";
@@ -25,10 +25,10 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
         }
     }, [socialIcons]);
 
-    const getSmartProfileFromOrbis = async () => {
+    const getSmartProfileFromOrbis = async (stream_id: string) => {
         if (loading) return
         setLoading(true)
-        const selectResult = await select();
+        const selectResult = await select(stream_id);
         if (!selectResult) {
             throw new Error("Failed to fetch data from select()");
         }
@@ -37,10 +37,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
         if (!rows || !rows.length) {
             throw new Error("No rows returned from select()");
         }
+        console.log(JSON.parse(rows?.[0]?.platforms))
 
         const orbisData = JSON.parse(rows?.[0]?.platforms || [])
         if (orbisData) {
-            const activePlatforms = socialConnectButtons?.filter(button =>
+            const activePlatforms = JSON.parse(localStorage.getItem("platforms")!)?.filter(button =>
                 orbisData.some((platform: Platform) =>
                     platform.platform.toLowerCase().replace(/\s+/g, '') === button.displayName.toLowerCase().replace(/\s+/g, '')
                 )
@@ -49,7 +50,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
 
             //////////////////////////////////////////
             await autoConnect()
-            const response = await selectSmartProfiles();
+            const response = await selectSmartProfiles(stream_id);
 
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
@@ -67,7 +68,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
+                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
                         const objData = {

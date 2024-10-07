@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { socialConnectButtons } from '../../common/constants';
+// import { socialConnectButtons } from '../../common/constants';
 import CustomIcon from '../CustomIcon';
-import HeaderLogo from './../../assets/svgIcons/app-logo.png';
 import './styles.css';
+import { getPlatformImage } from '../../common/utils';
 
 type Platform = {
     active: boolean,
@@ -50,13 +50,14 @@ const SocialProfiles = ({
         }
     }, [circleRef.current?.offsetWidth, isSmallScreen]);
 
-    const numIcons = socialConnectButtons.length;
-
-    // Calculate the angle between each icon
-    const angle = (360 / numIcons) * (Math.PI / 180); // Convert degrees to radians
-
+    // const numIcons = socialConnectButtons.length;
     const socailIcons = localStorage.getItem("platforms");
     const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
+
+    // Calculate the angle between each icon
+    const angle = (360 / parsedSocailIcons.length) * (Math.PI / 180); // Convert degrees to radians
+
+
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
         const platforms = localStorage.getItem("platforms");
@@ -77,19 +78,22 @@ const SocialProfiles = ({
     const smartProfileData = localStorage.getItem('smartProfileData');
     const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : [];
 
+    const plaformImg = getPlatformImage()
+
     return (
         <div ref={circleRef} className="circle">
             <div className='mid-icon'>
-                <img className="app-logo-center" src={HeaderLogo} alt='' />
+                <img className="app-logo-center" src={plaformImg} alt='' />
             </div>
-            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }) => {
-                const x = circleRadius * Math.cos(angle * id);
-                const y = circleRadius * Math.sin(angle * id);
-
+            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }, index: number) => {
+                const x = circleRadius * Math.cos(angle * index);
+                const y = circleRadius * Math.sin(angle * index);
+                // enable this only for debugging
+                // console.log(parsedSocailIcons[id]?.active, iconName, "icon")
                 return (
                     <div
                         key={id}
-                        className={`icon icon${id}`}
+                        className={`icon `}
                         style={{
                             position: "absolute",
                             left: `calc(50% + ${x}px - ${isSmallScreen ? '23px' : isTabScreen ? '29px' : '27px'})`,
@@ -99,10 +103,11 @@ const SocialProfiles = ({
                         onClick={() => handleIconClick(id)}
                     >
                         <CustomIcon
-                            path={activeStates[id] ||
-                                parsedSocailIcons[id].active ||
-                                connectedPlatforms?.includes(iconName)
-                                ? activeIcon : icon} />
+                            path={
+                                activeStates[id] ||
+                                    parsedSocailIcons.find(x => x.id === id)?.active ||
+                                    connectedPlatforms?.includes(iconName)
+                                    ? activeIcon : icon} />
                     </div>
                 );
             })}

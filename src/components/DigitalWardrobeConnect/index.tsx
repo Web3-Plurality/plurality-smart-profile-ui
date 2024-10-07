@@ -1,4 +1,4 @@
-import { socialConnectButtons } from "../../common/constants";
+// import { socialConnectButtons } from "../../common/constants";
 import { useStep } from "../../context/StepContext";
 import AddProfile from './../../assets/svgIcons/add-profile-icon.svg'
 
@@ -6,7 +6,12 @@ import './styles.css'
 
 const DigitalWardrobeConnect = ({ selectedNFT, activeStates }: { selectedNFT: string, activeStates: boolean[] }) => {
     const { handleStepper } = useStep();
-    const activeButtons = socialConnectButtons
+    // const activeButtons = socialConnectButtons
+    //     .filter((_, index) => activeStates[index] && index < 7)
+    //     .map(button => (
+    //         <img src={button.activeIcon} alt={button.displayName} />
+    //     ));
+    const activeButtons = JSON.parse(localStorage.getItem("platforms")!)
         .filter((_, index) => activeStates[index] && index < 7)
         .map(button => (
             <img src={button.activeIcon} alt={button.displayName} />

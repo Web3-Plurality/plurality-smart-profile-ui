@@ -10,6 +10,7 @@ import { AuthUserInformation } from '@useorbis/db-sdk';
 import { useNavigate } from 'react-router-dom';
 import { useStep } from '../context/StepContext';
 import { message } from 'antd';
+import { isProfileConnectPlatform, isRsmPlatform } from '../common/utils';
 
 // Define constants and provider outside the hook
 const domain = window.location.host;
@@ -126,19 +127,26 @@ export const useMetamaskToken = () => {
     async function handleLogout() {
         const litSignature = localStorage.getItem("signature")
         if (!litSignature) {
-          try {
-            await disconnectAsync();
-          } catch (err) {
-              console.error(err);
-          }
+            try {
+                await disconnectAsync();
+            } catch (err) {
+                console.error(err);
+            }
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
         const tool = localStorage.getItem("tool")
+        const clientId = localStorage.getItem("clientId")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
         localStorage.setItem("tool", tool || '')
+        let path = '/'
+        if (isRsmPlatform()) {
+            path = `/rsm?client_id=${clientId}`;
+        } else if (isProfileConnectPlatform()) {
+            path = `/profile-connect?client_id=${clientId}`;
+        }
         handleStepper("initial")
-        navigate('/', { replace: true });
+        navigate(path, { replace: true });
         message.error("Something went wrong, please contact the team")
     }
 

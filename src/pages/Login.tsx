@@ -19,30 +19,37 @@ import {
     encryptData,
     getDescription,
     getTitleText,
+    isProfileConnectPlatform,
+    isRsmPlatform,
     showBackButton,
     showHeader
 } from '../common/utils';
 import { PayloadDataType } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
-import MetaverseHub from '../components/MetaverseHub';
-import { BASE_URL, metaverseHubButtons, socialConnectButtons } from '../common/constants';
+import { BASE_URL, CLIENT_ID, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
 import { useMetamaskToken } from '../hooks/useMetamaskToken';
 import { useNavigate } from 'react-router-dom';
 import LogoutModal from '../components/LogoutModal';
 import axios from 'axios';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
-import { connectOrbisDidPkh, insertSmartProfile } from '../common/orbis';
+import { connectOrbisDidPkh, insertSmartProfile, select } from '../common/orbis';
 import { AuthUserInformation } from '@useorbis/db-sdk';
 
 const Login = () => {
     const { stepHistory, handleStepper, handleBack } = useStep();
     const { disconnectAsync } = useDisconnect();
     const navigate = useNavigate()
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
     const warningMessageRef = useRef<MessageType | null>(null);
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
+    const [isLoading, setIsLoading] = useState<boolean>(!!clientId)
+
+    const [socialButtons, setSocialButtons] = useState<any>([])
+    // I am actually not sure if we can reference a state inside another state??
+    const [activeStates, setActiveStates] = useState(socialButtons?.map(button => button.active));
+
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
@@ -59,7 +66,6 @@ const Login = () => {
     const { address: metamaskAddress, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
     const { getPublicKey } = useMetamaskPublicKey()
-
 
     const {
         message: eventMessage,
@@ -101,7 +107,9 @@ const Login = () => {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms))
+
+                const stream_id = localStorage.getItem("streamId")!
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {
@@ -126,6 +134,56 @@ const Login = () => {
     } = useMetamaskToken()
 
 
+    useEffect(() => {
+        // We need tp use this clientId to load the logo
+        if (clientId) {
+            setIsLoading(true)
+            localStorage.setItem('clientId', clientId)
+            const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
+            const fetchData = async () => {
+                try {
+                    const rsmUrl = `${BASE_URL}/rsm?uuid=${clientId}`
+                    const { data } = await axios.get(rsmUrl, {
+                        headers: {
+                            'x-domain': domain
+                        }
+                    })
+                    console.log("Data", data)
+                    if (!data.data) return
+                    if (data.error) {
+                        console.log("here 1")
+                        message.error(data.error)
+                        return
+                    }
+                    // store the streamID, log and links in localstorage
+                    localStorage.setItem('streamId', data.data.streamId)
+                    localStorage.setItem('logo', data.data.logo)
+                    localStorage.setItem('links', data.data.links)
+                    localStorage.setItem('incentives', data.data.incentiveType)
+
+                    //firstly initilize the roulette constant
+                    const selectedResult = await select(data.data.streamId)
+                    setSocialButtons(selectedResult?.neededPlatforms);
+                    // store those in localhsot
+                    console.log(selectedResult)
+                    localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
+                    localStorage.setItem("platformName", JSON.stringify(selectedResult?.rows[0].profile_name))
+                    localStorage.setItem("platformDescription", JSON.stringify(selectedResult?.rows[0].description))
+                    setIsLoading(false)
+                } catch (fetchError) {
+                    message.error('API request failed!');
+                    console.error("Fetch error:", fetchError);
+                } finally {
+                    setIsLoading(false)
+                }
+
+            }
+            fetchData()
+        } else {
+            setSocialButtons(socialConnectButtons);
+            localStorage.setItem("platforms", JSON.stringify(socialConnectButtons))
+        }
+    }, [clientId]);
 
     useEffect(() => {
         if (eventMessage === 'received') {
@@ -167,16 +225,18 @@ const Login = () => {
     }, [metamaskAddress])
 
     const handleIconClick = (index: number) => {
-        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialConnectButtons;
+        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
 
         const isMetaverseHub = currentStep === 'metaverseHub';
         // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
-        const isIndexValid = index < socialConnectButtons.length - 2;
+        const isIndexValid = index < socialButtons?.length - 2;
+
 
         const handleMetaverseHubClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+
             if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
                 handleStepper('socialConfirmation');
                 setSelectedSocial(profiles[index].displayName);
@@ -191,21 +251,42 @@ const Login = () => {
 
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
+            const platforms = localStorage.getItem('platforms')
+            const parsedPlatforms = platforms ? JSON.parse(platforms) : []
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialConnectButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
-            if (!connectedPlatforms.includes(clickedIconDisplayName)) {
+            const filteredProfile = socialButtons.filter((button) => button.id === index)
+            const clickedIconDisplayName = filteredProfile[0].displayName.toLowerCase().replace(/\s+/g, '');
+            const activePlatforms: string[] = []
+            parsedPlatforms?.forEach((platform) => {
+                if (platform.active) {
+                    activePlatforms.push(platform.displayName.toLowerCase().replace(/\s+/g, ''))
+                }
+            })
+            if (!connectedPlatforms.includes(clickedIconDisplayName) && !activePlatforms?.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
+            } else if (window.location.pathname === '/rsm' || window.location.pathname === '/') {
+                const storedUrls = localStorage.getItem('links')
+                const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
+                const clickedIconDisplayName = socialButtons.find(x => x.id === index).displayName.toLowerCase().replace(/\s+/g, '');
+                console.log("Here", clickedIconDisplayName, parsedUrls)
+                const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowerCase() === clickedIconDisplayName)
+                window.open(selectedItem?.url, '_blank');
             }
         };
 
         if (isMetaverseHub) {
             handleMetaverseHubClick();
-        } else if (!activeStates[index]) {
-            handleSocialConnectClick();
         } else {
-            setSelectedSocial(profiles[index].displayName);
+            handleSocialConnectClick();
         }
+        // if (isMetaverseHub) {
+        //     handleMetaverseHubClick();
+        // } else if (!activeStates[index]) {
+        //     handleSocialConnectClick();
+        // } else {
+        //     // setSelectedSocial(profiles[index].displayName);
+        // }
     };
 
 
@@ -225,9 +306,6 @@ const Login = () => {
         handleStepper('initial');
         message.error('Something went wrong. Please try again.');
     }
-
-
-    const allowContinue = (activeStates.filter((item) => item && activeStates.indexOf(item) !== 6 && activeStates.indexOf(item) !== 7)).length > 0
 
     const currentStep = stepHistory[stepHistory.length - 1];
     const isBackButton = showBackButton(currentStep)
@@ -264,7 +342,24 @@ const Login = () => {
         }
         try {
             if ((localStorage.getItem('tool') as string) !== 'metamask') {
-                localStorage.clear();
+                const streamId = localStorage.getItem('streamId')
+                const logo = localStorage.getItem('logo')
+                const links = localStorage.getItem('links')
+                const platforms = localStorage.getItem("platforms")
+                const clientId = localStorage.getItem("clientId")
+                const incentiveType = localStorage.getItem('incentives')
+                const platformName = localStorage.getItem('platformName')
+                const platformDescription = localStorage.getItem('platformDescription')
+
+                localStorage.clear()
+                localStorage.setItem('streamId', streamId || '')
+                localStorage.setItem('logo', logo || '')
+                localStorage.setItem('links', links || '')
+                localStorage.setItem('platforms', platforms || '')
+                localStorage.setItem('clientId', clientId || '')
+                localStorage.setItem('incentives', incentiveType || '')
+                localStorage.setItem('platformName', platformName || '')
+                localStorage.setItem('platformDescription', platformDescription || '')
             }
             if (setUser) setUser("user");
             await ensureMetamaskConnection();
@@ -276,7 +371,24 @@ const Login = () => {
 
     const handleLitConnect = async () => {
         if ((localStorage.getItem('tool') as string) !== 'lit') {
-            localStorage.clear();
+            const streamId = localStorage.getItem('streamId')
+            const logo = localStorage.getItem('logo')
+            const links = localStorage.getItem('links')
+            const platforms = localStorage.getItem("platforms")
+            const clientId = localStorage.getItem("clientId")
+            const incentiveType = localStorage.getItem('incentives')
+            const platformName = localStorage.getItem('platformName')
+            const platformDescription = localStorage.getItem('platformDescription')
+
+            localStorage.clear()
+            localStorage.setItem('streamId', streamId || '')
+            localStorage.setItem('logo', logo || '')
+            localStorage.setItem('links', links || '')
+            localStorage.setItem('platforms', platforms || '')
+            localStorage.setItem('clientId', clientId || '')
+            localStorage.setItem('incentives', incentiveType || '')
+            localStorage.setItem('platformName', platformName || '')
+            localStorage.setItem('platformDescription', platformDescription || '')
         }
         handleStepper('login')
     }
@@ -298,8 +410,6 @@ const Login = () => {
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'socialConfirmation':
                 return <SocialConfirmation handleStepper={handleStepper} selectedProfile={selectedSocial} previousStep={previousStep} />
-            case 'metaverseHub':
-                return <MetaverseHub handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'digitalWardrobe':
                 return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
             case 'digitalWardrobeConnect':
@@ -320,10 +430,19 @@ const Login = () => {
             console.error(err);
         }
         const smartprofileData = localStorage.getItem("smartProfileData")
+        const clientId = localStorage.getItem("clientId")
+        const tool = localStorage.getItem("tool")
         localStorage.clear();
         localStorage.setItem("smartProfileData", smartprofileData || '')
+        localStorage.setItem("tool", tool || '')
+        let path = '/'
+        if (isRsmPlatform()) {
+            path = `/rsm?client_id=${clientId}`;
+        } else if (isProfileConnectPlatform()) {
+            path = `/profile-connect?client_id=${clientId}`;
+        }
         handleStepper("initial")
-        navigate('/', { replace: true });
+        navigate(path, { replace: true });
     }
 
 
@@ -365,7 +484,6 @@ const Login = () => {
                 currentStep={currentStep === 'success'}
                 showBackButton={isBackButton}
                 handleBack={handleBack}
-                // handlefooterClick={ }
                 title={getTitleText(stepHistory)}
                 description={getDescription(stepHistory)}
                 showHeaderLogo={
@@ -373,7 +491,6 @@ const Login = () => {
                     currentStep !== 'metaverseHub'
                 }
                 showBackgroundImage={currentStep === 'socialConfirmation'}
-                socialsFooter={allowContinue ? 'Continue' : 'Skip for now'}
                 isLoading={isLoading}
                 infoLoading={infoLoading}
                 selectedSocial={selectedSocial}

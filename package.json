@@ -34,6 +34,7 @@
     "react-metamask-avatar": "^2.0.9",
     "react-otp-input": "^3.1.1",
     "react-router-dom": "^6.23.0",
+    "react-simple-star-rating": "^5.1.7",
     "siwe": "^2.3.2",
     "styled-components": "^6.1.11",
     "tweetnacl": "^1.0.3",

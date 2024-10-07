@@ -11,6 +11,7 @@ import { useDisconnect } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
 import { useStep } from '../context/StepContext';
 import { message } from 'antd';
+import { isRsmPlatform } from '../common/utils';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
@@ -112,18 +113,23 @@ export default function useSession() {
       try {
         await disconnectAsync();
       } catch (err) {
-          console.error(err);
+        console.error(err);
       }
     }
     const smartprofileData = localStorage.getItem("smartProfileData")
     const tool = localStorage.getItem("tool")
+    const clientId = localStorage.getItem("clientId")
     localStorage.clear();
     localStorage.setItem("smartProfileData", smartprofileData || '')
     localStorage.setItem("tool", tool || '')
+    let path = '/'
+    if (isRsmPlatform()) {
+      path = `/rsm?client_id=${clientId}`;
+    }
     handleStepper("initial")
-    navigate('/', { replace: true });
+    navigate(path, { replace: true });
     message.error("Something went wrong, please contact the team")
-}
+  }
 
   return {
     initSession,
