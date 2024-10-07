@@ -12,6 +12,7 @@ import {
     socialConnectButtons,
 } from "./constants";
 import { litNodeClient } from "./lit";
+import { ProfileData } from "../globalTypes";
 
 type ValidationResult = { valid: true } | { valid: false; error: string };
 
@@ -287,12 +288,12 @@ export async function select(stream_id: string) {
         console.log("Query that will be run", query)
         const result = await selectStatement.run();
         console.log(result);
-        const fetchedPlatforms = JSON.parse(result.rows[0].platforms)
-        let neededPlatforms = []
+        const fetchedPlatforms: ProfileData[] = JSON.parse(result.rows[0].platforms)
+        const neededPlatforms: ProfileData[] = []
         // set platforms this workflow needs
         for (const platform of socialConnectButtons) {
             // in order to minimize the changes, we use the contant as our maximal platforms, and we iterate over it based on the platforms we fetched from orbis
-            if (fetchedPlatforms.find((x) => x.platform === platform.displayName)) {
+            if (fetchedPlatforms.find((x: ProfileData) => x.platform === platform.displayName)) {
                 neededPlatforms.push(platform)
             }
         }
@@ -307,7 +308,7 @@ export async function select(stream_id: string) {
     }
 }
 
-export async function selectSmartProfiles(stream_id: any) {
+export async function selectSmartProfiles(stream_id: string) {
     try {
         const didKey = localStorage.getItem("userDid")
         const selectStatement = await orbisdb

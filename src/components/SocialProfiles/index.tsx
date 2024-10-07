@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import CustomIcon from '../CustomIcon';
 import './styles.css';
 import { getPlatformImage } from '../../common/utils';
+import { ProfileData } from '../../globalTypes';
 
 type Platform = {
     active: boolean,
@@ -105,7 +106,7 @@ const SocialProfiles = ({
                         <CustomIcon
                             path={
                                 activeStates[id] ||
-                                    parsedSocailIcons.find(x => x.id === id)?.active ||
+                                    parsedSocailIcons.find((x: ProfileData) => x.id === id)?.active ||
                                     connectedPlatforms?.includes(iconName)
                                     ? activeIcon : icon} />
                     </div>
