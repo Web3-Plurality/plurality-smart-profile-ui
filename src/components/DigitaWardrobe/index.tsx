@@ -1,5 +1,6 @@
 import { digitalWardrobeImages } from "../../common/constants";
 import { useStep } from "../../context/StepContext";
+import { ProfileData } from "../../globalTypes";
 import AddProfile from './../../assets/svgIcons/add-profile-icon.svg'
 
 import './styles.css'
@@ -37,8 +38,8 @@ const DigitalWardrobe = ({ activeStates, handleSelectedNFT }: DigitalWardrobePro
     //         <img src={button.activeIcon} alt={button.displayName} />
     //     ));
     const activeButtons = JSON.parse(localStorage.getItem("platforms")!)
-        .filter((_, index) => activeStates[index] && index < 7)
-        .map(button => (
+        .filter((_: unknown, index: number) => activeStates[index] && index < 7)
+        .map((button: ProfileData) => (
             <img src={button.activeIcon} alt={button.displayName} />
         ));
 

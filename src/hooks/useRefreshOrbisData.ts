@@ -3,6 +3,7 @@ import { BASE_URL } from "../common/constants";
 import { autoConnect, insertSmartProfile, select, selectSmartProfiles } from "../common/orbis";
 import axios from "axios";
 import { decryptData, encryptData } from "../common/utils";
+import { ProfileData } from "../globalTypes";
 
 type Platform = {
     platform: string,
@@ -41,9 +42,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
 
         const orbisData = JSON.parse(rows?.[0]?.platforms || [])
         if (orbisData) {
-            const activePlatforms = JSON.parse(localStorage.getItem("platforms")!)?.filter(button =>
+            const activePlatforms = JSON.parse(localStorage.getItem("platforms")!)?.filter((button: ProfileData) =>
                 orbisData.some((platform: Platform) =>
-                    platform.platform.toLowerCase().replace(/\s+/g, '') === button.displayName.toLowerCase().replace(/\s+/g, '')
+                    platform.platform.toLowerCase().replace(/\s+/g, '') === button?.displayName?.toLowerCase().replace(/\s+/g, '')
                 )
             );
             setSocialIcons(activePlatforms)

@@ -24,7 +24,7 @@ import {
     showBackButton,
     showHeader
 } from '../common/utils';
-import { PayloadDataType } from '../globalTypes';
+import { PayloadDataType, ProfileData } from '../globalTypes';
 import { useRegisterEvent } from '../common/eventListner';
 import { BASE_URL, CLIENT_ID, metaverseHubButtons, socialConnectButtons } from '../common/constants';
 import { MessageType } from 'antd/es/message/interface';
@@ -46,9 +46,11 @@ const Login = () => {
     const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
     const [isLoading, setIsLoading] = useState<boolean>(!!clientId)
 
-    const [socialButtons, setSocialButtons] = useState<any>([])
+    const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
     // I am actually not sure if we can reference a state inside another state??
-    const [activeStates, setActiveStates] = useState(socialButtons?.map(button => button.active));
+    const [activeStates, setActiveStates] = useState<boolean[]>(
+        socialButtons.map(button => button.active ?? false)
+    );
 
     const [selectedSocial, setSelectedSocial] = useState('')
     const [selectedNFT, setSelectedNFT] = useState('')
@@ -163,7 +165,9 @@ const Login = () => {
 
                     //firstly initilize the roulette constant
                     const selectedResult = await select(data.data.streamId)
-                    setSocialButtons(selectedResult?.neededPlatforms);
+                    if (selectedResult?.neededPlatforms) {
+                        setSocialButtons(selectedResult?.neededPlatforms);
+                    }
                     // store those in localhsot
                     console.log(selectedResult)
                     localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
@@ -235,11 +239,13 @@ const Login = () => {
         const handleMetaverseHubClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialButtons[index].displayName.toLowerCase().replace(/\s+/g, '');
+            const clickedIconDisplayName = socialButtons[index]?.displayName?.toLowerCase().replace(/\s+/g, '');
 
             if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
                 handleStepper('socialConfirmation');
-                setSelectedSocial(profiles[index].displayName);
+                if (profiles[index].displayName) {
+                    setSelectedSocial(profiles[index].displayName);
+                }
             } else {
                 if (warningMessageRef.current) {
                     warningMessageRef.current();
@@ -254,23 +260,25 @@ const Login = () => {
             const platforms = localStorage.getItem('platforms')
             const parsedPlatforms = platforms ? JSON.parse(platforms) : []
             const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const filteredProfile = socialButtons.filter((button) => button.id === index)
-            const clickedIconDisplayName = filteredProfile[0].displayName.toLowerCase().replace(/\s+/g, '');
+            const filteredProfile = socialButtons.filter((button: ProfileData) => button.id === index)
+            const clickedIconDisplayName = filteredProfile[0]?.displayName?.toLowerCase().replace(/\s+/g, '');
             const activePlatforms: string[] = []
-            parsedPlatforms?.forEach((platform) => {
+            parsedPlatforms?.forEach((platform: ProfileData) => {
                 if (platform.active) {
-                    activePlatforms.push(platform.displayName.toLowerCase().replace(/\s+/g, ''))
+                    activePlatforms.push(platform.displayName!.toLowerCase().replace(/\s+/g, ''));
                 }
-            })
-            if (!connectedPlatforms.includes(clickedIconDisplayName) && !activePlatforms?.includes(clickedIconDisplayName)) {
+            });
+            if (!connectedPlatforms.includes(clickedIconDisplayName) && !activePlatforms?.includes(clickedIconDisplayName || '')) {
                 setActiveIndex(index);
-                registerEvent(clickedIconDisplayName);
+                if (clickedIconDisplayName) {
+                    registerEvent(clickedIconDisplayName);
+                }
             } else if (window.location.pathname === '/rsm' || window.location.pathname === '/') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
-                const clickedIconDisplayName = socialButtons.find(x => x.id === index).displayName.toLowerCase().replace(/\s+/g, '');
-                console.log("Here", clickedIconDisplayName, parsedUrls)
-                const selectedItem = parsedUrls.find((item: any) => item.platformName.toLowerCase() === clickedIconDisplayName)
+                const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);
+                const clickedIconDisplayName = clickedIcon?.displayName?.toLowerCase().replace(/\s+/g, '')
+                const selectedItem = parsedUrls.find((item: ProfileData) => item?.platformName?.toLowerCase() === clickedIconDisplayName)
                 window.open(selectedItem?.url, '_blank');
             }
         };
