@@ -265,7 +265,7 @@ const Login = () => {
             if (!connectedPlatforms.includes(clickedIconDisplayName) && !activePlatforms?.includes(clickedIconDisplayName)) {
                 setActiveIndex(index);
                 registerEvent(clickedIconDisplayName);
-            } else if (window.location.pathname === '/rsm') {
+            } else if (window.location.pathname === '/rsm' || window.location.pathname === '/') {
                 const storedUrls = localStorage.getItem('links')
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
                 const clickedIconDisplayName = socialButtons.find(x => x.id === index).displayName.toLowerCase().replace(/\s+/g, '');
