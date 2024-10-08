@@ -37,7 +37,6 @@ jobs:
       - name: Prepare Environment files
         run: |
           cp .env.stagging.example .env.production
-      #   echo "VITE_APP_PUBLIC_DAPP_OWNER_WALLET_PRIVATE_KEY=${{ secrets.LIT_DAPP_OWNER_WALLET_PRIVATE_KEY }}" >> .env.production
 
       - name: Semantic Release
         run: npx semantic-release
