@@ -21,6 +21,7 @@ import spatialIconColored from './../assets/images/spatial-icon-colored.png'
 import metaIconColored from './../assets/images/meta-icon-colored.png'
 import artificialRomeIconColored from './../assets/images/artificial-rome-colored.png'
 import twitterIconColored from './../assets/images/twitter-icon-colored.png'
+import vicIconColored from './../assets/images/VIC.png'
 
 // Digital Wardrobe Images
 import firstImage from './../assets/images/wardrobe/first.png'
@@ -177,6 +178,14 @@ export const socialConnectButtons = [
         icon: twitterIcon,
         active: false,
         activeIcon: twitterIconColored
+    },
+    {
+        id: 11,
+        iconName: "VIC",
+        displayName: 'VIC',
+        icon: vicIconColored,
+        active: true,
+        activeIcon: vicIconColored
     }
 ]
 
