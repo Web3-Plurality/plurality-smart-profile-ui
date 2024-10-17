@@ -1,89 +1,67 @@
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import Login from './pages/Login';
-import NotFound from './pages/NotFound';
-
-import { AuthProvider } from './context/AuthContext';
-import { StepProvider } from './context/StepContext';
-import Header from './components/Header';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { persistor, store } from './services/store'
+import { Provider } from 'react-redux'
 import { StytchProvider } from '@stytch/react';
-import { StytchUIClient } from '@stytch/vanilla-js';
-
 import { WagmiProvider } from 'wagmi';
-import { goerli, mainnet, optimism } from 'wagmi/chains';
-import { metaMask } from 'wagmi/connectors';
-import { http, createConfig } from '@wagmi/core'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import CallBackUrl from './pages/CallBackUrl';
-import AuthStart from './pages/AuthStart';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistGate } from 'redux-persist/integration/react';
+
+import useResponsive from './hooks/useResponsive';
+import Login from './pages/Login'
+import CallBackUrl from './pages/CallBackUrl'
+import AuthStart from './pages/AuthStart'
+import PageNotFound from './pages/PageNotFound'
+import { stytch } from './services/Stytch';
+import { client, queryClient } from './services/WagmiConfig'
+
+import './globalStyles.css'
+import Header from './components/Header';
 import { message } from 'antd';
-import { useEffect, useState } from 'react';
-
-const stytch = new StytchUIClient(
-  import.meta.env.VITE_APP_PUBLIC_STYTCH_PUBLIC_TOKEN || ''
-);
-
-
-const client = createConfig({
-  chains: [goerli, mainnet, optimism],
-  connectors: [
-    metaMask({
-      preferDesktop: true,
-      modals: {
-        install: ({ terminate }) => {
-          message.error("MetaMask is not available for this device, please continue with email")
-          return {
-            unmount: terminate,
-          };
-        },
-      },
-    }),
-  ],
-  transports: {
-    [mainnet.id]: http(),
-    [goerli.id]: http(),
-    [optimism.id]: http(),
-  },
-});
-
-
-const queryClient = new QueryClient()
+import { useEffect } from 'react';
+import { ErrorMessages } from './utils/Constants';
+import Unauthorized from './pages/UnAuthorizedDomain';
 
 
 
 function App() {
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 767.98);
+  const { isMobileScreen, isTabScreen } = useResponsive()
 
   useEffect(() => {
-    const handleResize = () => setIsSmallScreen(window.innerWidth <= 767.98);
+    const isSafari = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      return /safari/.test(userAgent) && !/chrome/.test(userAgent);
+    };
 
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // safari on mobile
+    if (isMobileScreen && isSafari()) {
+      message.warning(ErrorMessages.SAFARI_ERROR)
+    }
+  }, [isMobileScreen]);
 
   return (
-    <AuthProvider>
-      <StepProvider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
         <WagmiProvider config={client}>
           <QueryClientProvider client={queryClient}>
             <StytchProvider stytch={stytch}>
               <Router>
-                {!isSmallScreen && <Header />}
+                {!isTabScreen && !isMobileScreen && <Header />}
                 <Routes>
                   <Route path="/rsm" element={<Login />} />
                   <Route path="/" element={<Login />} />
                   <Route path="/profile-connect" element={<Login />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />
                   <Route path="/auth-start" element={<AuthStart />} />
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="*" element={<PageNotFound />} />
                 </Routes>
               </Router>
             </StytchProvider>
           </QueryClientProvider>
         </WagmiProvider>
-      </StepProvider>
-    </AuthProvider>
-  );
+      </PersistGate>
+    </Provider>
+  )
 }
 
-export default App;
+export default App

@@ -1,0 +1,73 @@
+import { PLURALITY_CONTEXT } from "../../utils/EnvConfig";
+import { data, orbisdb } from "./orbisConfig";
+
+type ValidationResult = { valid: true } | { valid: false; error: string };
+
+export async function insertSmartProfile(
+    encrypted_profile_data: string,
+    scores: string,
+    version = '1',
+    connectedPlatforms: string,
+    streamId: string
+) {
+    const insertStatement = await orbisdb
+        .insert(data.models.smart_profile)
+        .value(
+            {
+                encrypted_profile_data,
+                scores,
+                connected_platforms: connectedPlatforms,
+                version,
+                profile_type_stream_id: streamId
+            }
+        )
+        .context(PLURALITY_CONTEXT);
+
+    // Perform local JSON Schema validation before running the query
+    const validation: ValidationResult = await insertStatement.validate()
+    if (!validation.valid) {
+        throw "Error during validation: " + validation.error
+    }
+
+    try {
+        const result = await insertStatement.run();
+        console.log("Result (SP): ", result)
+        return result
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+
+export async function insertIndividualProfile(
+    encrypted_profile_data: string,
+    scores: string, version = '1',
+    platformName: string) {
+    const insertStatement = await orbisdb
+        .insert(data.models.individual_profile)
+        .value(
+            {
+                platform_name: platformName,
+                encrypted_profile_data,
+                scores,
+                version,
+            }
+        )
+        .context(PLURALITY_CONTEXT);
+
+    // Perform local JSON Schema validation before running the query
+    const validation: ValidationResult = await insertStatement.validate()
+    if (!validation.valid) {
+        throw "Error during validation: " + validation.error
+    }
+
+    try {
+        const result = await insertStatement.run();
+        console.log("Result (IP): ", result)
+        return result
+    }
+    catch (error) {
+        console.log(error);
+    }
+}

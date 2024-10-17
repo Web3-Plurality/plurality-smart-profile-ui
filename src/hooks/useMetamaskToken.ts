@@ -3,34 +3,30 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { providers } from 'ethers';
 import { SiweMessage } from 'siwe';
+import { message } from 'antd';
 import { useAccount, useDisconnect } from 'wagmi';
-import { useAuth } from '../context/AuthContext';
-import { connectOrbisDidPkh } from '../common/orbis';
+import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
+// import { useAuth } from '../context/AuthContext';
 import { AuthUserInformation } from '@useorbis/db-sdk';
 import { useNavigate } from 'react-router-dom';
-import { useStep } from '../context/StepContext';
-import { message } from 'antd';
-import { isProfileConnectPlatform, isRsmPlatform } from '../common/utils';
+// import { useStep } from '../context/StepContext';
+import { isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { domain, origin, statement } from '../utils/Constants';
+import { useDispatch } from 'react-redux';
+import { goToStep } from '../Slice/stepperSlice';
 
-// Define constants and provider outside the hook
-const domain = window.location.host;
-const origin = window.location.origin;
-const statement = "I am the owner of this address";
 
 export const useMetamaskToken = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [ceramicError, setCeramicError] = useState(false);
 
-    const { address } = useAccount();
-    const { setUser } = useAuth()
-
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
+    const { address } = useAccount();
     const { disconnectAsync } = useDisconnect();
-    const { handleStepper } = useStep();
-
-
+    // const { setUser } = useAuth()
 
     // Create Siwe message
     const createSiweMessage = useCallback(async (address: string, nonce: string) => {
@@ -102,7 +98,8 @@ export const useMetamaskToken = () => {
             const { success, user } = data;
 
             if (success) {
-                setUser(user)
+                // setUser(user)
+                console.log('User: ', user)
                 localStorage.setItem('token', data.token)
                 const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
                 if (result === "error") {
@@ -141,11 +138,12 @@ export const useMetamaskToken = () => {
         localStorage.setItem("tool", tool || '')
         let path = '/'
         if (isRsmPlatform()) {
-            path = `/rsm?client_id=${clientId}`;
+            path = `/rsm?clientId=${clientId}`;
         } else if (isProfileConnectPlatform()) {
-            path = `/profile-connect?client_id=${clientId}`;
+            path = `/profile-connect?clientId=${clientId}`;
         }
-        handleStepper("initial")
+
+        dispatch(goToStep('home'))
         navigate(path, { replace: true });
         message.error("Something went wrong, please contact the team")
     }

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { AuthMethod } from '@lit-protocol/types';
-import { getPKPs, mintPKP } from '../common/lit';
 import { IRelayPKP } from '@lit-protocol/types';
+import { getPKPs, mintPKP } from '../services/Lit';
 
 export default function useAccounts() {
   const [accounts, setAccounts] = useState<IRelayPKP[]>([]);

@@ -1,56 +1,61 @@
-import axios from 'axios';
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { message } from 'antd';
 
-function Test() {
+import { ErrorMessages } from '../utils/Constants';
+import axiosInstance from '../services/Api';
+import { getLocalStorageValue } from '../utils/Helpers';
+
+function CallBackUrl() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(false);
+
     const [searchParams] = useSearchParams();
     const accessTokenID = searchParams.get('token_id');
     const appName = searchParams.get('app');
-    const [isLoading, setIsLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
+
+    const registerEvent = async () => {
+        try {
+            setIsLoading(true);
+            setError(false);
+
+            await axiosInstance.post(`oauth-${appName}/event`, {}, {
+                headers: {
+                    'x-sse-id': getLocalStorageValue('sseId'),
+                    'x-token-id': accessTokenID,
+                },
+            });
+        } catch (err) {
+            message.error(ErrorMessages.EVENT_REGISTRATION_FAILED);
+            console.error("Error:", err);
+            setError(true);
+        } finally {
+            setIsLoading(false);
+            window.close();
+        }
+    };
 
     useEffect(() => {
         if (!accessTokenID) {
-            console.error('No access token ID found in search parameters.');
-            window.close()
+            message.error(ErrorMessages.ACCESS_TOKEN_ID_ERROR);
+            window.close();
             return;
         }
 
-        const eventRegister = async () => {
-            setIsLoading(true);
-            setHasError(false);
+        registerEvent();
 
-            try {
-                await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/oauth-${appName}/event`,
-                    {},
-                    {
-                        headers: {
-                            'x-sse-id': localStorage.getItem('sseId') || '',
-                            'x-token-id': accessTokenID
-                        }
-                    }
-                );
-            } catch (error) {
-                console.error('Error during event registration:', error);
-                setHasError(true);
-            } finally {
-                setIsLoading(false);
-                window.close();
-            }
-        };
-
-        eventRegister();
     }, [accessTokenID, appName]);
 
     if (isLoading) {
         return <div>Loading...</div>;
     }
 
-    if (hasError) {
+    if (error) {
         return <div>Error occurred. Please try again.</div>;
     }
 
     return null;
 }
 
-export default Test;
+export default CallBackUrl;

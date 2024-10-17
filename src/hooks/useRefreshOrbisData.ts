@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
-import { BASE_URL } from "../common/constants";
-import { autoConnect, insertSmartProfile, select, selectSmartProfiles } from "../common/orbis";
 import axios from "axios";
-import { decryptData, encryptData } from "../common/utils";
-import { ProfileData } from "../globalTypes";
+import { API_BASE_URL } from "../utils/EnvConfig";
+import { ProfileData } from "../types";
+import { encryptData } from "../services/EncryptionDecryption/encryption";
+import { decryptData } from "../services/EncryptionDecryption/decryption";
+import { autoConnect } from "../services/orbis/autoConnect";
+import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
+import { insertSmartProfile } from "../services/orbis/insertQueries";
+import { useDispatch } from "react-redux";
+import { goToStep } from "../Slice/stepperSlice";
 
 type Platform = {
     platform: string,
     authentication: boolean
 }
 
-const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, handleStepper: (val: string) => void, step: string) => {
+const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, step: string) => {
     const [socialIcons, setSocialIcons] = useState(() => {
         const platforms = localStorage.getItem('platforms');
         return platforms ? JSON.parse(platforms) : null;
     });
 
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+
+    const dispatch = useDispatch()
 
     useEffect(() => {
         if (socialIcons) {
@@ -27,7 +34,6 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
     }, [socialIcons]);
 
     const getSmartProfileFromOrbis = async (stream_id: string) => {
-        if (loading) return
         setLoading(true)
         const selectResult = await select(stream_id);
         if (!selectResult) {
@@ -56,7 +62,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
                 const token = localStorage.getItem('token')
-                const { data } = await axios.post(`${BASE_URL}/user/smart-profile`, {}, {
+                const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, {}, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -78,7 +84,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         setLoading(false)
-                        handleStepper(step)
+                        dispatch(goToStep(step))
                     }
                 }
             }
@@ -89,11 +95,12 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                     const { streamId } = JSON.parse(smartprofileData)
                     if (streamId === response.rows[0].stream_id) {
                         setLoading(false)
-                        handleStepper(step)
+                        dispatch(goToStep(step))
                     } else {
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         if (decryptedData.code === -32603) {
-                            handleStepper('success')
+                            dispatch(goToStep('success'))
+
                             return
                         }
                         const objData = {
@@ -102,12 +109,12 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
                         setLoading(false)
-                        handleStepper(step)
+                        dispatch(goToStep(step))
                     }
                 } else {
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     if (decryptedData.code === -32603) {
-                        handleStepper('success')
+                        dispatch(goToStep('success'))
                         return
                     }
                     const objData = {
@@ -116,7 +123,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, ha
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
                     setLoading(false)
-                    handleStepper(step)
+                    dispatch(goToStep(step))
                 }
             }
         }

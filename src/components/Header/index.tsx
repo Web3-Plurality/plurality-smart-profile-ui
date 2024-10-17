@@ -1,28 +1,50 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccount, useDisconnect } from 'wagmi';
 import classNames from 'classnames';
-import { isProfileConnectPlatform, isRsmPlatform, showHeader } from '../../common/utils';
-import { useStep } from '../../context/StepContext';
-import CustomIcon from '../CustomIcon'
-import Drawer from '../Drawer';
 import BadgeIcon from './../../assets/svgIcons/badge-icon.svg'
 import './styles.css'
 import { useNavigate } from 'react-router-dom';
 import { Rating } from 'react-simple-star-rating';
+import { isProfileConnectPlatform, isRsmPlatform, showHeader } from '../../utils/Helpers';
+import CustomIcon from '../customIcon';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentStep } from '../../selectors/stepperSelector';
+import { goToStep } from '../../Slice/stepperSlice';
+import Drawer from './Drawer';
+import { selectShouldUpdate } from '../../selectors/headerSelector';
+import { useEffect, useState } from 'react';
 
 const isIframe = window.location !== window.parent.location
 
 const Header = () => {
-    const navigate = useNavigate()
+    const [toggle, setToggle] = useState(false)
 
-    const { stepHistory, handleStepper } = useStep();
-    const currentStep = stepHistory[stepHistory.length - 1];
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const currentStep = useSelector(selectCurrentStep)
+    const shouldUpdate = useSelector(selectShouldUpdate);
     const isHeaderVisible = showHeader(currentStep)
 
     const litAccount = localStorage.getItem('lit-wallet-sig')
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
 
+    const userOrbisData = localStorage.getItem('smartProfileData')
+    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
+
+    const name = parssedUserOrbisData?.data?.smartProfile?.username
+    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
+    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length
+
+    const incentiveType = localStorage.getItem('incentives')
+
     const { disconnectAsync } = useDisconnect();
     const { address: metamaskAddress } = useAccount();
+
+    useEffect(() => {
+        setToggle(!toggle)
+    }, [shouldUpdate])
 
     if (!isHeaderVisible) return
 
@@ -44,19 +66,12 @@ const Header = () => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        handleStepper("initial")
+        dispatch(goToStep('home'))
         navigate(path, { replace: true });
         window.location.reload();
     }
 
-    const userOrbisData = localStorage.getItem('smartProfileData')
-    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
-    const name = parssedUserOrbisData?.data?.smartProfile?.username
-    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
-    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length 
-
-    const incentiveType = localStorage.getItem('incentives')
 
     return (
         <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
@@ -72,14 +87,13 @@ const Header = () => {
 
                     {incentiveType && incentiveType === 'Stars' && (
                         <div>
-                            <Rating initialValue={ratingValue} iconsCount={4} readonly={true} size={15} />
+                            <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
                         </div>
                     )}
 
                 </div>
                 <Drawer
                     handleLogout={handleLogout}
-                    handleStepper={handleStepper}
                     address={metamaskAddress || litAddress}
                 />
             </div>

@@ -1,150 +1,88 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from 'react';
-import { message } from 'antd';
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { useStep } from '../context/StepContext';
-import WidgetLayout from '../components/appLayout';
-import EmailLogin from '../components/EmailLogin';
-import OTPVerification from '../components/OTPVerification';
-import AuthFlow from '../components/AuthFlow';
-import EmailVerification from '../components/EmailVerification';
-import AuthSuccess from '../components/AuthSuccess';
-import SocialConnect from '../components/SocialConnect';
-import SocialConfirmation from '../components/SocialConfirmation';
-import DigitalWardrobe from '../components/DigitaWardrobe';
-import DigitalWardrobeConnect from '../components/DigitalWardrobeConnect';
-import Dashboard from '../components/LitComponents/Dashboard';
-import ProfileSettings from '../components/ProfileSettings';
-import {
-    encryptData,
-    getDescription,
-    getTitleText,
-    isProfileConnectPlatform,
-    isRsmPlatform,
-    showBackButton,
-    showHeader
-} from '../common/utils';
-import { PayloadDataType, ProfileData } from '../globalTypes';
-import { useRegisterEvent } from '../common/eventListner';
-import { BASE_URL, CLIENT_ID, metaverseHubButtons, socialConnectButtons } from '../common/constants';
-import { MessageType } from 'antd/es/message/interface';
-import { useMetamaskToken } from '../hooks/useMetamaskToken';
-import { useNavigate } from 'react-router-dom';
-import LogoutModal from '../components/LogoutModal';
-import axios from 'axios';
-import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
-import { connectOrbisDidPkh, insertSmartProfile, select } from '../common/orbis';
-import { AuthUserInformation } from '@useorbis/db-sdk';
+import { useDispatch, useSelector } from "react-redux"
+import Home from "../components/Home/home"
+import WidgetLayout from "../components/Layout/appLayout"
+import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHeader } from "../utils/Helpers"
+import { goToStep } from "../Slice/stepperSlice"
+import { selectCurrentStep } from "../selectors/stepperSelector"
+import LitLogin from "../components/LitLogin/litLogin"
+import { useEffect, useRef, useState } from "react"
+import OTPVerification from "../components/otpVerification"
+import { PayloadDataType, ProfileData } from "../types"
+import EmailVerification from "../components/emailVerification"
+import Dashboard from "../components/dashboard"
+import AuthSuccess from "../components/authSuccess"
+import SocialConnect from "../components/socialConnect"
+import { socialConnectButtons } from "../utils/Constants"
+import { MessageType } from "antd/es/message/interface"
+import { message } from "antd"
+import { useRegisterEvent } from "../hooks/useEventListner"
+import useResponsive from "../hooks/useResponsive"
+import { useAccount, useConnect, useDisconnect } from "wagmi"
+import { useMetamaskToken } from "../hooks/useMetamaskToken"
+import ProfileSettings from "../components/ProfileSettings"
+import LogoutModal from "../components/LogoutModal"
+import { AuthUserInformation } from "@useorbis/db-sdk"
+import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
+import { useNavigate } from "react-router-dom"
+import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
+import axios from "axios"
+import { select } from "../services/orbis/selectQueries"
+import { setLoadingState } from "../Slice/userDataSlice"
+
 
 const Login = () => {
-    const { stepHistory, handleStepper, handleBack } = useStep();
-    const { disconnectAsync } = useDisconnect();
-    const navigate = useNavigate()
-    const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const warningMessageRef = useRef<MessageType | null>(null);
-    const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 834);
-    const [isLoading, setIsLoading] = useState<boolean>(!!clientId)
-
-    const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
-    // I am actually not sure if we can reference a state inside another state??
-    const [activeStates, setActiveStates] = useState<boolean[]>(
-        socialButtons.map(button => button.active ?? false)
-    );
-
-    const [selectedSocial, setSelectedSocial] = useState('')
-    const [selectedNFT, setSelectedNFT] = useState('')
     const [methodId, setMethodId] = useState<string>('')
-    const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
         method: 'email'
     });
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const warningMessageRef = useRef<MessageType | null>(null);
+    // const [selectedSocial, setSelectedSocial] = useState('')
+    // const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [activeIndex, setActiveIndex] = useState<number | null>(null)
+    const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
+    const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
 
-    const previousStep = stepHistory[stepHistory.length - 2]
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const currentStep = useSelector(selectCurrentStep)
 
-    const [, setUser] = useState<string>('')
-    const { address: metamaskAddress, isConnected } = useAccount();
+    const { disconnectAsync } = useDisconnect();
     const { connect, connectors } = useConnect();
-    const { getPublicKey } = useMetamaskPublicKey()
+    const { address: metamaskAddress, isConnected } = useAccount();
 
+    const storedLitAccount = localStorage.getItem('lit-wallet-sig')
+    const token = localStorage.getItem('token')
+
+
+    const { isTabScreen } = useResponsive()
     const {
         message: eventMessage,
         app,
-        isLoading: infoLoading,
         registerEvent,
     } = useRegisterEvent()
-
-    // const {
-    //     sumbitDataToOrbis,
-    //     isLoading: orbisLoading
-    // } = useOrbisHandler()
-
-    useEffect(() => {
-        const handleResize = () => setIsSmallScreen(window.innerWidth <= 576);
-
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('resizeTab', handleResize);
-        }
-    }, []);
-
-    const getLatestSmartProfile = async () => {
-        const presentSmartProfileData = localStorage.getItem('smartProfileData')
-        const token = localStorage.getItem('token')
-        if (presentSmartProfileData) {
-            const { data } = await axios.post(`${BASE_URL}/user/smart-profile`, { smartProfile: JSON.parse(presentSmartProfileData) }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-
-            if (data.success) {
-                const litSignature = localStorage.getItem("signature")
-                let publicKey;
-                if (!litSignature) {
-                    publicKey = await getPublicKey();
-                }
-                const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-
-                const stream_id = localStorage.getItem("streamId")!
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
-                // save smart profile in local storage along with the returned stream id
-                if (insertionResult) {
-                    const objData = {
-                        streamId: insertionResult?.id,
-                        data: { smartProfile: data.smartProfile }
-                    }
-                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
-                    handleStepper('metaverseHub')
-                }
-
-            }
-        }
-    }
-
     const {
         generateMetamaskToken,
         error: metmaskLoginError,
         setError,
         ceramicError,
         setCeramicError
-        // isLoading: nonceLoading
     } = useMetamaskToken()
-
 
     useEffect(() => {
         // We need tp use this clientId to load the logo
         if (clientId) {
-            setIsLoading(true)
+            // setIsLoading(true)
+            dispatch(setLoadingState({ loadingState: true, text: 'Loading your profile!' }))
             localStorage.setItem('clientId', clientId)
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${BASE_URL}/rsm?uuid=${clientId}`
+                    const rsmUrl = `${API_BASE_URL}/rsm?uuid=${clientId}`
                     const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
@@ -173,12 +111,14 @@ const Login = () => {
                     localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
                     localStorage.setItem("platformName", JSON.stringify(selectedResult?.rows[0].profile_name))
                     localStorage.setItem("platformDescription", JSON.stringify(selectedResult?.rows[0].description))
-                    setIsLoading(false)
+                    // setIsLoading(false)
                 } catch (fetchError) {
-                    message.error('API request failed!');
+                    // message.error('API request failed!');
                     console.error("Fetch error:", fetchError);
+                    navigate('/unauthorized')
                 } finally {
-                    setIsLoading(false)
+                    // setIsLoading(false)
+                    dispatch(setLoadingState({ loadingState: false, text: '' }))
                 }
 
             }
@@ -190,70 +130,110 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (eventMessage === 'received') {
-            const newActiveStates = [...activeStates];
-            if (activeIndex !== null) {
-                newActiveStates[activeIndex] = !newActiveStates[activeIndex];
-            }
-            setActiveStates(newActiveStates);
-            setIsLoading(false)
-        }
-    }, [eventMessage, app]);
-
-    useEffect(() => {
-        const token = localStorage.getItem('token')
         if (isConnected && !token) {
             generateMetamaskToken()
         }
     }, [isConnected])
 
-    const widgetHeader = document.getElementById('w-header');
-    widgetHeader?.classList.remove('toogleShow')
+    useEffect(() => {
+        if (metamaskAddress && currentStep === "home") {
+            dispatch(goToStep("success"))
+        } else if (litAddress || metamaskAddress) {
+            dispatch(goToStep(currentStep))
+        } else {
+            if (showHeader(currentStep)) {
+                dispatch(goToStep("home"))
+            }
+        }
+    }, [metamaskAddress, currentStep])
 
-    const storedLitAccount = localStorage.getItem('lit-wallet-sig')
+
     let litAddress = ''
     if (storedLitAccount) {
         litAddress = JSON.parse(storedLitAccount).address
     }
 
-    useEffect(() => {
-        if (metamaskAddress && currentStep === 'initial') {
-            handleStepper("success")
-        } else if (litAddress || metamaskAddress) {
-            handleStepper(currentStep)
-        } else {
-            if (showHeader(currentStep)) {
-                handleStepper('initial')
-            }
+    const handleLitConnect = () => {
+        checkPreviousLoginMode('lit')
+        dispatch(goToStep('litLogin'))
+    }
+
+    const handleSmallScreenWarning = () => {
+        if (warningMessageRef.current) {
+            warningMessageRef.current();
+            warningMessageRef.current = null;
         }
-    }, [metamaskAddress])
+        warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
+    };
+
+    const handleMetaMaskNotInstalled = () => {
+        alert("MetaMask is not installed");
+        const params = new URLSearchParams(window.location.search);
+        const origin = params.get('origin')!;
+        window.parent.postMessage({ eventName: 'errorMessage', data: "Please install MetaMask" }, origin);
+    };
+
+    const ensureMetamaskConnection = async () => {
+        const isMetaMaskInstalled = typeof window.ethereum !== 'undefined';
+        if (!isMetaMaskInstalled) {
+            handleMetaMaskNotInstalled();
+            return;
+        }
+        const needsConnection = !metamaskAddress || !isConnected;
+
+        if (needsConnection) {
+            await disconnectAsync();
+            const metamaskConnector = connectors[0]; // MetaMask connector
+            connect({ connector: metamaskConnector });
+        }
+    };
+
+    const handleMetamaskConnect = async () => {
+        if (isTabScreen) {
+            handleSmallScreenWarning();
+            return;
+        }
+
+        try {
+            checkPreviousLoginMode('metamask')
+            await ensureMetamaskConnection();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+
+
+    const handleFinalPayload = (data: PayloadDataType) => {
+        setFinalPayload(data)
+    }
 
     const handleIconClick = (index: number) => {
-        const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
+        // const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
 
-        const isMetaverseHub = currentStep === 'metaverseHub';
-        // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
-        const isIndexValid = index < socialButtons?.length - 2;
+        // const isMetaverseHub = currentStep === 'metaverseHub';
+        // // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
+        // const isIndexValid = index < socialButtons?.length - 2;
 
 
-        const handleMetaverseHubClick = () => {
-            const smartProfileData = localStorage.getItem('smartProfileData')
-            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-            const clickedIconDisplayName = socialButtons[index]?.displayName?.toLowerCase().replace(/\s+/g, '');
+        // const handleMetaverseHubClick = () => {
+        //     const smartProfileData = localStorage.getItem('smartProfileData')
+        //     const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+        //     const clickedIconDisplayName = socialButtons[index]?.displayName?.toLowerCase().replace(/\s+/g, '');
 
-            if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
-                handleStepper('socialConfirmation');
-                if (profiles[index].displayName) {
-                    setSelectedSocial(profiles[index].displayName);
-                }
-            } else {
-                if (warningMessageRef.current) {
-                    warningMessageRef.current();
-                    warningMessageRef.current = null;
-                }
-                warningMessageRef.current = message.warning('Please connect this profile first!');
-            }
-        };
+        //     if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
+        //         dispatch(goToStep('socialConfirmation'))
+        //         // if (profiles[index].displayName) {
+        //         //     setSelectedSocial(profiles[index].displayName);
+        //         // }
+        //     } else {
+        //         if (warningMessageRef.current) {
+        //             warningMessageRef.current();
+        //             warningMessageRef.current = null;
+        //         }
+        //         warningMessageRef.current = message.warning('Please connect this profile first!');
+        //     }
+        // };
 
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
@@ -283,11 +263,12 @@ const Login = () => {
             }
         };
 
-        if (isMetaverseHub) {
-            handleMetaverseHubClick();
-        } else {
-            handleSocialConnectClick();
-        }
+        handleSocialConnectClick()
+        // if (isMetaverseHub) {
+        //     handleMetaverseHubClick();
+        // } else {
+        //     handleSocialConnectClick();
+        // }
         // if (isMetaverseHub) {
         //     handleMetaverseHubClick();
         // } else if (!activeStates[index]) {
@@ -297,139 +278,45 @@ const Login = () => {
         // }
     };
 
-
-    const handleSelectedNFT = (nft: string) => {
-        setSelectedNFT(nft)
-    }
-
-    const handleMethodId = (id: string) => {
-        setMethodId(id)
-    }
-
-    const handleFinalPayload = (data: PayloadDataType) => {
-        setFinalPayload(data)
-    }
-
-    const handleVerificationError = () => {
-        handleStepper('initial');
-        message.error('Something went wrong. Please try again.');
-    }
-
-    const currentStep = stepHistory[stepHistory.length - 1];
-    const isBackButton = showBackButton(currentStep)
-
-    const ensureMetamaskConnection = async (): Promise<boolean> => {
-        // Check if MetaMask is installed
-        if (typeof window.ethereum !== 'undefined') {
-
-            // Check if MetaMask is connected
-            if (!metamaskAddress || !isConnected) {
-                await disconnectAsync()
-                const metamskConnector = connectors[0] //Metamask
-                connect({ connector: metamskConnector });
+    useEffect(() => {
+        if (eventMessage === 'received') {
+            const newActiveStates = [...activeStates];
+            if (activeIndex !== null) {
+                newActiveStates[activeIndex] = !newActiveStates[activeIndex];
             }
-            return true; // MetaMask is installed
-        } else {
-            alert("MetaMask is not installed");
-            const params = new URLSearchParams(window.location.search)
-            const origin = params.get('origin')!;
-            window.parent.postMessage({ eventName: 'errorMessage', data: "Please install metamask" }, origin);
-            return false; // MetaMask is not installed
+            setActiveStates(newActiveStates);
+            dispatch(setLoadingState({ loadingState: false, text: '' }))
         }
-    };
+    }, [eventMessage, app]);
 
-
-    const handleMetamaskConnect = async () => {
-        if (isSmallScreen) {
-            if (warningMessageRef.current) {
-                warningMessageRef.current();
-                warningMessageRef.current = null;
-            }
-            warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
-            return;
+    useEffect(() => {
+        if (finalPayload.session) {
+            dispatch(goToStep('verification'));
         }
-        try {
-            if ((localStorage.getItem('tool') as string) !== 'metamask') {
-                const streamId = localStorage.getItem('streamId')
-                const logo = localStorage.getItem('logo')
-                const links = localStorage.getItem('links')
-                const platforms = localStorage.getItem("platforms")
-                const clientId = localStorage.getItem("clientId")
-                const incentiveType = localStorage.getItem('incentives')
-                const platformName = localStorage.getItem('platformName')
-                const platformDescription = localStorage.getItem('platformDescription')
-
-                localStorage.clear()
-                localStorage.setItem('streamId', streamId || '')
-                localStorage.setItem('logo', logo || '')
-                localStorage.setItem('links', links || '')
-                localStorage.setItem('platforms', platforms || '')
-                localStorage.setItem('clientId', clientId || '')
-                localStorage.setItem('incentives', incentiveType || '')
-                localStorage.setItem('platformName', platformName || '')
-                localStorage.setItem('platformDescription', platformDescription || '')
-            }
-            if (setUser) setUser("user");
-            await ensureMetamaskConnection();
-
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleLitConnect = async () => {
-        if ((localStorage.getItem('tool') as string) !== 'lit') {
-            const streamId = localStorage.getItem('streamId')
-            const logo = localStorage.getItem('logo')
-            const links = localStorage.getItem('links')
-            const platforms = localStorage.getItem("platforms")
-            const clientId = localStorage.getItem("clientId")
-            const incentiveType = localStorage.getItem('incentives')
-            const platformName = localStorage.getItem('platformName')
-            const platformDescription = localStorage.getItem('platformDescription')
-
-            localStorage.clear()
-            localStorage.setItem('streamId', streamId || '')
-            localStorage.setItem('logo', logo || '')
-            localStorage.setItem('links', links || '')
-            localStorage.setItem('platforms', platforms || '')
-            localStorage.setItem('clientId', clientId || '')
-            localStorage.setItem('incentives', incentiveType || '')
-            localStorage.setItem('platformName', platformName || '')
-            localStorage.setItem('platformDescription', platformDescription || '')
-        }
-        handleStepper('login')
-    }
+    }, [finalPayload.session])
 
     const conditionalRendrer = () => {
-        const currentStep = stepHistory[stepHistory.length - 1];
         switch (currentStep) {
-            case 'initial':
-                return <AuthFlow handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
-            case 'login':
-                return <EmailLogin handleMethodId={handleMethodId} />;
+            case 'home':
+                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
+            case 'litLogin':
+                return <LitLogin setMethodId={setMethodId} />
             case 'otp':
-                return <OTPVerification handleStepper={handleStepper} methodId={methodId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification methodId={methodId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
-                return <EmailVerification handleStepper={handleStepper} finalPayload={finalPayload} onError={handleVerificationError} />
+                return <EmailVerification finalPayload={finalPayload} />
+            case 'dashboard':
+                return <Dashboard currentAccount={litAddress} />
             case 'success':
-                return <AuthSuccess handleStepper={handleStepper} />
+                return <AuthSuccess />
             case 'socialConnect':
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
-            case 'socialConfirmation':
-                return <SocialConfirmation handleStepper={handleStepper} selectedProfile={selectedSocial} previousStep={previousStep} />
-            case 'digitalWardrobe':
-                return <DigitalWardrobe handleSelectedNFT={handleSelectedNFT} activeStates={activeStates} />
-            case 'digitalWardrobeConnect':
-                return <DigitalWardrobeConnect selectedNFT={selectedNFT} activeStates={activeStates} />
-            case 'dashboard':
-                return <Dashboard currentAccount={litAddress} handleStepper={handleStepper} />
             case 'profileSettings':
                 return <ProfileSettings />
             default:
-                return <div>Something went wrong!</div>;
+                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
         }
-    };
+    }
 
     async function handleLogout() {
         try {
@@ -449,18 +336,15 @@ const Login = () => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        handleStepper("initial")
+        dispatch(goToStep('home'))
         navigate(path, { replace: true });
     }
-
-
 
 
     const handleOk = async () => {
         if (ceramicError) {
             const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
             if (result === "error") {
-                // Handle error case if needed
                 console.error("Error connecting to Orbis");
                 setCeramicError(true)
             } else if (result && result.did) {
@@ -481,6 +365,7 @@ const Login = () => {
         setCeramicError(false)
     }
 
+
     return (
         <>
             <LogoutModal
@@ -488,27 +373,10 @@ const Login = () => {
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />
-            <WidgetLayout
-                currentStep={currentStep === 'success'}
-                showBackButton={isBackButton}
-                handleBack={handleBack}
-                title={getTitleText(stepHistory)}
-                description={getDescription(stepHistory)}
-                showHeaderLogo={
-                    currentStep !== 'socialConnect' &&
-                    currentStep !== 'metaverseHub'
-                }
-                showBackgroundImage={currentStep === 'socialConfirmation'}
-                isLoading={isLoading}
-                infoLoading={infoLoading}
-                selectedSocial={selectedSocial}
-                sumbitDataToOrbis={getLatestSmartProfile}
 
-            >
-                {conditionalRendrer()}
-            </WidgetLayout >
+            <WidgetLayout> {conditionalRendrer()}</WidgetLayout>
         </>
-    );
-};
+    )
+}
 
-export default Login;
+export default Login

@@ -1,28 +1,33 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BASE_URL } from '../common/constants';
+import { message } from 'antd';
+
+import { ErrorMessages } from './../utils/Constants';
+import { setLocalStorageValue } from '../utils/Helpers';
+import { API_BASE_URL } from '../utils/EnvConfig';
 
 const AuthStart = () => {
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
         const id = searchParams.get('sse_id');
-        const AppRoute = searchParams.get('route');
+        const appRoute = searchParams.get('route');
 
-        if (id) {
-            localStorage.setItem('sseId', id);
-
-            const oauthUrl = `${BASE_URL}${AppRoute}?sse_id=${id}`;
-            window.location.href = oauthUrl;
-        } else {
-            console.error('sse_id query parameter is missing');
+        if (!id) {
+            message.error(ErrorMessages.SSID_MISSING_ERROR)
+            window.close();
+            return;
         }
+
+        setLocalStorageValue('sseId', id);
+        const redirectUrl = `${API_BASE_URL}${appRoute}?sse_id=${id}`;
+        window.location.href = redirectUrl;
+
     }, [searchParams]);
 
 
     return (
         <div className='fullscreen-loader'>
-            {/* <Loading copy={'Redirection...'} /> */}
             Redirecting...
         </div>
     );
