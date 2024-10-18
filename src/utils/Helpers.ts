@@ -10,9 +10,10 @@ import {
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
     SPATIAL_ROUTE,
-    TIKTOK_ROUTE
+    TIKTOK_ROUTE,
+    TWITTER_ROUTE
 } from "./Constants"
-import HeaderLogo from './../assets/svgIcons/app-logo.png'
+// import HeaderLogo from './../assets/svgIcons/app-logo.png'
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
@@ -45,6 +46,8 @@ const RouteMapper = (app: string) => {
             return SPATIAL_ROUTE
         case 'artificialRome':
             return ARTIFICIAL_ROME_ROUTE
+        case 'twitter':
+            return TWITTER_ROUTE
         default:
             return FACEBOOK_ROUTE
     }
@@ -147,7 +150,7 @@ const isProfileConnectPlatform = () => {
 
 const getPlatformImage = () => {
     const platformLogo = localStorage.getItem('logo')
-    return platformLogo ? platformLogo : HeaderLogo
+    return platformLogo ?? ''
 }
 
 export {

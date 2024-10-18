@@ -6,12 +6,16 @@ import { RouteMapper } from '../utils/Helpers'
 import { encryptData } from '../services/EncryptionDecryption/encryption'
 import { autoConnect } from '../services/orbis/autoConnect'
 import { insertIndividualProfile, insertSmartProfile } from '../services/orbis/insertQueries'
+import { setLoadingState } from '../Slice/userDataSlice'
+import { useDispatch } from 'react-redux'
 
 export const useRegisterEvent = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [app, setApp] = useState('')
+
+    const dispatch = useDispatch()
 
 
     const { getPublicKey } = useMetamaskPublicKey()
@@ -59,6 +63,7 @@ export const useRegisterEvent = () => {
         const token = localStorage.getItem('token')
         try {
             setIsLoading(true)
+            dispatch(setLoadingState({ loadingState: true, text: "Updating your profile" }));
             const { data } = await axios.get(infoUrl, {
                 headers: {
                     'x-token-id': auth,
@@ -66,7 +71,6 @@ export const useRegisterEvent = () => {
                 }
             })
             if (data.message === 'success') {
-
 
                 const individualProfileData = data.individualProfile
                 const scores = individualProfileData.scores
@@ -112,6 +116,7 @@ export const useRegisterEvent = () => {
                                 data: { smartProfile: smartProfileResponse.smartProfile }
                             }
                             localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                            dispatch(setLoadingState({ loadingState: false, text: "" }));
                             // setLoading(false)
                         }
                     }

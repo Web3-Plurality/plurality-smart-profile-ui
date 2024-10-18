@@ -45,7 +45,7 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
 
     return (
         <WidgetContentWrapper>
-            {showWidgetLogo && <img className="app-logo" src={plaformImg} alt='' />}
+            {showWidgetLogo && plaformImg && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />
             ) : (
