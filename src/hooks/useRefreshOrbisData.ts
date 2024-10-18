@@ -9,6 +9,7 @@ import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { goToStep } from "../Slice/stepperSlice";
+import { updateHeader } from "../Slice/headerSlice";
 
 type Platform = {
     platform: string,
@@ -55,6 +56,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
             );
             setSocialIcons(activePlatforms)
 
+
             //////////////////////////////////////////
             await autoConnect()
             const response = await selectSmartProfiles(stream_id);
@@ -83,6 +85,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             data: { smartProfile: data.smartProfile }
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        dispatch(updateHeader())
                         setLoading(false)
                         dispatch(goToStep(step))
                     }
@@ -108,6 +111,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             data: { smartProfile: decryptedData }
                         }
                         localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        dispatch(updateHeader())
                         setLoading(false)
                         dispatch(goToStep(step))
                     }
@@ -122,6 +126,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         data: { smartProfile: decryptedData }
                     }
                     localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    dispatch(updateHeader())
                     setLoading(false)
                     dispatch(goToStep(step))
                 }

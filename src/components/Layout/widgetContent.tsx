@@ -7,6 +7,7 @@ import useResponsive from "../../hooks/useResponsive";
 import Loader from "../Loader";
 import { selectLoader } from "../../selectors/userDataSelector";
 import { useSelector } from "react-redux";
+import { selectCurrentStep } from "../../selectors/stepperSelector";
 
 
 const WidgetContentWrapper = styled.div`
@@ -35,14 +36,16 @@ const WidgetContentWrapper = styled.div`
 
 const WidgetContent = ({ children }: { children: ReactNode }) => {
     const showLoader = useSelector(selectLoader)
+    const currentStep = useSelector(selectCurrentStep)
     const plaformImg = getPlatformImage()
+    const showWidgetLogo = currentStep !== 'socialConnect'
     const { isTabScreen, isMobileScreen } = useResponsive()
 
     const isSmallScreen = isTabScreen || isMobileScreen
 
     return (
         <WidgetContentWrapper>
-            <img className="app-logo" src={plaformImg} alt='' />
+            {showWidgetLogo && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />
             ) : (

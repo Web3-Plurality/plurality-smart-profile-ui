@@ -4,8 +4,7 @@ import useRefreshOrbisData from '../hooks/useRefreshOrbisData';
 import Loader from './Loader';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
 import SocialProfiles from './socialProfiles';
-import { updateHeader } from '../Slice/headerSlice';
-import { useDispatch } from 'react-redux';
+
 interface SocialConnectProps {
     activeStates: boolean[],
     handleIconClick: (idx: number) => void
@@ -13,7 +12,6 @@ interface SocialConnectProps {
 
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     const { getPublicKey } = useMetamaskPublicKey()
-    const dispatch = useDispatch();
     const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, 'socialConnect')
     const streamId = localStorage.getItem("streamId") || '';
 
@@ -23,8 +21,6 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
 
     if (loading) {
         return <Loader message={'Looking up your profiles...'} />;
-    } else {
-        dispatch(updateHeader())
     }
 
     return (
