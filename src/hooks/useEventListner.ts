@@ -10,7 +10,6 @@ import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 
 export const useRegisterEvent = () => {
-    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [app, setApp] = useState('')
@@ -62,7 +61,6 @@ export const useRegisterEvent = () => {
         const infoUrl = `${API_BASE_URL}${AppRoute}/info`
         const token = localStorage.getItem('token')
         try {
-            setIsLoading(true)
             dispatch(setLoadingState({ loadingState: true, text: "Updating your profile" }));
             const { data } = await axios.get(infoUrl, {
                 headers: {
@@ -71,7 +69,6 @@ export const useRegisterEvent = () => {
                 }
             })
             if (data.message === 'success') {
-
                 const individualProfileData = data.individualProfile
                 const scores = individualProfileData.scores
                 const litSignature = localStorage.getItem("signature")
@@ -116,8 +113,6 @@ export const useRegisterEvent = () => {
                                 data: { smartProfile: smartProfileResponse.smartProfile }
                             }
                             localStorage.setItem('smartProfileData', JSON.stringify(objData))
-                            dispatch(setLoadingState({ loadingState: false, text: "" }));
-                            // setLoading(false)
                         }
                     }
                 }
@@ -126,7 +121,7 @@ export const useRegisterEvent = () => {
             setError('Error')
             console.log(err)
         } finally {
-            setIsLoading(false)
+            dispatch(setLoadingState({ loadingState: false, text: "" }));
         }
     }
 
@@ -135,7 +130,6 @@ export const useRegisterEvent = () => {
     return {
         message,
         app,
-        isLoading,
         error,
         registerEvent,
     }

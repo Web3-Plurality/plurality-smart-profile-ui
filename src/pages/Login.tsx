@@ -111,13 +111,11 @@ const Login = () => {
                     localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
                     localStorage.setItem("platformName", JSON.stringify(selectedResult?.rows[0].profile_name))
                     localStorage.setItem("platformDescription", JSON.stringify(selectedResult?.rows[0].description))
-                    // setIsLoading(false)
                 } catch (fetchError) {
                     // message.error('API request failed!');
                     console.error("Fetch error:", fetchError);
                     navigate('/unauthorized')
                 } finally {
-                    // setIsLoading(false)
                     dispatch(setLoadingState({ loadingState: false, text: '' }))
                 }
 
@@ -285,7 +283,7 @@ const Login = () => {
                 newActiveStates[activeIndex] = !newActiveStates[activeIndex];
             }
             setActiveStates(newActiveStates);
-            dispatch(setLoadingState({ loadingState: false, text: '' }))
+            // dispatch(setLoadingState({ loadingState: false, text: '' }))
         }
     }, [eventMessage, app]);
 
