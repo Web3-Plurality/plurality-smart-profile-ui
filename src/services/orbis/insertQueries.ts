@@ -8,7 +8,7 @@ export async function insertSmartProfile(
     scores: string,
     version = '1',
     connectedPlatforms: string,
-    streamId: string
+    profileTypeStreamId: string
 ) {
     const insertStatement = await orbisdb
         .insert(data.models.smart_profile)
@@ -18,7 +18,7 @@ export async function insertSmartProfile(
                 scores,
                 connected_platforms: connectedPlatforms,
                 version,
-                profile_type_stream_id: streamId
+                profile_type_stream_id: profileTypeStreamId
             }
         )
         .context(PLURALITY_CONTEXT);

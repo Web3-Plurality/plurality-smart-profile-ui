@@ -82,7 +82,7 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}/rsm?uuid=${clientId}`
+                    const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
                     const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
@@ -96,7 +96,7 @@ const Login = () => {
                         return
                     }
                     // store the streamID, log and links in localstorage
-                    localStorage.setItem('streamId', data.data.streamId)
+                    localStorage.setItem('profileTypeStreamId', data.data.streamId)
                     localStorage.setItem('logo', data.data.logo)
                     localStorage.setItem('links', data.data.links)
                     localStorage.setItem('incentives', data.data.incentiveType)

@@ -13,10 +13,10 @@ interface SocialConnectProps {
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     const { getPublicKey } = useMetamaskPublicKey()
     const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, 'socialConnect')
-    const streamId = localStorage.getItem("streamId") || '';
+    const profileTypeStreamId = localStorage.getItem("profileTypeStreamId") || '';
 
     useEffect(() => {
-        getSmartProfileFromOrbis(streamId)
+        getSmartProfileFromOrbis(profileTypeStreamId)
     }, [])
 
     if (loading) {

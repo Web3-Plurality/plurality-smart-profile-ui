@@ -108,7 +108,7 @@ const checkPreviousLoginMode = (account: string) => {
     const prevTool = localStorage.getItem('tool')
 
     if (prevTool && prevTool !== account) {
-        const streamId = localStorage.getItem('streamId')
+        const profileTypeStreamId = localStorage.getItem('profileTypeStreamId')
         const logo = localStorage.getItem('logo')
         const links = localStorage.getItem('links')
         const platforms = localStorage.getItem("platforms")
@@ -119,7 +119,7 @@ const checkPreviousLoginMode = (account: string) => {
 
         localStorage.clear();
 
-        localStorage.setItem('streamId', streamId || '')
+        localStorage.setItem('profileTypeStreamId', profileTypeStreamId || '')
         localStorage.setItem('logo', logo || '')
         localStorage.setItem('links', links || '')
         localStorage.setItem('platforms', platforms || '')

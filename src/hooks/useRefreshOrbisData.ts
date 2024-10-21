@@ -64,9 +64,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
                 const token = localStorage.getItem('token')
+                const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")
                 const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, {}, {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
+                        'x-profile-type-stream-id': profileTypeStreamId,
                     }
                 })
 

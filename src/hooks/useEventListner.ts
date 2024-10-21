@@ -8,6 +8,7 @@ import { autoConnect } from '../services/orbis/autoConnect'
 import { insertIndividualProfile, insertSmartProfile } from '../services/orbis/insertQueries'
 import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
+import { updateHeader } from '../Slice/headerSlice'
 
 export const useRegisterEvent = () => {
     const [error, setError] = useState('')
@@ -89,23 +90,24 @@ export const useRegisterEvent = () => {
                     if (localSmartProfile) {
                         payload = JSON.parse(localSmartProfile).data.smartProfile
                     }
+                    const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")
 
                     const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
                         headers: {
-                            Authorization: `Bearer ${token}`
+                            Authorization: `Bearer ${token}`,
+                            'x-profile-type-stream-id': profileTypeStreamId,
                         }
                     })
 
                     if (smartProfileResponse.success) {
                         const litSignature = localStorage.getItem("signature")
-                        const stream_id = localStorage.getItem("streamId")!
                         let publicKey
                         if (!litSignature) {
                             publicKey = await getPublicKey();
                         }
                         const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
                         await autoConnect()
-                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms), stream_id)
+                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connected_platforms), profileTypeStreamId!)
                         // save smart profile in local storage along with the returned stream id
                         if (insertionResult) {
                             const objData = {
@@ -122,6 +124,7 @@ export const useRegisterEvent = () => {
             console.log(err)
         } finally {
             dispatch(setLoadingState({ loadingState: false, text: "" }));
+            dispatch(updateHeader())
         }
     }
 
