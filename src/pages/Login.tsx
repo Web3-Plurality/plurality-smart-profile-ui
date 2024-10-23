@@ -6,7 +6,7 @@ import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHe
 import { goToStep } from "../Slice/stepperSlice"
 import { selectCurrentStep } from "../selectors/stepperSelector"
 import LitLogin from "../components/LitLogin/litLogin"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import OTPVerification from "../components/otpVerification"
 import { PayloadDataType, ProfileData } from "../types"
 import EmailVerification from "../components/emailVerification"
@@ -14,10 +14,10 @@ import Dashboard from "../components/dashboard"
 import AuthSuccess from "../components/authSuccess"
 import SocialConnect from "../components/socialConnect"
 import { socialConnectButtons } from "../utils/Constants"
-import { MessageType } from "antd/es/message/interface"
+// import { MessageType } from "antd/es/message/interface"
 import { message } from "antd"
 import { useRegisterEvent } from "../hooks/useEventListner"
-import useResponsive from "../hooks/useResponsive"
+// import useResponsive from "../hooks/useResponsive"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
@@ -40,7 +40,7 @@ const Login = () => {
     });
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const warningMessageRef = useRef<MessageType | null>(null);
+    // const warningMessageRef = useRef<MessageType | null>(null);
     // const [selectedSocial, setSelectedSocial] = useState('')
     // const [isLoading, setIsLoading] = useState<boolean>(false)
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -59,7 +59,7 @@ const Login = () => {
     const token = localStorage.getItem('token')
 
 
-    const { isTabScreen } = useResponsive()
+    // const { isTabScreen } = useResponsive()
     const {
         message: eventMessage,
         app,
@@ -82,7 +82,7 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}?uuid=${clientId}`
+                    const rsmUrl = `${API_BASE_URL}/rsm?uuid=${clientId}`
                     const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
@@ -156,13 +156,13 @@ const Login = () => {
         dispatch(goToStep('litLogin'))
     }
 
-    const handleSmallScreenWarning = () => {
-        if (warningMessageRef.current) {
-            warningMessageRef.current();
-            warningMessageRef.current = null;
-        }
-        warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
-    };
+    // const handleSmallScreenWarning = () => {
+    //     if (warningMessageRef.current) {
+    //         warningMessageRef.current();
+    //         warningMessageRef.current = null;
+    //     }
+    //     warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
+    // };
 
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
@@ -187,10 +187,10 @@ const Login = () => {
     };
 
     const handleMetamaskConnect = async () => {
-        if (isTabScreen) {
-            handleSmallScreenWarning();
-            return;
-        }
+        // if (isTabScreen) {
+        //     handleSmallScreenWarning();
+        //     return;
+        // }
 
         try {
             checkPreviousLoginMode('metamask')
