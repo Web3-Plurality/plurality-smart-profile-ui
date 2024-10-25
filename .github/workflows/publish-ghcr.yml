@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install
+          npm install --legacy-peer-deps
       
       # These values are here on experimental basis - only for testnet for production we would move to a secure backend signer service
       - name: Prepare Environment files

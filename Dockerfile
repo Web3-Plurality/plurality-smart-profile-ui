@@ -3,7 +3,7 @@ RUN apt-get update
 RUN mkdir /app
 WORKDIR /app
 COPY package-lock.json package.json /app/
-RUN npm install 
+RUN npm install --legacy-peer-deps
 COPY . /app/
 RUN npm run build
 RUN npm install -g serve
