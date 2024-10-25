@@ -137,6 +137,14 @@ const Login = () => {
     }, [isConnected])
 
     useEffect(() => {
+        const profileData = localStorage.getItem('smartProfileData')
+        if (profileData) {
+            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
+        }
+    }, [])
+
+
+    useEffect(() => {
         if (metamaskAddress && currentStep === "home") {
             dispatch(goToStep("success"))
         } else if (litAddress || metamaskAddress) {
