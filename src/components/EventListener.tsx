@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 const EventListener: React.FC = () => {
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
-        console.log("Inside EventListener", event, event.data, event.origin, parentUrl, event.data.type)
+        console.log("Inside EventListener", event, parentUrl)
         if (event.origin === parentUrl && event.data.type === 'metamaskRequest') {
             const data = event.data;
             let signer = null;
