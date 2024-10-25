@@ -59,6 +59,8 @@ const Login = () => {
     const token = localStorage.getItem('token')
 
 
+    const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
+
     // const { isTabScreen } = useResponsive()
     const {
         message: eventMessage,
@@ -131,6 +133,7 @@ const Login = () => {
         if (isConnected && !token) {
             generateMetamaskToken()
         }
+        window.parent.postMessage({ eventName: 'metamaskConnection', data: { isConnected } }, parentUrl);
     }, [isConnected])
 
     useEffect(() => {

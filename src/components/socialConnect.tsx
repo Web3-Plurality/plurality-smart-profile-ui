@@ -1,5 +1,4 @@
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useRefreshOrbisData from '../hooks/useRefreshOrbisData';
 import Loader from './Loader';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
@@ -11,12 +10,23 @@ interface SocialConnectProps {
 }
 
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
+    const [, setRefresh] = useState(false)
     const { getPublicKey } = useMetamaskPublicKey()
     const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData(getPublicKey, 'socialConnect')
     const profileTypeStreamId = localStorage.getItem("profileTypeStreamId") || '';
 
     useEffect(() => {
         getSmartProfileFromOrbis(profileTypeStreamId)
+    }, [])
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+
+            if (event.data && event.data.data === 'refresh') {
+                setRefresh(prev => !prev);
+            }
+        };
+        window.addEventListener('message', handleMessage);
     }, [])
 
     if (loading) {
