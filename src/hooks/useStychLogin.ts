@@ -1,20 +1,21 @@
-import { useState } from "react";
 import { useStytch } from "@stytch/react";
 import { OTPCodeEmailOptions } from "@stytch/vanilla-js";
-import { useStep } from "../context/StepContext";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentStep } from "../selectors/stepperSelector";
+import { goToStep } from "../Slice/stepperSlice";
+import { setLoadingState } from "../Slice/userDataSlice";
+import { message } from "antd";
+import { ErrorMessages, LoaderMessages } from "../utils/Constants";
 
-export default function useStychLogin(email: string, handleMethodId?: (id: string) =>  void) {
-    const [error, setError] = useState<string>('')
-    const [loading, setLoading] = useState(false)
+export default function useStychLogin(email: string, setMethodId?: (id: string) => void) {
 
-    const { handleStepper, stepHistory } = useStep();
-
+    const currentStep = useSelector(selectCurrentStep)
+    const dispatch = useDispatch()
     const stytchClient = useStytch();
 
     const sendPasscode = async () => {
         try {
-            setLoading(true)
-            setError('')
+            dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_SEND }))
 
             const templateId = import.meta.env.VITE_APP_EMAIL_TEMPLATE_ID!;
             const options: OTPCodeEmailOptions = {
@@ -22,30 +23,24 @@ export default function useStychLogin(email: string, handleMethodId?: (id: strin
                 expiration_minutes: 2
             }
 
-                localStorage.setItem("user", email);
+            localStorage.setItem("user", email);
+            const response = await stytchClient.otps.email.loginOrCreate(email, options);
+            setMethodId?.(response.method_id);
 
-                const response = await stytchClient.otps.email.loginOrCreate(email, options);
-    
-                handleMethodId?.(response.method_id);
-
-                if(stepHistory[stepHistory.length - 1] !== 'otp'){
-                    handleStepper('otp')
-                }
-                setLoading(false)
+            if (currentStep !== 'otp') {
+                dispatch(goToStep('otp'))
+            }
+            dispatch(setLoadingState({ loadingState: false, text: '' }))
         } catch (err: unknown) {
-            setLoading(false)
-            setError("Something goes wrong while sending the passcode, please try it again");
+            message.error(ErrorMessages.STYCH_EMAIL_LOGIN_ERROR);
+            dispatch(goToStep('litEmail'))
+            console.log(err)
         } finally {
-            setLoading(false);
+            dispatch(setLoadingState({ loadingState: false, text: '' }))
         }
     }
 
-    return {
-        sendPasscode,
-        setError,
-        loading,
-        error
-    }
+    return { sendPasscode }
 }
 
 

@@ -14,10 +14,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-   // host: "app.plurality.local",
-   hmr: {
-    overlay: false, // Disable the error overlay
-  },
+    // host: "app.plurality.local",
+    hmr: {
+      overlay: false, // Disable the error overlay
+    },
   },
   optimizeDeps: {
     exclude: ['crypto'],

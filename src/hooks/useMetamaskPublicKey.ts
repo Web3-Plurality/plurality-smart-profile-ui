@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAccount } from "wagmi";
-import { useStep } from "../context/StepContext";
 import { message } from "antd";
+import { useDispatch } from "react-redux";
+import { goToStep } from "../Slice/stepperSlice";
 
 export const useMetamaskPublicKey = () => {
     const { address } = useAccount();
 
     const publicKey = localStorage.getItem('publicKey')
-    const { handleStepper } = useStep();
+    const dispatch = useDispatch()
 
 
 
@@ -32,9 +33,9 @@ export const useMetamaskPublicKey = () => {
             if (error.code === -32603) {
                 // User rejected the request
                 console.log("Please connect to MetaMask.");
-                handleStepper('success')
+                dispatch(goToStep('success'))
             } else {
-                handleStepper('success')
+                dispatch(goToStep('success'))
                 message.error('Something went wrong!')
                 console.error("An error occurred while getting the encryption public key:", error);
             }

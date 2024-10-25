@@ -5,6 +5,7 @@
 /environment
 /.pnp
 .pnp.js
+*.tsbuildinfo
 
 # testing
 /coverage

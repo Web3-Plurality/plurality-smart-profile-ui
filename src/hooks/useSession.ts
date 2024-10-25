@@ -1,28 +1,26 @@
 import { useCallback, useState } from 'react';
 import { AuthMethod } from '@lit-protocol/types';
-import { litNodeClient } from '../common/lit';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
-import { useAuth } from '../context/AuthContext';
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { useDisconnect } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
-import { useStep } from '../context/StepContext';
 import { message } from 'antd';
-import { isRsmPlatform } from '../common/utils';
+import { litNodeClient } from '../services/Lit';
+import { getLocalStorageValue, setLocalStorageValue } from '../utils/Helpers';
+import { useDispatch } from 'react-redux';
+import { goToStep } from '../Slice/stepperSlice';
+import { API_BASE_URL } from '../utils/EnvConfig';
+import axiosInstance from '../services/Api';
+import { globalSessionSigs } from '../Slice/userDataSlice';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
   const navigate = useNavigate()
-
-  const { setUser } = useAuth()
-  const { disconnectAsync } = useDisconnect();
-  const { handleStepper } = useStep();
-
+  const dispatch = useDispatch()
 
   /**
    * Generate session sigs and store new session data
@@ -33,8 +31,8 @@ export default function useSession() {
       setError(undefined);
       try {
 
-        const authToken = await userAuthorization(pkp.ethAddress)
-        const capacityDelegationAuthSig = await getCapacityDelegationAuthSig(authToken)
+        await userAuthorization(pkp.ethAddress)
+        const capacityDelegationAuthSig = await getCapacityDelegationAuthSig()
 
         await litNodeClient.connect()
 
@@ -54,6 +52,7 @@ export default function useSession() {
 
         setSessionSigs(sessionSigs);
         localStorage.setItem('signature', JSON.stringify(sessionSigs))
+        dispatch(globalSessionSigs(JSON.stringify(sessionSigs)))
 
       } catch (err) {
         setError(err as Error);
@@ -66,68 +65,48 @@ export default function useSession() {
 
   const userAuthorization = async (pkpAddress: string) => {
     try {
-      const url = `${import.meta.env.VITE_APP_API_BASE_URL}/user`
+      const url = `${API_BASE_URL}/user`
       const payload = {
         address: pkpAddress,
         email: localStorage.getItem('user'),
-        subscribe: true
+        subscribe: true,
+        clientId: localStorage.getItem("clientId") 
       };
       const headers = {
         'x-stytch-token': Cookies.get('stytch_session_jwt'),
       };
-      const { data } = await axios.post(url, { data: payload }, { headers })
-      if (data.success) {
-        localStorage.setItem("token", data.token)
-        setUser(data.user)
-        return data.token
-      } else {
-        handleLogout();
+      const { data } = await axios.post<{ token: string }>(url, { data: payload }, { headers })
+      console.log("DATAAA", data)
+      if (data) {
+        console.log("Token: ", data.token)
+        setLocalStorageValue("token", data.token)
       }
     } catch (err) {
       handleLogout();
-      console.log("Something went wrong!")
+      console.log("Something went wrong!", err)
     }
   }
 
-  const getCapacityDelegationAuthSig = async (token: string) => {
+  const getCapacityDelegationAuthSig = async () => {
     try {
-      const url = `${import.meta.env.VITE_APP_API_BASE_URL}/user/capacity`
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-      };
-      const { data } = await axios.get(url, { headers })
-      if (data.success) {
+      const { data } = await axiosInstance.get('/user/capacity')
+      if (data) {
         return data.capacityDelegationAuthSig
-      } else {
-        handleLogout();
       }
     } catch (err) {
       handleLogout();
-      console.log("Something went wrong!")
+      console.log("Something went wrong!", err)
     }
   }
 
   async function handleLogout() {
-    const litSignature = localStorage.getItem("signature")
-    if (!litSignature) {
-      try {
-        await disconnectAsync();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    const smartprofileData = localStorage.getItem("smartProfileData")
-    const tool = localStorage.getItem("tool")
-    const clientId = localStorage.getItem("clientId")
+    const smartprofileData = getLocalStorageValue("smartProfileData")
+    const tool = getLocalStorageValue("tool")
     localStorage.clear();
-    localStorage.setItem("smartProfileData", smartprofileData || '')
-    localStorage.setItem("tool", tool || '')
-    let path = '/'
-    if (isRsmPlatform()) {
-      path = `/rsm?client_id=${clientId}`;
-    }
-    handleStepper("initial")
-    navigate(path, { replace: true });
+    setLocalStorageValue("smartProfileData", smartprofileData || '')
+    setLocalStorageValue("tool", tool || '')
+    dispatch(goToStep("home"))
+    navigate('/', { replace: true });
     message.error("Something went wrong, please contact the team")
   }
 

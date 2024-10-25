@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeEvent, useState } from "react"
-import CustomInputField from "../CustomInputField"
+import axios from "axios"
+import { message } from "antd"
+import { useAccount } from "wagmi"
 
 import './styles.css'
-import CustomButtom from "../CustomButton"
-import { useAccount } from "wagmi"
 import { UserAvatar } from "../Avatar"
-import axios from "axios"
-import { BASE_URL } from "../../common/constants"
-import { useAuth } from "../../context/AuthContext"
-import { message } from "antd"
-import { useStep } from "../../context/StepContext"
+import CustomInputField from "../customInputField"
 import { useMetamaskPublicKey } from "../../hooks/useMetamaskPublicKey"
-import { encryptData } from "../../common/utils"
-import { autoConnect, insertSmartProfile } from "../../common/orbis"
+import { API_BASE_URL } from "../../utils/EnvConfig"
+import { encryptData } from "../../services/EncryptionDecryption/encryption"
+import CustomButtom from "../customButton"
+import { autoConnect } from "../../services/orbis/autoConnect"
+import { insertSmartProfile } from "../../services/orbis/insertQueries"
+import { useDispatch } from "react-redux"
+import { goBack } from "../../Slice/stepperSlice"
 
 const ProfileSettings = () => {
-    const { user: userData } = useAuth()
+    const dispatch = useDispatch()
     const { getPublicKey } = useMetamaskPublicKey()
-    const { handleBack } = useStep();
     const [loading, setLoading] = useState(false)
     const userOrbisData = localStorage.getItem('smartProfileData')
     const parsedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
@@ -59,15 +59,16 @@ const ProfileSettings = () => {
 
 
     const handleDataSumbit = () => {
-        if (
-            username === userData?.username &&
-            profilePic === userAvatar &&
-            userBio === userData?.bio
-        ) {
-            message.warning("Your data is alreday upto date")
-        } else {
-            submitData()
-        }
+        // if (
+        //     username === userData?.username &&
+        //     profilePic === userAvatar &&
+        //     userBio === userData?.bio
+        // ) {
+        //     message.warning("Your data is alreday upto date")
+        // } else {
+        //     submitData()
+        // }
+        submitData()
     }
     const submitData = async () => {
         try {
@@ -78,9 +79,10 @@ const ProfileSettings = () => {
                 profileImg: profilePic === userAvatar ? "" : profilePic,
                 bio: userBio
             }
-            const { data } = await axios.put(`${BASE_URL}/user`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
+            const { data } = await axios.put(`${API_BASE_URL}/user`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'x-profile-type-stream-id': localStorage.getItem("profileTypeStreamId"),
                 }
             })
 
@@ -93,9 +95,9 @@ const ProfileSettings = () => {
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
                 await autoConnect()
-          
-                let stream_id = localStorage.getItem("streamId")!
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
+
+                const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")!
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), profileTypeStreamId)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {
@@ -106,7 +108,7 @@ const ProfileSettings = () => {
                     message.success("Profile updated successfully!")
 
                     setLoading(false)
-                    handleBack()
+                    dispatch(goBack())
                 }
             }
         } catch (err) {
