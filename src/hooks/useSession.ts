@@ -69,7 +69,8 @@ export default function useSession() {
       const payload = {
         address: pkpAddress,
         email: localStorage.getItem('user'),
-        subscribe: true
+        subscribe: true,
+        clientId: localStorage.getItem("clientId") 
       };
       const headers = {
         'x-stytch-token': Cookies.get('stytch_session_jwt'),

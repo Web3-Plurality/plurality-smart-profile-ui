@@ -78,14 +78,14 @@ const Header = () => {
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>{name || 'John Doe'}</span>
-                    {incentiveType && incentiveType === 'Points' && (
+                    {incentiveType && incentiveType === 'POINTS' && (
                         <div className='icon-box'>
                             <span>{score || 0}</span>
                             <CustomIcon path={BadgeIcon} />
                         </div>
                     )}
 
-                    {incentiveType && incentiveType === 'Stars' && (
+                    {incentiveType && incentiveType === 'STARS' && (
                         <div>
                             <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
                         </div>

@@ -82,13 +82,13 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
                 />
             </div>
             {currentStep !== "profileSettings" && (<div className='mobile-scores'>
-                {incentiveType && incentiveType === 'Points' && (
+                {incentiveType && incentiveType === 'POINTS' && (
                     <>
                         <span>{score || 0}</span>
                         <CustomIcon path={BadgeIcon} />
                     </>
                 )}
-                {incentiveType && incentiveType === 'Stars' && <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />}
+                {incentiveType && incentiveType === 'STARS' && <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />}
 
             </div>)}
         </div>

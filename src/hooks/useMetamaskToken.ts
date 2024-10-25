@@ -91,7 +91,7 @@ export const useMetamaskToken = () => {
             const headers = { 'x-siwe': headersData }
 
             const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user`,
-                { data: { address } },
+                { data: { address, clientId: localStorage.getItem("clientId") } },
                 { headers }
             );
 
