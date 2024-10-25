@@ -47,6 +47,7 @@
     position: absolute;
     top: 23px;
     right: 2px;
+    cursor: pointer;
 }
 
 .mobile-scores {

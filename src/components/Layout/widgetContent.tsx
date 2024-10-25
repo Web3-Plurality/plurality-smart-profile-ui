@@ -10,7 +10,11 @@ import { useSelector } from "react-redux";
 import { selectCurrentStep } from "../../selectors/stepperSelector";
 
 
-const WidgetContentWrapper = styled.div`
+interface WidgetContentWrapperProps {
+    isIframe: boolean;
+}
+
+const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -20,7 +24,7 @@ const WidgetContentWrapper = styled.div`
 
     .app-logo {
         position: absolute;
-        bottom: 100%;
+        bottom: ${({ isIframe }) => (isIframe ? '87%' : '100%')};
         left: 50%;
         transform: translate(-50%, 50%);
         height: 120px;
@@ -42,9 +46,10 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const { isTabScreen, isMobileScreen } = useResponsive()
 
     const isSmallScreen = isTabScreen || isMobileScreen
+    const isIframe = window.self !== window.top;
 
     return (
-        <WidgetContentWrapper>
+        <WidgetContentWrapper isIframe={isIframe}>
             {showWidgetLogo && plaformImg && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />

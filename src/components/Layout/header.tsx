@@ -26,6 +26,11 @@ const WidgetHeaderWrapper = styled.div`
       margin: 0;
     }
 
+    &.topSpacing {
+      margin-top: -30px;
+    }
+    
+
     @media (max-width: 575.98px) {
       font-size: 20px !important;
       display: flex;
@@ -64,7 +69,7 @@ export default function WidgetHeader() {
 
   return (
     <WidgetHeaderWrapper id="w-header">
-      <h1 className={classNames({ isdescription: description, success: currentStep === "success" })}>
+      <h1 className={classNames({ isdescription: description, success: currentStep === "success", topSpacing: currentStep === 'socialConnect' })}>
         {title}
       </h1>
       {description && (
