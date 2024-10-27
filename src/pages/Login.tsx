@@ -84,7 +84,7 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}/rsm?uuid=${clientId}`
+                    const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
                     const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
