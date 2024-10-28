@@ -7,7 +7,7 @@ interface FooterWrapperProps {
 
 const FooterWrapper = styled.div<FooterWrapperProps>`
     position: absolute;
-    bottom: ${({ isIframe }) => (isIframe ? '0' : '2.9%')};
+    bottom: ${({ isIframe }) => (isIframe ? '1%' : '2.9%')};
     display: flex;
     justify-content: center;
     align-items: center;
@@ -16,6 +16,10 @@ const FooterWrapper = styled.div<FooterWrapperProps>`
 
     span {
         color: #4F4F4F;
+    }
+    img{
+        width: 80px;
+        margin-top: 2px;
     }
 `;
 

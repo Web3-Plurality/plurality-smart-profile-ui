@@ -31,7 +31,11 @@ const ButtonWrapper = styled(Button)`
             background-color: #000000 !important;
         }
     
-        @media (max-width: 575.98px) {
+        @media (max-width: 441px) {
+            min-width: 320px;
+        }
+
+        @media (max-width: 376px) {
             min-width: 270px;
         }
 `

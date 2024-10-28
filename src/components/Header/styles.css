@@ -11,9 +11,16 @@
     /* z-index: 99; */
 }
 
+.mobile-header-wrapper {
+    position: absolute;
+    top: 23px;
+    right: 2px;
+    cursor: pointer;
+}
+
 .iframeHeader {
-    top: 65px;
-    right: 290px;
+    position: absolute;
+    top: 45px;
 }
 
 .user-detail {
@@ -43,12 +50,7 @@
     margin-top: 5px;
 }
 
-.mobile-header-wrapper {
-    position: absolute;
-    top: 23px;
-    right: 2px;
-    cursor: pointer;
-}
+
 
 .mobile-scores {
     display: flex;

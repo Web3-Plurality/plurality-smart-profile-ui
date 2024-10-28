@@ -10,14 +10,18 @@ import { getBtntext, isBackBtnVisible } from '../../utils/Helpers';
 import { selectLoader } from '../../selectors/userDataSelector';
 import { goBack } from '../../Slice/stepperSlice';
 
-const WidgetLayoutWrapper = styled.div`
+interface WidgetLayoutWrapperProps {
+    isIframe: boolean;
+}
+
+const WidgetLayoutWrapper = styled.div<WidgetLayoutWrapperProps>`
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     overflow: hidden;
-    background-color: #EFEFEF;
+    background-color: ${({ isIframe }) => (isIframe ? 'transparent' : '#EFEFEF')};
 
     .widget {   
         position: relative;
@@ -30,13 +34,10 @@ const WidgetLayoutWrapper = styled.div`
         max-height: 550px;
         background-color: #F9F9F9;
         border-radius: 25px;
-        box-shadow:
-        2px 2px 5px rgba(128, 128, 128, 0.2),
-        4px 4px 10px rgba(128, 128, 128, 0.2),
-        6px 6px 15px rgba(128, 128, 128, 0.2),
-        -2px -2px 5px rgba(255, 255, 255, 0.8),
-        -2px -2px 10px rgba(255, 255, 255, 0.8),
-        -6px -6px 15px rgba(255, 255, 255, 0.8);
+        box-shadow: ${({ isIframe }) =>
+        isIframe
+            ? 'none'
+            : '2px 2px 5px rgba(128, 128, 128, 0.2), 4px 4px 10px rgba(128, 128, 128, 0.2), 6px 6px 15px rgba(128, 128, 128, 0.2), -2px -2px 5px rgba(255, 255, 255, 0.8), -2px -2px 10px rgba(255, 255, 255, 0.8), -6px -6px 15px rgba(255, 255, 255, 0.8);'};
         
         @media (max-width: 440px) {
             width: calc(100% - 40px);
@@ -58,13 +59,16 @@ const WidgetLayout = ({
     const text = getBtntext(currentStep)
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
 
+    const isIframe = window.self !== window.top;
+
     return (
-        <WidgetLayoutWrapper>
+        <WidgetLayoutWrapper isIframe={isIframe}>
             <div className='widget'>
                 <WidgetContent children={children} />
                 {isVisible && <BackButton text={text} handleClick={() => dispatch(goBack())} />}
+                {isIframe && <PoweredByFooter />}
             </div>
-            <PoweredByFooter />
+            {!isIframe && <PoweredByFooter />}
         </WidgetLayoutWrapper >
     );
 };

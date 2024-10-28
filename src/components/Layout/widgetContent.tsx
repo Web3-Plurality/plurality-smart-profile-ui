@@ -31,11 +31,17 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
         width: auto;
         object-fit: contain;
         z-index: 100;
+
+        @media (max-width: 380px) {
+            height: 90px;
+        }
     }
 
     h1 {
         margin-top: 0;
     }
+
+    
 `;
 
 const WidgetContent = ({ children }: { children: ReactNode }) => {
