@@ -41,7 +41,7 @@ const WidgetHeaderWrapper = styled.div`
     }
 
     @media (max-width: 575.98px) {
-      font-size: 20px !important;
+      font-size: 28px !important;
       display: flex;
 
       img {
@@ -49,7 +49,7 @@ const WidgetHeaderWrapper = styled.div`
       }
     }
     @media (max-width: 410px) {
-      font-size: 20px !important;
+      font-size: 22px !important;
     }
 
     @media (max-width: 360px) {

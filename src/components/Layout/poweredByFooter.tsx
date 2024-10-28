@@ -1,13 +1,10 @@
 import styled from 'styled-components';
 import footerLogo from './../../assets/images/footer-logo.png';
 
-interface FooterWrapperProps {
-    isIframe: boolean;
-}
 
-const FooterWrapper = styled.div<FooterWrapperProps>`
+const FooterWrapper = styled.div`
     position: absolute;
-    bottom: ${({ isIframe }) => (isIframe ? '1%' : '2.9%')};
+    bottom: 2.9%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -24,11 +21,8 @@ const FooterWrapper = styled.div<FooterWrapperProps>`
 `;
 
 const PoweredByFooter = () => {
-    const isIframe = window.self !== window.top;
-
     return (
         <FooterWrapper
-            isIframe={isIframe}
             role="button"
             tabIndex={0}
             onClick={() => window.open('https://plurality.network/', '_blank', 'noopener,noreferrer')}
