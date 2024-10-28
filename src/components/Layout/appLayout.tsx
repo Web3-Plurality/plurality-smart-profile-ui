@@ -37,8 +37,16 @@ const WidgetLayoutWrapper = styled.div`
         -2px -2px 5px rgba(255, 255, 255, 0.8),
         -2px -2px 10px rgba(255, 255, 255, 0.8),
         -6px -6px 15px rgba(255, 255, 255, 0.8);
+        
+        @media (max-width: 440px) {
+            width: calc(100% - 40px);
+            max-width: 430px; 
+        }
+
     }
 `;
+
+
 
 const WidgetLayout = ({
     children,

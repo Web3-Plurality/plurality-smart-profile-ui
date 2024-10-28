@@ -26,9 +26,9 @@ import { AuthUserInformation } from "@useorbis/db-sdk"
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
-import axios from "axios"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
+import axiosInstance from "../services/Api"
 
 
 const Login = () => {
@@ -39,7 +39,7 @@ const Login = () => {
         method: 'email'
     });
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const clientId = queryParams.get('uuid') || CLIENT_ID;
     // const warningMessageRef = useRef<MessageType | null>(null);
     // const [selectedSocial, setSelectedSocial] = useState('')
     // const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -85,7 +85,7 @@ const Login = () => {
             const fetchData = async () => {
                 try {
                     const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
-                    const { data } = await axios.get(rsmUrl, {
+                    const { data } = await axiosInstance.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
                         }
