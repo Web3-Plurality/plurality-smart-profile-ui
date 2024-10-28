@@ -49,7 +49,7 @@ function App() {
                 {!isTabScreen && !isMobileScreen && <Header />}
                 <EventListener />
                 <Routes>
-                  <Route path="/client-app" element={<Login />} />
+                  <Route path="/rsm" element={<Login />} />
                   <Route path="/" element={<Login />} />
                   <Route path="/profile-connect" element={<Login />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />

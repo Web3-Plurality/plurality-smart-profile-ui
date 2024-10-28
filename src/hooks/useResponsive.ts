@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-const getScreenType = (width: number): 'mobile' | 'tablet' | 'desktop' | 'large' => {
+const getScreenType = (width: number): 'xSmall' | 'mobile' | 'tablet' | 'desktop' | 'large' => {
+    if (width <= 400) return 'xSmall';
     if (width <= 576) return 'mobile';
     if (width <= 834) return 'tablet';
     if (width <= 1440) return 'desktop';
@@ -30,6 +31,7 @@ const useResponsive = () => {
     }, []);
 
     return {
+        isExtraSmallScreen: screenType === 'xSmall',
         isMobileScreen: screenType === 'mobile',
         isTabScreen: screenType === 'tablet',
         isDesktopScreen: screenType === 'desktop',

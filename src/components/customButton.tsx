@@ -36,7 +36,7 @@ const ButtonWrapper = styled(Button)`
         }
 
         @media (max-width: 376px) {
-            min-width: 270px;
+            min-width: 250px;
         }
 `
 

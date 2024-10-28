@@ -48,13 +48,20 @@ const ProfileIconsWrapper = styled.div`
         max-height: 55px;
         border-radius: 50%;
         transition: transform 0.3s ease-in-out;
+
+        @media (max-width: 365px) {
+            max-width: 45px;
+        }
+
+        &:hover{
+           transform: scale(1.2)
+        }
     }
 
     @media (max-width: 575.98px) {
         .icon {
             width: 14vw;
             height: 14vw;
-            max-width: 45px;
             max-height: 45px;
         }
     }
@@ -96,7 +103,8 @@ const SocialProfiles = ({
     const circleRef = useRef<HTMLDivElement>(null);
     const [circleRadius, setCircleRadius] = useState(153);
 
-    const { isMobileScreen, isTabScreen } = useResponsive()
+    const { isExtraSmallScreen, isMobileScreen, isTabScreen } = useResponsive()
+    const isIframe = window.self !== window.top;
 
     // useEffect(() => {
     //     if (circleRef.current) {
@@ -108,16 +116,15 @@ const SocialProfiles = ({
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
-            const baseRadius = isMobileScreen ? width / 2 : width / 2.1;
+            console.log(isMobileScreen && isIframe)
+            const baseRadius = isExtraSmallScreen ? (width / 1.98) : isMobileScreen ? isIframe ? (width / 2.06) : (width / 2.1) : width / 2.1;
             setCircleRadius(baseRadius - 30);
         }
-    }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen]);
+    }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen, isIframe]);
 
-    // const numIcons = socialConnectButtons.length;
     const socailIcons = localStorage.getItem("platforms");
     const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
 
-    // Calculate the angle between each icon
     const angle = (360 / parsedSocailIcons.length) * (Math.PI / 180);
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
@@ -155,8 +162,8 @@ const SocialProfiles = ({
                         className={`icon `}
                         style={{
                             position: "absolute",
-                            left: `calc(50% + ${x}px - ${isMobileScreen ? '22px' : isTabScreen ? '29px' : '27px'})`,
-                            top: `calc(50% + ${y}px - ${isMobileScreen ? '19px' : isTabScreen ? '25px' : '25px'})`,
+                            left: `calc(50% + ${x}px - ${isExtraSmallScreen ? '22px' : isMobileScreen ? isIframe ? '26px' : '22px' : isTabScreen ? '29px' : '27px'})`,
+                            top: `calc(50% + ${y}px - ${isExtraSmallScreen ? '21px' : isMobileScreen ? isIframe ? '25px' : '20px' : isTabScreen ? '25px' : '25px'})`,
                             cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(id)}
