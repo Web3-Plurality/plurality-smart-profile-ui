@@ -167,14 +167,6 @@ const Login = () => {
         dispatch(goToStep('litLogin'))
     }
 
-    // const handleSmallScreenWarning = () => {
-    //     if (warningMessageRef.current) {
-    //         warningMessageRef.current();
-    //         warningMessageRef.current = null;
-    //     }
-    //     warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
-    // };
-
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
         const params = new URLSearchParams(window.location.search);
@@ -198,11 +190,6 @@ const Login = () => {
     };
 
     const handleMetamaskConnect = async () => {
-        // if (isTabScreen) {
-        //     handleSmallScreenWarning();
-        //     return;
-        // }
-
         try {
             checkPreviousLoginMode('metamask')
             await ensureMetamaskConnection();
@@ -218,32 +205,6 @@ const Login = () => {
     }
 
     const handleIconClick = (index: number) => {
-        // const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
-
-        // const isMetaverseHub = currentStep === 'metaverseHub';
-        // // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
-        // const isIndexValid = index < socialButtons?.length - 2;
-
-
-        // const handleMetaverseHubClick = () => {
-        //     const smartProfileData = localStorage.getItem('smartProfileData')
-        //     const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-        //     const clickedIconDisplayName = socialButtons[index]?.displayName?.toLowerCase().replace(/\s+/g, '');
-
-        //     if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
-        //         dispatch(goToStep('socialConfirmation'))
-        //         // if (profiles[index].displayName) {
-        //         //     setSelectedSocial(profiles[index].displayName);
-        //         // }
-        //     } else {
-        //         if (warningMessageRef.current) {
-        //             warningMessageRef.current();
-        //             warningMessageRef.current = null;
-        //         }
-        //         warningMessageRef.current = message.warning('Please connect this profile first!');
-        //     }
-        // };
-
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const platforms = localStorage.getItem('platforms')
@@ -273,18 +234,6 @@ const Login = () => {
         };
 
         handleSocialConnectClick()
-        // if (isMetaverseHub) {
-        //     handleMetaverseHubClick();
-        // } else {
-        //     handleSocialConnectClick();
-        // }
-        // if (isMetaverseHub) {
-        //     handleMetaverseHubClick();
-        // } else if (!activeStates[index]) {
-        //     handleSocialConnectClick();
-        // } else {
-        //     // setSelectedSocial(profiles[index].displayName);
-        // }
     };
 
     useEffect(() => {

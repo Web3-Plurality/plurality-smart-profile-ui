@@ -34,6 +34,10 @@ const WidgetHeaderWrapper = styled.div`
       margin-top: -20px;
     }
 
+    &.topSpacingIframeProfile{
+      margin-top: 5px;
+    }
+
     @media (max-width: 834px) {
       font-size: 23px !important;
       display: flex;
@@ -94,7 +98,8 @@ export default function WidgetHeader() {
           isdescription: description,
           success: currentStep === "success",
           topSpacing: currentStep === 'socialConnect' && !isIframe,
-          topSpacingIframe: currentStep === 'socialConnect' && isIframe
+          topSpacingIframe: currentStep === 'socialConnect' && isIframe,
+          topSpacingIframeProfile: currentStep === 'profileSettings' && isIframe
         }
         )}
       >

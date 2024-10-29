@@ -56,6 +56,7 @@ const RouteMapper = (app: string) => {
 // Component Title Mapper
 const getTitleText = (currentStep: string) => {
     const platformName = localStorage.getItem('platformName')
+    const isIframe = window.self !== window.top;
     switch (currentStep) {
         case 'home':
             return 'Login To Your Account';
@@ -69,12 +70,14 @@ const getTitleText = (currentStep: string) => {
             return `Welcome to ${platformName ? JSON.parse(platformName) : ''}`;
         case 'socialConnect':
             return 'Connect Your Platforms';
+        case 'digitalWardrobeConnect':
+            return 'Digital Wardrobe';
         case 'metaverseHub':
             return 'Your Metaverse Hub';
         case 'digitalWardrobe':
             return 'Digital Wardrobe';
-        case 'digitalWardrobeConnect':
-            return 'Digital Wardrobe';
+        case 'profileSettings':
+            return `${isIframe ? 'Update Profile' : ''}`;
         default:
             return '';
     }

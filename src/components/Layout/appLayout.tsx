@@ -65,7 +65,7 @@ const WidgetLayout = ({
         <WidgetLayoutWrapper isIframe={isIframe}>
             <div className='widget'>
                 <WidgetContent children={children} />
-                {isVisible && <BackButton text={text} handleClick={() => dispatch(goBack())} />}
+                {isVisible && !isIframe && <BackButton text={text} handleClick={() => dispatch(goBack())} />}
                 {isIframe && <PoweredByFooter />}
             </div>
             {!isIframe && <PoweredByFooter />}
