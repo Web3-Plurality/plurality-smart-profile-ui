@@ -1,7 +1,10 @@
 import { ethers, verifyMessage } from 'ethers';
 import React, { useEffect } from 'react';
+import { useAccount } from 'wagmi';
 
 const EventListener: React.FC = () => {
+    const { isConnected } = useAccount();
+
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
         // console.log("Inside EventListener", event, parentUrl)
@@ -11,10 +14,16 @@ const EventListener: React.FC = () => {
 
             let provider;
             if (window.ethereum == null) {
-                console.log("Please install metamask");
-                window.parent.postMessage({ type: 'noEthersProvider', data: "Please install metamask" }, parentUrl);
+                window.parent.postMessage({ id: data.id, type: 'noEthersProvider', data: "Please install metamask" }, parentUrl);
                 return;
-            } else {
+            } else if (event.data.isWidgetOpen === 'false') {
+                window.parent.postMessage({ id: data.id, type: 'noWidgetInitiated', data: "Please open Plurality Widget first" }, parentUrl);
+                return;
+            } else if (!isConnected) {
+                window.parent.postMessage({ id: data.id, type: 'noMetamskConnection', data: "Please connect Metamsk first" }, parentUrl);
+                return;
+            }
+            else {
                 try {
                     provider = new ethers.BrowserProvider(window.ethereum);
                     signer = await provider.getSigner();
