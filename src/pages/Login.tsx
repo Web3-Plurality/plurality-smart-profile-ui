@@ -6,7 +6,7 @@ import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHe
 import { goToStep } from "../Slice/stepperSlice"
 import { selectCurrentStep } from "../selectors/stepperSelector"
 import LitLogin from "../components/LitLogin/litLogin"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import OTPVerification from "../components/otpVerification"
 import { PayloadDataType, ProfileData } from "../types"
 import EmailVerification from "../components/emailVerification"
@@ -29,6 +29,7 @@ import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
 import axiosInstance from "../services/Api"
+import { MessageType } from "antd/es/message/interface"
 
 
 const Login = () => {
@@ -39,10 +40,8 @@ const Login = () => {
         method: 'email'
     });
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('uuid') || CLIENT_ID;
-    // const warningMessageRef = useRef<MessageType | null>(null);
-    // const [selectedSocial, setSelectedSocial] = useState('')
-    // const [isLoading, setIsLoading] = useState<boolean>(false)
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const warningMessageRef = useRef<MessageType | null>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
@@ -60,8 +59,8 @@ const Login = () => {
 
 
     const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
+    const isIframe = window.self !== window.top;
 
-    // const { isTabScreen } = useResponsive()
     const {
         message: eventMessage,
         app,
@@ -163,8 +162,17 @@ const Login = () => {
     }
 
     const handleLitConnect = () => {
-        checkPreviousLoginMode('lit')
-        dispatch(goToStep('litLogin'))
+        if (isIframe) {
+            if (warningMessageRef.current) {
+                warningMessageRef.current();
+                warningMessageRef.current = null;
+            }
+            warningMessageRef.current = message.warning('Coming Soon!');
+
+        } else {
+            checkPreviousLoginMode('lit')
+            dispatch(goToStep('litLogin'))
+        }
     }
 
     const handleMetaMaskNotInstalled = () => {
