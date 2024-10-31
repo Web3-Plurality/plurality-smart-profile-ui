@@ -45,4 +45,13 @@
         width: 310px;
         height: 310px;
     }
+
+    .settings-wrapper input {
+        width: 280px;
+    }
+
+    .settings-wrapper textarea {
+        width: 280px;
+        margin-left: 55px;
+    }
 }

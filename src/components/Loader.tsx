@@ -52,7 +52,7 @@ export default function Loader({ message }: LoaderProps) {
         footerButton?.classList.add('toggleShow')
 
         const widgetHeader = document.getElementById('w-header');
-        footerButton?.classList.add('toggleShow')
+        widgetHeader?.classList.add('toggleShow')
 
         return () => {
             footerButton?.classList.remove('toggleShow')

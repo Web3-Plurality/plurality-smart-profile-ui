@@ -106,13 +106,6 @@ const SocialProfiles = ({
     const { isExtraSmallScreen, isMobileScreen, isTabScreen } = useResponsive()
     const isIframe = window.self !== window.top;
 
-    // useEffect(() => {
-    //     if (circleRef.current) {
-    //         const width = circleRef.current.offsetWidth;
-    //         const radSize = isMobileScreen ? 2.06 : 2.1
-    //         setCircleRadius(width / radSize - 30);
-    //     }
-    // }, [circleRef.current?.offsetWidth, isMobileScreen]);
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
