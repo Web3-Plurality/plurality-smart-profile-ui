@@ -2,6 +2,11 @@ import { useCallback, useState } from 'react';
 import { AuthMethod } from '@lit-protocol/types';
 import { IRelayPKP } from '@lit-protocol/types';
 import { getPKPs, mintPKP } from '../services/Lit';
+import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { goToStep } from '../Slice/stepperSlice';
+import { message } from 'antd';
 
 export default function useAccounts() {
   const [accounts, setAccounts] = useState<IRelayPKP[]>([]);
@@ -9,6 +14,9 @@ export default function useAccounts() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
   const [isFetchTriggered, setIsFetchTriggered] = useState<boolean>(false)
+
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   /**
    * Fetch PKPs tied to given auth method
@@ -28,6 +36,7 @@ export default function useAccounts() {
         }
       } catch (err) {
         setError(err as Error);
+        handleLogout()
       } finally {
         setLoading(false);
       }
@@ -48,12 +57,29 @@ export default function useAccounts() {
         setCurrentAccount(newPKP);
       } catch (err) {
         setError(err as Error);
+        handleLogout()
       } finally {
         setLoading(false);
       }
     },
     []
   );
+
+  async function handleLogout() {
+    const smartprofileData = getLocalStorageValue("smartProfileData")
+    const tool = getLocalStorageValue("tool")
+    const clientId = localStorage.getItem('clientId')
+    localStorage.clear();
+    setLocalStorageValue("smartProfileData", smartprofileData || '')
+    setLocalStorageValue("tool", tool || '')
+    dispatch(goToStep("litLogin"))
+    let path = window.location.pathname
+    if (isRsmPlatform() || isProfileConnectPlatform()) {
+      path = `${window.location.pathname}?client_id=${clientId}`
+    }
+    navigate(path, { replace: true });
+    message.error("Something went wrong, please contact the team")
+  }
 
   return {
     fetchAccounts,
