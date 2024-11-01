@@ -28,12 +28,14 @@ import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
-import axiosInstance from "../services/Api"
+// import axiosInstance from "../services/Api"
+import axios from "axios"
 import { MessageType } from "antd/es/message/interface"
 
 
 const Login = () => {
-    const [methodId, setMethodId] = useState<string>('')
+    // const [methodId, setMethodId] = useState<string>('')
+    const [emailId, setEmailId] = useState<string>('')
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
@@ -83,16 +85,14 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
-                    const { data } = await axiosInstance.get(rsmUrl, {
+                    const rsmUrl = `${API_BASE_URL}/crm/client?uuid=${clientId}`
+                    const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
                         }
                     })
-                    console.log("Data", data)
                     if (!data.data) return
                     if (data.error) {
-                        console.log("here 1")
                         message.error(data.error)
                         return
                     }
@@ -266,9 +266,9 @@ const Login = () => {
             case 'home':
                 return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
             case 'litLogin':
-                return <LitLogin setMethodId={setMethodId} />
+                return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification methodId={methodId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification finalPayload={finalPayload} />
             case 'dashboard':

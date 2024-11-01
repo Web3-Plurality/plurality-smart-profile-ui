@@ -109,7 +109,6 @@ const SocialProfiles = ({
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
-            console.log(isMobileScreen && isIframe)
             const baseRadius = isExtraSmallScreen ? (width / 1.98) : isMobileScreen ? isIframe ? (width / 2.06) : (width / 2.1) : width / 2.1;
             setCircleRadius(baseRadius - 30);
         }

@@ -35,7 +35,6 @@ export const useRegisterEvent = () => {
             };
 
             evtSource.onerror = function (err) {
-                console.error('EventSource failed:', err);
                 setError('EventSource failed');
                 evtSource.close();
             };

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import CustomButtom from "./customButton";
 import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
 import { AuthUserInformation } from '@useorbis/db-sdk';
@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux"
 import { goToStep } from "../Slice/stepperSlice"
 import { setLoadingState } from "../Slice/userDataSlice";
 import { LoaderMessages } from '../utils/Constants';
+import { getLocalStorageValue } from '../utils/Helpers';
 
 interface DashboardProps {
     currentAccount: string;
@@ -14,24 +15,24 @@ interface DashboardProps {
 export default function Dashboard({
     currentAccount
 }: DashboardProps) {
-    const [btnDisable, setBtnDisable] = useState(true)
     const dispatch = useDispatch()
+    const didExists = getLocalStorageValue('userDid')
+
     useEffect(() => {
         const connectToOris = async () => {
-            dispatch(setLoadingState({ loadingState: false, text: LoaderMessages.LIT_PROFILE_SETUP }))
+            dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.LIT_PROFILE_SETUP }))
             const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
             if (result === "error") {
-                console.error("Error connecting to Orbis");
-                setBtnDisable(true)
                 dispatch(setLoadingState({ loadingState: false, text: '' }))
             } else if (result && result.did) {
-                setBtnDisable(false)
                 localStorage.setItem('userDid', JSON.stringify(result.did))
                 dispatch(setLoadingState({ loadingState: false, text: '' }))
             }
         }
-        connectToOris()
-    }, [])
+        if (!didExists) {
+            connectToOris()
+        }
+    }, [didExists])
 
     return (
         <div className="dashboard-container">
@@ -42,7 +43,7 @@ export default function Dashboard({
             </div>
             <div className="divider"></div>
             <div className="message-card">
-                <CustomButtom text='Next' isDisable={btnDisable} handleClick={() => dispatch(goToStep('success'))} />
+                <CustomButtom text='Next' handleClick={() => dispatch(goToStep('success'))} />
             </div>
         </div>
     );

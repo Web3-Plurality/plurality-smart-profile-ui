@@ -10,6 +10,11 @@ export async function insertSmartProfile(
     connectedPlatforms: string,
     profileTypeStreamId: string
 ) {
+    console.log(encrypted_profile_data,
+        scores,
+        connectedPlatforms,
+        version,
+        profileTypeStreamId)
     const insertStatement = await orbisdb
         .insert(data.models.smart_profile)
         .value(

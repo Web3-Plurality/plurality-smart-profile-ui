@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import OtpInput from "react-otp-input";
-import { useStytch } from "@stytch/react";
 import useStychLogin from "../hooks/useStychLogin";
 import { LoaderMessages } from "../utils/Constants";
 import { setLoadingState } from "../Slice/userDataSlice";
 import CustomButtom from "./customButton";
 import styled from "styled-components";
 import { PayloadDataType } from "../types";
+import axios from "axios";
+import { API_BASE_URL } from "../utils/EnvConfig";
+import { getLocalStorageValue, setLocalStorageValue } from "./../utils/Helpers";
 
 interface OTPVerificationProps {
-    methodId: string;
+    emailId: string;
     handleFinalPayload: (data: PayloadDataType) => void;
 }
 
@@ -66,7 +68,7 @@ const Error = styled.span`
     font-size: 0.9rem;
 `;
 
-const OTPVerification = ({ methodId, handleFinalPayload }: OTPVerificationProps) => {
+const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) => {
     const [otp, setOtp] = useState("");
     const [error, setError] = useState(false);
     const [timer, setTimer] = useState(30);
@@ -74,7 +76,6 @@ const OTPVerification = ({ methodId, handleFinalPayload }: OTPVerificationProps)
     const email = localStorage.getItem('user');
 
     const dispatch = useDispatch();
-    const stytchClient = useStytch();
     const { sendPasscode } = useStychLogin(email || '');
 
     useEffect(() => {
@@ -103,12 +104,20 @@ const OTPVerification = ({ methodId, handleFinalPayload }: OTPVerificationProps)
     const handleOTPVerification = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_VERFICATION }));
-            const response = await stytchClient.otps.authenticate(otp, methodId, {
-                session_duration_minutes: 60,
-            });
+            const url = `${API_BASE_URL}/user/auth/otp/authenticate`
+            const payload = {
+                code: otp,
+                email_id: emailId,
+                email: getLocalStorageValue('user'),
+                subscribe: true,
+                clientId: getLocalStorageValue("clientId")
+            };
 
-            if (response.status_code === 200 && response.session_jwt) {
-                handleFinalPayload({ session: response.session_jwt, userId: response.user_id, method: 'email' });
+            const { data } = await axios.post(url, payload)
+
+            if (data?.success && data?.stytchToken) {
+                setLocalStorageValue("token", data?.pluralityToken)
+                handleFinalPayload({ session: data?.stytchToken, userId: data?.userId, method: 'email' });
                 localStorage.setItem('tool', 'lit');
             }
         } catch (err) {

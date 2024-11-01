@@ -10,7 +10,7 @@ import CustomInputField from "../customInputField";
 import styled from "styled-components";
 
 interface LitLoginProps {
-    setMethodId: (id: string) => void;
+    setEmailId: (id: string) => void;
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,12 +25,12 @@ const LitLoginWrapper = styled.div`
 `
 
 
-const LitLogin = ({ setMethodId }: LitLoginProps) => {
+const LitLogin = ({ setEmailId }: LitLoginProps) => {
     const [email, setEmail] = useState('');
     const [acceptance, setAcceptance] = useState(true);
     const {
         sendPasscode,
-    } = useStychLogin(email, setMethodId);
+    } = useStychLogin(email, setEmailId);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setEmail(e.target.value);

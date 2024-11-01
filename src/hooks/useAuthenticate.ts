@@ -33,7 +33,7 @@ export default function useAuthenticate() {
         setAuthMethod(result);
       } catch (err) {
         setError(true);
-        console.log("Found you: ", err)
+        console.log("Error", err)
         handleLogout()
       } finally {
         setLoading(false);
