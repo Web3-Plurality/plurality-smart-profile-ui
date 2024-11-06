@@ -8,10 +8,10 @@ module.exports = {
       '@semantic-release/exec',
       {
         'prepareCmd': `
-          docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-widget-ui:latest \\
-          && docker push ghcr.io/web3-plurality/plurality-widget-ui:latest \\
-          && docker tag ghcr.io/web3-plurality/plurality-widget-ui:latest ghcr.io/web3-plurality/plurality-widget-ui:\${nextRelease.version} \\
-          && docker push ghcr.io/web3-plurality/plurality-widget-ui:\${nextRelease.version}
+          docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-widget-ui-pre:latest \\
+          && docker push ghcr.io/web3-plurality/plurality-widget-ui-pre:latest \\
+          && docker tag ghcr.io/web3-plurality/plurality-widget-ui-pre:latest ghcr.io/web3-plurality/plurality-widget-ui-pre:\${nextRelease.version} \\
+          && docker push ghcr.io/web3-plurality/plurality-widget-ui-pre:\${nextRelease.version}
          `
       }
     ],

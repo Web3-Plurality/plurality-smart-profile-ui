@@ -8,7 +8,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { litNodeClient } from '../services/Lit';
-import { getLocalStorageValue, setLocalStorageValue } from '../utils/Helpers';
+import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
 import { useDispatch } from 'react-redux';
 import { goToStep } from '../Slice/stepperSlice';
 import { API_BASE_URL } from '../utils/EnvConfig';
@@ -55,6 +55,7 @@ export default function useSession() {
         dispatch(globalSessionSigs(JSON.stringify(sessionSigs)))
 
       } catch (err) {
+        handleLogout();
         setError(err as Error);
       } finally {
         setLoading(false);
@@ -70,7 +71,7 @@ export default function useSession() {
         address: pkpAddress,
         email: localStorage.getItem('user'),
         subscribe: true,
-        clientId: localStorage.getItem("clientId") 
+        clientId: localStorage.getItem("clientId")
       };
       const headers = {
         'x-stytch-token': Cookies.get('stytch_session_jwt'),
@@ -102,11 +103,17 @@ export default function useSession() {
   async function handleLogout() {
     const smartprofileData = getLocalStorageValue("smartProfileData")
     const tool = getLocalStorageValue("tool")
+    const clientId = localStorage.getItem('clientId')
     localStorage.clear();
     setLocalStorageValue("smartProfileData", smartprofileData || '')
     setLocalStorageValue("tool", tool || '')
-    dispatch(goToStep("home"))
-    navigate('/', { replace: true });
+
+    dispatch(goToStep("litLogin"))
+    let path = window.location.pathname
+    if (isRsmPlatform() || isProfileConnectPlatform()) {
+      path = `${window.location.pathname}?client_id=${clientId}`
+    }
+    navigate(path, { replace: true });
     message.error("Something went wrong, please contact the team")
   }
 

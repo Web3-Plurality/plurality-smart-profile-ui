@@ -1,15 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { providers } from 'ethers';
+import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { message } from 'antd';
 import { useAccount, useDisconnect } from 'wagmi';
 import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
-// import { useAuth } from '../context/AuthContext';
 import { AuthUserInformation } from '@useorbis/db-sdk';
 import { useNavigate } from 'react-router-dom';
-// import { useStep } from '../context/StepContext';
 import { isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { domain, origin, statement } from '../utils/Constants';
 import { useDispatch } from 'react-redux';
@@ -26,7 +24,6 @@ export const useMetamaskToken = () => {
 
     const { address } = useAccount();
     const { disconnectAsync } = useDisconnect();
-    // const { setUser } = useAuth()
 
     // Create Siwe message
     const createSiweMessage = useCallback(async (address: string, nonce: string) => {
@@ -47,7 +44,7 @@ export const useMetamaskToken = () => {
     const signInWithEthereum = useCallback(async (nonce: string) => {
         if (typeof window.ethereum !== 'undefined') {
             try {
-                const provider = new providers.Web3Provider(window.ethereum);
+                const provider = new ethers.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 const userAddress = await signer.getAddress();
                 const message = await createSiweMessage(userAddress, nonce);
@@ -98,7 +95,6 @@ export const useMetamaskToken = () => {
             const { success, user } = data;
 
             if (success) {
-                // setUser(user)
                 console.log('User: ', user)
                 localStorage.setItem('token', data.token)
                 const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();

@@ -20,8 +20,10 @@ const ProfileIconsWrapper = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 375px;
-    height: 375px;
+    width: 80vw;
+    height: 80vw;
+    max-width: 375px;
+    max-height: 375px;
     border-radius: 50%;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
     background: url("/src/assets/images/circle.png");
@@ -32,30 +34,61 @@ const ProfileIconsWrapper = styled.div`
 
     .mid-icon {
         position: absolute;
-        width: 50px;
-        height: 50px;
+        width: 10vw;
+        height: 10vw;
+        max-width: 50px;
+        max-height: 50px;
     }
 
     .icon {
         position: absolute;
-        width: 55px;
-        height: 55px;
+        width: 12vw;
+        height: 12vw;
+        max-width: 55px;
+        max-height: 55px;
         border-radius: 50%;
         transition: transform 0.3s ease-in-out;
+
+        @media (max-width: 365px) {
+            max-width: 45px;
+        }
+
+        &:hover{
+           transform: scale(1.2)
+        }
     }
 
     @media (max-width: 575.98px) {
-        .circle {
-            width: 310px;
-            height: 310px;
-        }
-
         .icon {
-            width: 45px;
-            height: 45px;
+            width: 14vw;
+            height: 14vw;
+            max-height: 45px;
         }
     }
-`
+
+    @media (max-width: 470px) {
+        .app-logo-center{
+            width: 160px;
+            height: 160px;
+        }
+    }
+
+    @media (max-width: 398px) {
+        .app-logo-center{
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    @media (max-width: 350px) {
+        .app-logo-center{
+            width: 120px;
+            height: 120px;
+        }
+    }
+
+`;
+
 
 type MetaverseProps = {
     metaverse?: boolean,
@@ -70,21 +103,21 @@ const SocialProfiles = ({
     const circleRef = useRef<HTMLDivElement>(null);
     const [circleRadius, setCircleRadius] = useState(153);
 
-    const { isMobileScreen, isTabScreen } = useResponsive()
+    const { isExtraSmallScreen, isMobileScreen, isTabScreen } = useResponsive()
+    const isIframe = window.self !== window.top;
 
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
-            const radSize = isMobileScreen ? 2 : 2.1
-            setCircleRadius(width / radSize - 30);
+            console.log(isMobileScreen && isIframe)
+            const baseRadius = isExtraSmallScreen ? (width / 1.98) : isMobileScreen ? isIframe ? (width / 2.06) : (width / 2.1) : width / 2.1;
+            setCircleRadius(baseRadius - 30);
         }
-    }, [circleRef.current?.offsetWidth, isMobileScreen]);
+    }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen, isIframe]);
 
-    // const numIcons = socialConnectButtons.length;
     const socailIcons = localStorage.getItem("platforms");
     const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
 
-    // Calculate the angle between each icon
     const angle = (360 / parsedSocailIcons.length) * (Math.PI / 180);
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
@@ -122,8 +155,8 @@ const SocialProfiles = ({
                         className={`icon `}
                         style={{
                             position: "absolute",
-                            left: `calc(50% + ${x}px - ${isMobileScreen ? '23px' : isTabScreen ? '29px' : '27px'})`,
-                            top: `calc(50% + ${y}px - ${isMobileScreen ? '20px' : isTabScreen ? '25px' : '25px'})`,
+                            left: `calc(50% + ${x}px - ${isExtraSmallScreen ? '22px' : isMobileScreen ? isIframe ? '26px' : '22px' : isTabScreen ? '29px' : '27px'})`,
+                            top: `calc(50% + ${y}px - ${isExtraSmallScreen ? '21px' : isMobileScreen ? isIframe ? '25px' : '20px' : isTabScreen ? '25px' : '25px'})`,
                             cursor: 'pointer'
                         }}
                         onClick={() => handleIconClick(id)}

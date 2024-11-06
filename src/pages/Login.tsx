@@ -14,10 +14,10 @@ import Dashboard from "../components/dashboard"
 import AuthSuccess from "../components/authSuccess"
 import SocialConnect from "../components/socialConnect"
 import { socialConnectButtons } from "../utils/Constants"
-import { MessageType } from "antd/es/message/interface"
+// import { MessageType } from "antd/es/message/interface"
 import { message } from "antd"
 import { useRegisterEvent } from "../hooks/useEventListner"
-import useResponsive from "../hooks/useResponsive"
+// import useResponsive from "../hooks/useResponsive"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
@@ -26,9 +26,10 @@ import { AuthUserInformation } from "@useorbis/db-sdk"
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
-import axios from "axios"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
+import axiosInstance from "../services/Api"
+import { MessageType } from "antd/es/message/interface"
 
 
 const Login = () => {
@@ -41,8 +42,6 @@ const Login = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const warningMessageRef = useRef<MessageType | null>(null);
-    // const [selectedSocial, setSelectedSocial] = useState('')
-    // const [isLoading, setIsLoading] = useState<boolean>(false)
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
@@ -59,7 +58,9 @@ const Login = () => {
     const token = localStorage.getItem('token')
 
 
-    const { isTabScreen } = useResponsive()
+    const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
+    const isIframe = window.self !== window.top;
+
     const {
         message: eventMessage,
         app,
@@ -83,7 +84,7 @@ const Login = () => {
             const fetchData = async () => {
                 try {
                     const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
-                    const { data } = await axios.get(rsmUrl, {
+                    const { data } = await axiosInstance.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
                         }
@@ -131,7 +132,16 @@ const Login = () => {
         if (isConnected && !token) {
             generateMetamaskToken()
         }
+        window.parent.postMessage({ eventName: 'metamaskConnection', data: { isConnected } }, parentUrl);
     }, [isConnected])
+
+    useEffect(() => {
+        const profileData = localStorage.getItem('smartProfileData')
+        if (profileData) {
+            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
+        }
+    }, [])
+
 
     useEffect(() => {
         if (metamaskAddress && currentStep === "home") {
@@ -152,17 +162,18 @@ const Login = () => {
     }
 
     const handleLitConnect = () => {
-        checkPreviousLoginMode('lit')
-        dispatch(goToStep('litLogin'))
-    }
+        if (isIframe) {
+            if (warningMessageRef.current) {
+                warningMessageRef.current();
+                warningMessageRef.current = null;
+            }
+            warningMessageRef.current = message.warning('Coming Soon!');
 
-    const handleSmallScreenWarning = () => {
-        if (warningMessageRef.current) {
-            warningMessageRef.current();
-            warningMessageRef.current = null;
+        } else {
+            checkPreviousLoginMode('lit')
+            dispatch(goToStep('litLogin'))
         }
-        warningMessageRef.current = message.warning('Device not supported for Metamask connection!');
-    };
+    }
 
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
@@ -187,11 +198,6 @@ const Login = () => {
     };
 
     const handleMetamaskConnect = async () => {
-        if (isTabScreen) {
-            handleSmallScreenWarning();
-            return;
-        }
-
         try {
             checkPreviousLoginMode('metamask')
             await ensureMetamaskConnection();
@@ -207,32 +213,6 @@ const Login = () => {
     }
 
     const handleIconClick = (index: number) => {
-        // const profiles = currentStep === 'metaverseHub' ? metaverseHubButtons : socialButtons;
-
-        // const isMetaverseHub = currentStep === 'metaverseHub';
-        // // We minus 2 here because in the metaverse hub, we dont need meta and decentraland
-        // const isIndexValid = index < socialButtons?.length - 2;
-
-
-        // const handleMetaverseHubClick = () => {
-        //     const smartProfileData = localStorage.getItem('smartProfileData')
-        //     const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
-        //     const clickedIconDisplayName = socialButtons[index]?.displayName?.toLowerCase().replace(/\s+/g, '');
-
-        //     if (activeStates[index] || !isIndexValid || connectedPlatforms.includes(clickedIconDisplayName)) {
-        //         dispatch(goToStep('socialConfirmation'))
-        //         // if (profiles[index].displayName) {
-        //         //     setSelectedSocial(profiles[index].displayName);
-        //         // }
-        //     } else {
-        //         if (warningMessageRef.current) {
-        //             warningMessageRef.current();
-        //             warningMessageRef.current = null;
-        //         }
-        //         warningMessageRef.current = message.warning('Please connect this profile first!');
-        //     }
-        // };
-
         const handleSocialConnectClick = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const platforms = localStorage.getItem('platforms')
@@ -262,18 +242,6 @@ const Login = () => {
         };
 
         handleSocialConnectClick()
-        // if (isMetaverseHub) {
-        //     handleMetaverseHubClick();
-        // } else {
-        //     handleSocialConnectClick();
-        // }
-        // if (isMetaverseHub) {
-        //     handleMetaverseHubClick();
-        // } else if (!activeStates[index]) {
-        //     handleSocialConnectClick();
-        // } else {
-        //     // setSelectedSocial(profiles[index].displayName);
-        // }
     };
 
     useEffect(() => {

@@ -19,7 +19,8 @@ const defaultProps = {
 };
 
 const SocialButtonWrapper = styled(Button) <{ styleProp?: string }>`
-    min-width: 350px;
+    width: 100%; /* Full width */
+    min-width: 350px; /* Minimum width */
     height: auto;
     padding: 0 20px;
     border-radius: 10px;
@@ -31,12 +32,12 @@ const SocialButtonWrapper = styled(Button) <{ styleProp?: string }>`
     justify-content: space-between;
     margin-top: 1rem;
 
-    .button-content-left{
+    .button-content-left {
         display: flex;
         align-items: center;
         gap: 5px;
 
-        p{
+        p {
             padding: 0 !important;
             color: #4F4F4F;
             font-size: 17px;
@@ -44,7 +45,27 @@ const SocialButtonWrapper = styled(Button) <{ styleProp?: string }>`
             transform: ${props => props.styleProp};
         }
     }
+
+    @media (max-width: 420px) {
+        min-width: calc(100% + 30px);
+    }
+
+    @media (max-width: 370px) {
+        min-width: calc(100% - 30px); 
+    }
+
+    @media (max-width: 340px) {
+        min-width: calc(100% - 50px);
+        padding: 0 10px;
+    }
+
+    @media (max-width: 320px) {
+        min-width: 100%;
+    }
 `;
+
+
+
 
 const SocialButton = ({ text, icon, style, handleClick }: CustomButtomProps) => {
     return (

@@ -20,6 +20,7 @@ import { message } from 'antd';
 import { useEffect } from 'react';
 import { ErrorMessages } from './utils/Constants';
 import Unauthorized from './pages/UnAuthorizedDomain';
+import EventListener from './components/EventListener';
 
 
 
@@ -46,6 +47,7 @@ function App() {
             <StytchProvider stytch={stytch}>
               <Router>
                 {!isTabScreen && !isMobileScreen && <Header />}
+                <EventListener />
                 <Routes>
                   <Route path="/rsm" element={<Login />} />
                   <Route path="/" element={<Login />} />
