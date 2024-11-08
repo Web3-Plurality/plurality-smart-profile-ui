@@ -43,6 +43,4 @@ jobs:
           && docker push ghcr.io/web3-plurality/plurality-widget-ui:latest \
           && docker tag ghcr.io/web3-plurality/plurality-widget-ui:latest ghcr.io/web3-plurality/plurality-widget-ui:${{ env.VERSION }} \
           && docker push ghcr.io/web3-plurality/plurality-widget-ui:${{ env.VERSION }}
-        env:
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          

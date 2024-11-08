@@ -33,10 +33,9 @@ jobs:
         run: |
           npm install --legacy-peer-deps
       
-      # These values are here on experimental basis - only for testnet for production we would move to a secure backend signer service
       - name: Prepare Environment files
         run: |
-          cp .env.stagging.example .env.production
+          cp .env.staging.example .env.production
 
       - name: Semantic Release
         run: npx semantic-release
