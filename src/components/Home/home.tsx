@@ -5,9 +5,10 @@ import metamaskIcon from './../../assets/svgIcons/metamask-icon.svg'
 interface HomeProps {
     handleLitConnect: () => void
     handleMetamaskConnect: () => void
+    handleGoogleConnect: () => void
 }
 
-const Home = ({ handleLitConnect, handleMetamaskConnect }: HomeProps) => {
+const Home = ({ handleLitConnect, handleMetamaskConnect, handleGoogleConnect }: HomeProps) => {
     return (
         <>
             <SocialButton
@@ -21,6 +22,12 @@ const Home = ({ handleLitConnect, handleMetamaskConnect }: HomeProps) => {
                 text={'Login with Metamask'}
                 icon={metamaskIcon}
                 handleClick={handleMetamaskConnect}
+            />
+
+            <SocialButton
+                text={'Login with Google'}
+                icon={metamaskIcon}
+                handleClick={handleGoogleConnect}
             />
         </>
     )

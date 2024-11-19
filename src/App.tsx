@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import { ErrorMessages } from './utils/Constants';
 import Unauthorized from './pages/UnAuthorizedDomain';
 import EventListener from './components/EventListener';
+import GoogleLogin from './GoogleLogin';
 
 
 
@@ -52,6 +53,7 @@ function App() {
                   <Route path="/rsm" element={<Login />} />
                   <Route path="/" element={<Login />} />
                   <Route path="/profile-connect" element={<Login />} />
+                  <Route path="/google-login" element={<GoogleLogin />} />
                   <Route path="/auth-callback" element={<CallBackUrl />} />
                   <Route path="/auth-start" element={<AuthStart />} />
                   <Route path="/unauthorized" element={<Unauthorized />} />
