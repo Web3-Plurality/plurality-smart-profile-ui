@@ -20,7 +20,8 @@ function CallBackUrl() {
             setIsLoading(true);
             setError(false);
 
-            await axiosInstance.post(`oauth-${appName}/event`, {}, {
+            const apiUrl = appName ? `oauth-${appName}` : 'user/auth/google'
+            await axiosInstance.post(`${apiUrl}/event`, {}, {
                 headers: {
                     'x-sse-id': getLocalStorageValue('sseId'),
                     'x-token-id': accessTokenID,

@@ -62,6 +62,7 @@ export default function useAuthenticate() {
 
   return {
     authWithStytch,
+    setAuthMethod,
     authMethod,
     loading,
     error,

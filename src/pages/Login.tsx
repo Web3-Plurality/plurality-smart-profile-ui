@@ -179,16 +179,8 @@ const Login = () => {
         }
     }
     const handleGoogleConnect = () => {
-        const width = 500
-        const height = 600
-        const left = window.screenX + (window.outerWidth - width) / 2
-        const top = window.screenY + (window.outerHeight - height) / 2.5
+        registerEvent('')
 
-        window.open(
-            "https://app.plurality.local/user/auth/google/login",
-            "Google Authentication",
-            `width=${width},height=${height},left=${left},top=${top}`
-        )
     }
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
@@ -295,7 +287,7 @@ const Login = () => {
             case 'profileSettings':
                 return <ProfileSettings />
             default:
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
+                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
         }
     }
 

@@ -2,13 +2,14 @@ import { useState } from 'react'
 import axios from 'axios'
 import { useMetamaskPublicKey } from './useMetamaskPublicKey'
 import { API_BASE_URL } from '../utils/EnvConfig'
-import { RouteMapper } from '../utils/Helpers'
+import { RouteMapper, setLocalStorageValue } from '../utils/Helpers'
 import { encryptData } from '../services/EncryptionDecryption/encryption'
 import { autoConnect } from '../services/orbis/autoConnect'
 import { insertIndividualProfile, insertSmartProfile } from '../services/orbis/insertQueries'
 import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
+import { goToStep } from '../Slice/stepperSlice'
 
 export const useRegisterEvent = () => {
     const [error, setError] = useState('')
@@ -24,18 +25,27 @@ export const useRegisterEvent = () => {
         try {
             const evtSource = new EventSource(`${API_BASE_URL}/register-event`, { withCredentials: true });
             evtSource.onmessage = function (event) {
-                const { message, app, id, auth } = JSON.parse(event?.data);
+                console.log(JSON.parse(event?.data))
+                const { message, app, id, auth, googleAccessToken, pluralityToken } = JSON.parse(event?.data);
                 setMessage(message);
                 setApp(app);
-                if (message === "received") {
+                if (message === "received" && app === 'google') {
+                    localStorage.setItem('token', pluralityToken)
+                    localStorage.setItem('googleAccessToken', googleAccessToken)
+                    dispatch(goToStep('verification'))
+                } else if (message === "received") {
                     fetchUserInfo(app, auth)
+                } else if (appName === '') {
+                    console.log("Gooogle o oauth")
+                    setLocalStorageValue('sseId', id)
+                    handleGoogleConnect(id)
                 } else {
                     socialConnect(id, appName)
                 }
             };
 
             evtSource.onerror = function (err) {
-                console.log('Error: ', err)
+                console.log('Event Source error', err)
                 setError('EventSource failed');
                 evtSource.close();
             };
@@ -48,6 +58,18 @@ export const useRegisterEvent = () => {
         }
     };
 
+    const handleGoogleConnect = (sseID: number) => {
+        const width = 500
+        const height = 600
+        const left = window.screenX + (window.outerWidth - width) / 2
+        const top = window.screenY + (window.outerHeight - height) / 2.5
+
+        window.open(
+            `${API_BASE_URL}/user/auth/google/login?sse_id=${sseID}`,
+            "Google Authentication",
+            `width=${width},height=${height},left=${left},top=${top}`
+        )
+    }
 
     const socialConnect = (id: string, appName: string) => {
         const AppRoute = RouteMapper(appName)
