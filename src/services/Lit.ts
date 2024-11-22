@@ -7,6 +7,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
     AuthMethodScope,
     AuthMethodType,
+    LIT_NETWORK,
     LitNetwork,
     ProviderType,
 } from '@lit-protocol/constants';
@@ -97,14 +98,21 @@ export async function updateSessionSigs(
  * Fetch PKPs associated with given auth method
  */
 export async function getPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
-    const provider = getProviderByAuthMethod(authMethod);
 
-    if (!provider) {
-        throw new Error('Provider is undefined');
-    }
+      
+      const pkp = await litAuthClient.mintPKPWithAuthMethods([authMethod], {
+        addPkpEthAddressAsPermittedAddress: true
+      });
+      console.log("Fetched PKP", pkp);
+      return [pkp];
+    // const provider = getProviderByAuthMethod(authMethod);
 
-    const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
-    return allPKPs;
+    // if (!provider) {
+    //     throw new Error('Provider is undefined');
+    // }
+
+    // const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
+    // return allPKPs;
 }
 
 /**
@@ -159,7 +167,7 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
 function getProviderByAuthMethod(authMethod: AuthMethod) {
     switch (authMethod.authMethodType) {
         case AuthMethodType.GoogleJwt:
-            return litAuthClient.getProvider(ProviderType.Google);
+            return litAuthClient.getProvider(ProviderType.WebAuthn);
         case AuthMethodType.Discord:
             return litAuthClient.getProvider(ProviderType.Discord);
         case AuthMethodType.EthWallet:

@@ -20,7 +20,7 @@ interface EmailLoginProps {
 const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     const navigate = useNavigate();
     const dispatch = useDispatch()
-    const googleToken = getLocalStorageValue('googleAccessToken')
+    const googleToken = getLocalStorageValue('googleJwtToken')
 
     const handleNavigation = () => {
         const clientId = localStorage.getItem('clientId')
@@ -69,7 +69,7 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         }
         if (googleToken) {
             setAuthMethod({
-                authMethodType: AuthMethodType.Google,
+                authMethodType: AuthMethodType.GoogleJwt,
                 accessToken: googleToken
             })
         } else {
