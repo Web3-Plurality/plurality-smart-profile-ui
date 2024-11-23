@@ -10,6 +10,7 @@ import { PayloadDataType } from "../types";
 import axios from "axios";
 import { API_BASE_URL } from "../utils/EnvConfig";
 import { getLocalStorageValue, setLocalStorageValue } from "./../utils/Helpers";
+import { message } from "antd";
 
 interface OTPVerificationProps {
     emailId: string;
@@ -113,11 +114,17 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
                 clientId: getLocalStorageValue("clientId")
             };
 
-            const { data } = await axios.post(url, payload)
+            const response = await axios.post(url, payload)
 
-            if (data?.success && data?.stytchToken) {
-                setLocalStorageValue("token", data?.pluralityToken)
-                handleFinalPayload({ session: data?.stytchToken, userId: data?.userId, method: 'email' });
+            if (!response) {
+                setError(true);
+                message.error('Invalid code entered, if this behavior persists, please contact us')
+                return
+            }
+
+            if (response.data?.success && response.data?.stytchToken) {
+                setLocalStorageValue("token", response.data?.pluralityToken)
+                handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });
                 localStorage.setItem('tool', 'lit');
             }
         } catch (err) {

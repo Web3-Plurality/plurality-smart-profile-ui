@@ -34,7 +34,7 @@ const Header = () => {
     const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
     const name = parssedUserOrbisData?.data?.smartProfile?.username
-    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
+    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.scoreValue + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.scoreValue
     const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length
 
     const incentiveType = localStorage.getItem('incentives')

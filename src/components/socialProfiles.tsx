@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react';
 import { ProfileData } from '../types';
 import { getPlatformImage } from '../utils/Helpers';
@@ -136,7 +137,7 @@ const SocialProfiles = ({
     }, [activeStates]);
 
     const smartProfileData = localStorage.getItem('smartProfileData');
-    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : [];
+    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : [];
 
     const plaformImg = getPlatformImage()
 

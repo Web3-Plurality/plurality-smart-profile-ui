@@ -217,7 +217,7 @@ const Login = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const platforms = localStorage.getItem('platforms')
             const parsedPlatforms = platforms ? JSON.parse(platforms) : []
-            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : []
             const filteredProfile = socialButtons.filter((button: ProfileData) => button.id === index)
             const clickedIconDisplayName = filteredProfile[0]?.displayName?.toLowerCase().replace(/\s+/g, '');
             const activePlatforms: string[] = []
