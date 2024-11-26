@@ -4,7 +4,7 @@ import { authenticateWithStytch } from '../services/Lit';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
-import { goToStep } from '../Slice/stepperSlice';
+import { goToStep, resetSteps } from '../Slice/stepperSlice';
 import { message } from 'antd';
 
 export default function useAuthenticate() {
@@ -49,6 +49,7 @@ export default function useAuthenticate() {
     localStorage.clear();
     setLocalStorageValue("smartProfileData", smartprofileData || '')
     setLocalStorageValue("tool", tool || '')
+    dispatch(resetSteps())
     dispatch(goToStep("litLogin"))
     let path = window.location.pathname
     if (isRsmPlatform() || isProfileConnectPlatform()) {

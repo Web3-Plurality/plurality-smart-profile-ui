@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { domain, origin, statement } from '../utils/Constants';
 import { useDispatch } from 'react-redux';
-import { goToStep } from '../Slice/stepperSlice';
+import { resetSteps } from '../Slice/stepperSlice';
 
 
 export const useMetamaskToken = () => {
@@ -66,7 +66,7 @@ export const useMetamaskToken = () => {
     const generateMetamaskToken = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/login`,{address});
+            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/login`, { address });
             if (data.nonce) {
                 const signInResponse = await signInWithEthereum(data.nonce);
                 if (signInResponse) {
@@ -139,7 +139,7 @@ export const useMetamaskToken = () => {
             path = `/profile-connect?clientId=${clientId}`;
         }
 
-        dispatch(goToStep('home'))
+        dispatch(resetSteps())
         navigate(path, { replace: true });
         message.error("Something went wrong, please contact the team")
     }

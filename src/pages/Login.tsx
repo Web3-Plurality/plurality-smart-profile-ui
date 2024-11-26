@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
 import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHeader } from "../utils/Helpers"
-import { goToStep } from "../Slice/stepperSlice"
+import { goToStep, resetSteps } from "../Slice/stepperSlice"
 import { selectCurrentStep } from "../selectors/stepperSelector"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useRef, useState } from "react"
@@ -294,7 +294,9 @@ const Login = () => {
         const clientId = localStorage.getItem("clientId")
         const tool = localStorage.getItem("tool")
         localStorage.clear();
-        localStorage.setItem("smartProfileData", smartprofileData || '')
+        if (smartprofileData) {
+            localStorage.setItem("smartProfileData", smartprofileData || '')
+        }
         localStorage.setItem("tool", tool || '')
         let path = '/'
         if (isRsmPlatform()) {
@@ -302,7 +304,8 @@ const Login = () => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        dispatch(goToStep('home'))
+        window.location.reload()
+        dispatch(resetSteps())
         navigate(path, { replace: true });
     }
 

@@ -8,7 +8,7 @@ import { message } from 'antd';
 import { litNodeClient } from '../services/Lit';
 import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
 import { useDispatch } from 'react-redux';
-import { goToStep } from '../Slice/stepperSlice';
+import { goToStep, resetSteps } from '../Slice/stepperSlice';
 import axiosInstance from '../services/Api';
 import { globalSessionSigs } from '../Slice/userDataSlice';
 
@@ -82,6 +82,7 @@ export default function useSession() {
     setLocalStorageValue("smartProfileData", smartprofileData || '')
     setLocalStorageValue("tool", tool || '')
 
+    dispatch(resetSteps())
     dispatch(goToStep("litLogin"))
     let path = window.location.pathname
     if (isRsmPlatform() || isProfileConnectPlatform()) {

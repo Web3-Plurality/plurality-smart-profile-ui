@@ -10,7 +10,7 @@ import { isProfileConnectPlatform, isRsmPlatform, showHeader } from '../../utils
 import CustomIcon from '../customIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentStep } from '../../selectors/stepperSelector';
-import { goToStep } from '../../Slice/stepperSlice';
+import { resetSteps } from '../../Slice/stepperSlice';
 import Drawer from './Drawer';
 import { selectShouldUpdate } from '../../selectors/headerSelector';
 import { useEffect, useState } from 'react';
@@ -66,7 +66,7 @@ const Header = () => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        dispatch(goToStep('home'))
+        dispatch(resetSteps())
         navigate(path, { replace: true });
         window.location.reload();
     }
