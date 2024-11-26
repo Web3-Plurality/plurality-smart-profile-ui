@@ -12,10 +12,6 @@ import { goToStep } from "../Slice/stepperSlice"
 import { message } from "antd"
 import { ErrorMessages } from "../utils/Constants"
 import { isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
-// import { message } from "antd"
-// import { ErrorMessages } from "../utils/Constants"
-
-
 interface EmailLoginProps {
     finalPayload: PayloadDataType
 }
@@ -107,11 +103,12 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     }
 
     if (error) {
-        console.log("here", error)
         dispatch(goToStep("home"))
         message.error(ErrorMessages.GENERAL_ERROR);
         return null
     }
+
+    return
 }
 
 export default EmailVerification

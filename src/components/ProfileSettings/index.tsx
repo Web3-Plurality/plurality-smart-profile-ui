@@ -79,7 +79,7 @@ const ProfileSettings = () => {
                 profileImg: profilePic === userAvatar ? "" : profilePic,
                 bio: userBio
             }
-            const { data } = await axios.put(`${API_BASE_URL}/user`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
+            const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'x-profile-type-stream-id': localStorage.getItem("profileTypeStreamId"),
@@ -97,7 +97,7 @@ const ProfileSettings = () => {
                 await autoConnect()
 
                 const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")!
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), profileTypeStreamId)
+                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), profileTypeStreamId)
                 // save smart profile in local storage along with the returned stream id
                 if (insertionResult) {
                     const objData = {

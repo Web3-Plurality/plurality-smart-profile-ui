@@ -79,7 +79,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connected_platforms), stream_id)
+                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), stream_id)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
                         const objData = {

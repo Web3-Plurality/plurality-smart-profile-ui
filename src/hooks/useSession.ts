@@ -3,15 +3,12 @@ import { AuthMethod } from '@lit-protocol/types';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
-import Cookies from 'js-cookie';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { litNodeClient } from '../services/Lit';
 import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
 import { useDispatch } from 'react-redux';
-import { goToStep } from '../Slice/stepperSlice';
-import { API_BASE_URL } from '../utils/EnvConfig';
+import { goToStep, resetSteps } from '../Slice/stepperSlice';
 import axiosInstance from '../services/Api';
 import { globalSessionSigs } from '../Slice/userDataSlice';
 
@@ -22,6 +19,22 @@ export default function useSession() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
+  const getCapacityDelegationAuthSig = async (pkp: IRelayPKP) => {
+    try {
+      const userPkp = localStorage.getItem("pkpKey")
+      if (userPkp || pkp) {
+        const payload = { address: pkp?.ethAddress }
+        const { data } = await axiosInstance.post('/user/capacity', payload)
+        if (data) {
+          return data.capacityDelegationAuthSig
+        }
+      }
+    } catch (err) {
+      handleLogout();
+      console.log("Something went wrong!", err)
+    }
+  }
+
   /**
    * Generate session sigs and store new session data
    */
@@ -30,10 +43,7 @@ export default function useSession() {
       setLoading(true);
       setError(undefined);
       try {
-
-        await userAuthorization(pkp.ethAddress)
-        const capacityDelegationAuthSig = await getCapacityDelegationAuthSig()
-
+        const capacityDelegationAuthSig = await getCapacityDelegationAuthSig(pkp)
         await litNodeClient.connect()
 
         // Generate session sigs
@@ -64,42 +74,6 @@ export default function useSession() {
     []
   );
 
-  const userAuthorization = async (pkpAddress: string) => {
-    try {
-      const url = `${API_BASE_URL}/user`
-      const payload = {
-        address: pkpAddress,
-        email: localStorage.getItem('user'),
-        subscribe: true,
-        clientId: localStorage.getItem("clientId")
-      };
-      const headers = {
-        'x-stytch-token': Cookies.get('stytch_session_jwt'),
-      };
-      const { data } = await axios.post<{ token: string }>(url, { data: payload }, { headers })
-      console.log("DATAAA", data)
-      if (data) {
-        console.log("Token: ", data.token)
-        setLocalStorageValue("token", data.token)
-      }
-    } catch (err) {
-      handleLogout();
-      console.log("Something went wrong!", err)
-    }
-  }
-
-  const getCapacityDelegationAuthSig = async () => {
-    try {
-      const { data } = await axiosInstance.get('/user/capacity')
-      if (data) {
-        return data.capacityDelegationAuthSig
-      }
-    } catch (err) {
-      handleLogout();
-      console.log("Something went wrong!", err)
-    }
-  }
-
   async function handleLogout() {
     const smartprofileData = getLocalStorageValue("smartProfileData")
     const tool = getLocalStorageValue("tool")
@@ -108,6 +82,7 @@ export default function useSession() {
     setLocalStorageValue("smartProfileData", smartprofileData || '')
     setLocalStorageValue("tool", tool || '')
 
+    dispatch(resetSteps())
     dispatch(goToStep("litLogin"))
     let path = window.location.pathname
     if (isRsmPlatform() || isProfileConnectPlatform()) {

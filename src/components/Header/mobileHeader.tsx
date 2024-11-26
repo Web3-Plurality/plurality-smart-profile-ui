@@ -10,7 +10,7 @@ import Drawer from './Drawer';
 import CustomIcon from '../customIcon';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCurrentStep } from '../../selectors/stepperSelector';
-import { goToStep } from '../../Slice/stepperSlice';
+import { resetSteps } from '../../Slice/stepperSlice';
 import { selectShouldUpdate } from '../../selectors/headerSelector';
 import { useEffect, useState } from 'react';
 
@@ -57,7 +57,7 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        dispatch(goToStep('home'))
+        dispatch(resetSteps())
         navigate(path, { replace: true });
         window.location.reload();
     }
@@ -69,7 +69,7 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
     const incentiveType = localStorage.getItem('incentives')
 
     // const name = parssedUserOrbisData?.data?.smartProfile?.username
-    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.score_value + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.score_value
+    const score = parssedUserOrbisData?.data?.smartProfile?.scores?.[0]?.scoreValue + parssedUserOrbisData?.data?.smartProfile?.scores?.[1]?.scoreValue
     const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connected_platforms?.length
 
     return (

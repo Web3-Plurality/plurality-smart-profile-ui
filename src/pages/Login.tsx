@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
 import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHeader } from "../utils/Helpers"
-import { goToStep } from "../Slice/stepperSlice"
+import { goToStep, resetSteps } from "../Slice/stepperSlice"
 import { selectCurrentStep } from "../selectors/stepperSelector"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useRef, useState } from "react"
@@ -28,12 +28,14 @@ import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
-import axiosInstance from "../services/Api"
+// import axiosInstance from "../services/Api"
+import axios from "axios"
 import { MessageType } from "antd/es/message/interface"
 
 
 const Login = () => {
-    const [methodId, setMethodId] = useState<string>('')
+    // const [methodId, setMethodId] = useState<string>('')
+    const [emailId, setEmailId] = useState<string>('')
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
@@ -83,16 +85,14 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}/client-app?uuid=${clientId}`
-                    const { data } = await axiosInstance.get(rsmUrl, {
+                    const rsmUrl = `${API_BASE_URL}/crm/client?uuid=${clientId}`
+                    const { data } = await axios.get(rsmUrl, {
                         headers: {
                             'x-domain': domain
                         }
                     })
-                    console.log("Data", data)
                     if (!data.data) return
                     if (data.error) {
-                        console.log("here 1")
                         message.error(data.error)
                         return
                     }
@@ -217,7 +217,7 @@ const Login = () => {
             const smartProfileData = localStorage.getItem('smartProfileData')
             const platforms = localStorage.getItem('platforms')
             const parsedPlatforms = platforms ? JSON.parse(platforms) : []
-            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : []
+            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : []
             const filteredProfile = socialButtons.filter((button: ProfileData) => button.id === index)
             const clickedIconDisplayName = filteredProfile[0]?.displayName?.toLowerCase().replace(/\s+/g, '');
             const activePlatforms: string[] = []
@@ -266,9 +266,9 @@ const Login = () => {
             case 'home':
                 return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
             case 'litLogin':
-                return <LitLogin setMethodId={setMethodId} />
+                return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification methodId={methodId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification finalPayload={finalPayload} />
             case 'dashboard':
@@ -294,7 +294,9 @@ const Login = () => {
         const clientId = localStorage.getItem("clientId")
         const tool = localStorage.getItem("tool")
         localStorage.clear();
-        localStorage.setItem("smartProfileData", smartprofileData || '')
+        if (smartprofileData) {
+            localStorage.setItem("smartProfileData", smartprofileData || '')
+        }
         localStorage.setItem("tool", tool || '')
         let path = '/'
         if (isRsmPlatform()) {
@@ -302,7 +304,8 @@ const Login = () => {
         } else if (isProfileConnectPlatform()) {
             path = `/profile-connect?client_id=${clientId}`;
         }
-        dispatch(goToStep('home'))
+        window.location.reload()
+        dispatch(resetSteps())
         navigate(path, { replace: true });
     }
 

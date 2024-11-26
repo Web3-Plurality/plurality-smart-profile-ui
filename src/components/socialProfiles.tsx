@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react';
 import { ProfileData } from '../types';
 import { getPlatformImage } from '../utils/Helpers';
@@ -109,7 +110,6 @@ const SocialProfiles = ({
     useEffect(() => {
         if (circleRef.current) {
             const width = circleRef.current.offsetWidth;
-            console.log(isMobileScreen && isIframe)
             const baseRadius = isExtraSmallScreen ? (width / 1.98) : isMobileScreen ? isIframe ? (width / 2.06) : (width / 2.1) : width / 2.1;
             setCircleRadius(baseRadius - 30);
         }
@@ -137,7 +137,7 @@ const SocialProfiles = ({
     }, [activeStates]);
 
     const smartProfileData = localStorage.getItem('smartProfileData');
-    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connected_platforms : [];
+    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : [];
 
     const plaformImg = getPlatformImage()
 
