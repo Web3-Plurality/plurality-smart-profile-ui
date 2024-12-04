@@ -76,7 +76,6 @@ const Login = () => {
         setCeramicError
     } = useMetamaskToken()
 
-
     useEffect(() => {
         // We need tp use this clientId to load the logo
         if (clientId) {
@@ -275,7 +274,7 @@ const Login = () => {
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification emailId={ localStorage?.getItem('emailId') ? localStorage?.getItem('emailId') : emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification finalPayload={finalPayload} />
             case 'dashboard':

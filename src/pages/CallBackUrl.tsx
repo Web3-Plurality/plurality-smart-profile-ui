@@ -13,15 +13,17 @@ function CallBackUrl() {
 
     const [searchParams] = useSearchParams();
     const accessTokenID = searchParams.get('token_id');
-    const appName = searchParams.get('app');
+    const appName = searchParams.get('app'); 
+    const redirect = searchParams.get('redirect');// redirect to otp page if its true
+
 
     const registerEvent = async () => {
         try {
             setIsLoading(true);
             setError(false);
-
+            console.log("redirect", redirect)
             const apiUrl = appName ? `oauth-${appName}` : 'user/auth/google'
-            await axiosInstance.post(`${apiUrl}/event`, {clientId: localStorage.getItem("clientId")}, {
+            await axiosInstance.post(`${apiUrl}/event`, { clientId: localStorage.getItem("clientId"), redirect : redirect === 'true' ? true : false }, {
                 headers: {
                     'x-sse-id': getLocalStorageValue('sseId'),
                     'x-token-id': accessTokenID,
