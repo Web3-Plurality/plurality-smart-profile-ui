@@ -114,6 +114,12 @@ const getDescription = (currentStep: string) => {
     }
 };
 
+const getParentUrl = () => {
+    const { ancestorOrigins, origin } = window.location
+    const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
+    return parentUrl
+}
+
 const isLitLogin = (val: string) => {
     if (val.length) return true
     return false
@@ -257,6 +263,7 @@ export {
     showBackButton,
     getTitleText,
     getDescription,
+    getParentUrl,
     isLitLogin,
     checkPreviousLoginMode,
     getBtntext,

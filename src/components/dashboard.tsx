@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux"
 import { setLoadingState } from "../Slice/userDataSlice";
 import { LoaderMessages } from '../utils/Constants';
 import { CLIENT_ID } from '../utils/EnvConfig';
-import { getLocalStorageValueofClient } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl } from '../utils/Helpers';
 import { useStepper } from '../hooks/useStepper';
 import { useAccount, useDisconnect } from 'wagmi';
 
@@ -23,7 +23,9 @@ export default function Dashboard({
     const { goToStep } = useStepper()
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { userDid, litWalletSig } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+    const parentUrl = getParentUrl()
 
     useEffect(() => {
         const connectToOris = async () => {
@@ -48,6 +50,7 @@ export default function Dashboard({
 
         if (!userDid) {
             connectToOris()
+            window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!litWalletSig } }, parentUrl);
         }
 
         const disconnectMetamask = async () => {
@@ -62,6 +65,18 @@ export default function Dashboard({
 
         disconnectMetamask()
     }, [])
+
+    useEffect(() => {
+        const isInIframe = window.self !== window.top; // Check if inside an iframe
+
+        const detailsCard = document.querySelector('.details-card');
+
+        if (!isInIframe && detailsCard) {
+            detailsCard.classList.add('outside-iframe');
+        } else if (detailsCard) {
+            detailsCard.classList.remove('outside-iframe');
+        }
+    }, []);
 
     return (
         <div className="dashboard-container">
