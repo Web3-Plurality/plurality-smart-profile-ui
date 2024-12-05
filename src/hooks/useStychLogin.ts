@@ -6,11 +6,15 @@ import { message } from "antd";
 import { ErrorMessages, LoaderMessages } from "../utils/Constants";
 import axios from "axios";
 import { API_BASE_URL } from '../utils/EnvConfig';
+import { useRegisterEvent } from "./useEventListner";
 
 export default function useStychLogin(email: string, setEmailId?: (id: string) => void) {
 
     const currentStep = useSelector(selectCurrentStep)
     const dispatch = useDispatch()
+    const {
+        registerEvent
+    } = useRegisterEvent()
     const sendPasscode = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_SEND }))
@@ -23,6 +27,7 @@ export default function useStychLogin(email: string, setEmailId?: (id: string) =
                 // inform user to use google login method instead of stytch
                 message.info(data?.message)
                 dispatch(resetSteps())
+                registerEvent('');
                 // open the google Login window
                 return
             }
