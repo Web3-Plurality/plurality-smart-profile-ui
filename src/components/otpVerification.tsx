@@ -123,13 +123,6 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
                 return
             }
 
-            if (response?.data?.redirectToGoogle) {
-                setError(true);
-                message.error(response?.data?.message)
-                dispatch(resetSteps())
-                return
-            }
-
             if (response.data?.success && response.data?.stytchToken) {
                 setLocalStorageValue("token", response.data?.pluralityToken)
                 handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });

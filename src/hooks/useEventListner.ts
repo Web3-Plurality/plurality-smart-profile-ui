@@ -30,6 +30,8 @@ export const useRegisterEvent = () => {
                 setMessage(message);
                 setApp(app);
                 if (message === "received" && app === 'google' && emailId) {
+                    // if emailId is comming  means this user already been logged in with stytch but now trying to login with google,
+                    // so we have to redirect him to otp page
                     localStorage.setItem('emailId', emailId)
                     dispatch(goToStep('otp'))
                 } else if (message === "received" && app === 'google') {

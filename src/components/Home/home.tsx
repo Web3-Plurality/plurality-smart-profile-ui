@@ -1,6 +1,7 @@
 import SocialButton from "./socialButton"
 import mailIcon from './../../assets/svgIcons/mailIcon.svg'
 import metamaskIcon from './../../assets/svgIcons/metamask-icon.svg'
+import google from './../../assets/svgIcons/google.svg'
 
 interface HomeProps {
     handleLitConnect: () => void
@@ -26,7 +27,7 @@ const Home = ({ handleLitConnect, handleMetamaskConnect, handleGoogleConnect }: 
 
             <SocialButton
                 text={'Login with Google'}
-                icon={metamaskIcon}
+                icon={google}
                 handleClick={handleGoogleConnect}
             />
         </>
