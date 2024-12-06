@@ -7,6 +7,7 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
     AuthMethodScope,
     AuthMethodType,
+    LIT_NETWORK,
     LitNetwork,
     ProviderType,
 } from '@lit-protocol/constants';
@@ -97,14 +98,28 @@ export async function updateSessionSigs(
  * Fetch PKPs associated with given auth method
  */
 export async function getPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
-    const provider = getProviderByAuthMethod(authMethod);
 
-    if (!provider) {
-        throw new Error('Provider is undefined');
-    }
+      if (authMethod.authMethodType === AuthMethodType.GoogleJwt) {
+        const provider = litAuthClient.initProvider(ProviderType.Google)
+        if (!provider) {
+            throw new Error('Provider is undefined');
+        }
+        const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
+          console.log("Fetched PKP", allPKPs);
+          return allPKPs;
+      }
+      else{
 
-    const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
-    return allPKPs;
+          const provider = getProviderByAuthMethod(authMethod);
+      
+          if (!provider) {
+              throw new Error('Provider is undefined');
+          }
+      
+          const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
+          return allPKPs;
+      }
+      
 }
 
 /**

@@ -11,7 +11,8 @@ import { useDispatch } from "react-redux"
 import { goToStep } from "../Slice/stepperSlice"
 import { message } from "antd"
 import { ErrorMessages } from "../utils/Constants"
-import { isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
+import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
+import { AuthMethodType } from "@lit-protocol/constants"
 interface EmailLoginProps {
     finalPayload: PayloadDataType
 }
@@ -19,6 +20,7 @@ interface EmailLoginProps {
 const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     const navigate = useNavigate();
     const dispatch = useDispatch()
+    const googleToken = getLocalStorageValue('googleJwtToken')
 
     const handleNavigation = () => {
         const clientId = localStorage.getItem('clientId')
@@ -32,6 +34,7 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
 
     const {
         authMethod,
+        setAuthMethod,
         authWithStytch,
         loading: authLoading,
         error: authError,
@@ -64,12 +67,21 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         const registerInBackend = async () => {
             await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
         }
-        registerInBackend()
-    }, [])
+        if (googleToken) {
+            setAuthMethod({
+                authMethodType: AuthMethodType.GoogleJwt,
+                accessToken: googleToken
+            })
+        } else {
+            registerInBackend()
+        }
+    }, [googleToken])
 
     useEffect(() => {
         // If user is authenticated, fetch accounts
+        console.log('Enyere here 1')
         if (authMethod) {
+            console.log('Enyere here')
             handleNavigation()
             fetchAccounts(authMethod);
         }

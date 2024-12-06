@@ -156,6 +156,9 @@ const Login = () => {
     }, [metamaskAddress, currentStep])
 
 
+
+
+
     let litAddress = ''
     if (storedLitAccount) {
         litAddress = JSON.parse(storedLitAccount).address
@@ -174,7 +177,10 @@ const Login = () => {
             dispatch(goToStep('litLogin'))
         }
     }
+    const handleGoogleConnect = () => {
+        registerEvent('')
 
+    }
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
         const params = new URLSearchParams(window.location.search);
@@ -264,11 +270,11 @@ const Login = () => {
     const conditionalRendrer = () => {
         switch (currentStep) {
             case 'home':
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
+                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification emailId={ localStorage?.getItem('emailId') ? localStorage?.getItem('emailId') : emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification finalPayload={finalPayload} />
             case 'dashboard':
@@ -280,7 +286,7 @@ const Login = () => {
             case 'profileSettings':
                 return <ProfileSettings />
             default:
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} />
+                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
         }
     }
 

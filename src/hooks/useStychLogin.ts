@@ -1,17 +1,20 @@
 import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentStep } from "../selectors/stepperSelector";
-import { goToStep } from "../Slice/stepperSlice";
+import { goToStep, resetSteps } from "../Slice/stepperSlice";
 import { setLoadingState } from "../Slice/userDataSlice";
 import { message } from "antd";
 import { ErrorMessages, LoaderMessages } from "../utils/Constants";
 import axios from "axios";
 import { API_BASE_URL } from '../utils/EnvConfig';
+import { useRegisterEvent } from "./useEventListner";
 
 export default function useStychLogin(email: string, setEmailId?: (id: string) => void) {
 
     const currentStep = useSelector(selectCurrentStep)
     const dispatch = useDispatch()
-
+    const {
+        registerEvent
+    } = useRegisterEvent()
     const sendPasscode = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_SEND }))
@@ -20,7 +23,14 @@ export default function useStychLogin(email: string, setEmailId?: (id: string) =
 
             const url = `${API_BASE_URL}/user/auth/otp/login`
             const { data } = await axios.post(url, { email })
-            console.log(data)
+            if (data?.redirectToGoogle) {
+                // inform user to use google login method instead of stytch
+                message.info(data?.message)
+                dispatch(resetSteps())
+                registerEvent('');
+                // open the google Login window
+                return
+            }
             setEmailId?.(data?.emailId)
             // localStorage.setItem("emailId", response?.data?.emailId)
 
