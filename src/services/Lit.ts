@@ -7,7 +7,6 @@ import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
     AuthMethodScope,
     AuthMethodType,
-    LIT_NETWORK,
     LitNetwork,
     ProviderType,
 } from '@lit-protocol/constants';

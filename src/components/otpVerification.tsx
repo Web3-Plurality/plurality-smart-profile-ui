@@ -11,7 +11,6 @@ import axios from "axios";
 import { API_BASE_URL } from "../utils/EnvConfig";
 import { getLocalStorageValue, setLocalStorageValue } from "./../utils/Helpers";
 import { message } from "antd";
-import { goBack, resetSteps } from "../Slice/stepperSlice";
 
 interface OTPVerificationProps {
     emailId: string;
