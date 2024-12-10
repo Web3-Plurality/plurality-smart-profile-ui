@@ -123,7 +123,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
             }
 
             if (response.data?.success && response.data?.stytchToken) {
-                setLocalStorageValue("token", response.data?.pluralityToken)
+                setLocalStorageValue("token", response.data?.token)
                 handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });
                 localStorage.setItem('tool', 'lit');
             }

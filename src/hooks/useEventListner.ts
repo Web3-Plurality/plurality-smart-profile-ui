@@ -27,7 +27,7 @@ export const useRegisterEvent = () => {
             const evtSource = new EventSource(`${API_BASE_URL}/register-event`, { withCredentials: true });
             evtSource.onmessage = function (event) {
                 console.log(JSON.parse(event?.data))
-                const { message, app, id, auth, googleJwtToken, pluralityToken, emailId } = JSON.parse(event?.data);
+                const { message, app, id, auth, googleJwtToken, token, emailId } = JSON.parse(event?.data);
                 setMessage(message);
                 setApp(app);
                 if (message === "received" && app === 'google' && emailId) {
@@ -36,7 +36,7 @@ export const useRegisterEvent = () => {
                     localStorage.setItem('emailId', emailId)
                     dispatch(goToStep('otp'))
                 } else if (message === "received" && app === 'google') {
-                    localStorage.setItem('token', pluralityToken)
+                    localStorage.setItem('token', token)
                     localStorage.setItem('googleJwtToken', googleJwtToken)
                     dispatch(goToStep('verification'))
                 }else if (message === "received") {
