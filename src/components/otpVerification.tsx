@@ -105,7 +105,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
     const handleOTPVerification = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_VERFICATION }));
-            const url = `${API_BASE_URL}/user/auth/otp/authenticate`
+            const url = `${API_BASE_URL}/auth/otp/authenticate`
             const payload = {
                 code: otp,
                 email_id: emailId,

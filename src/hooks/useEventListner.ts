@@ -71,7 +71,7 @@ export const useRegisterEvent = () => {
         const top = window.screenY + (window.outerHeight - height) / 2.5
 
         window.open(
-            `${API_BASE_URL}/user/auth/google/login?sse_id=${sseID}`,
+            `${API_BASE_URL}/auth/google/login?sse_id=${sseID}`,
             "Google Authentication",
             `width=${width},height=${height},left=${left},top=${top}`
         )
