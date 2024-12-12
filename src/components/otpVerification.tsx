@@ -105,7 +105,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
     const handleOTPVerification = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_VERFICATION }));
-            const url = `${API_BASE_URL}/user/auth/otp/authenticate`
+            const url = `${API_BASE_URL}/auth/otp/authenticate`
             const payload = {
                 code: otp,
                 email_id: emailId,
@@ -123,7 +123,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
             }
 
             if (response.data?.success && response.data?.stytchToken) {
-                setLocalStorageValue("token", response.data?.pluralityToken)
+                setLocalStorageValue("token", response.data?.token)
                 handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });
                 localStorage.setItem('tool', 'lit');
             }

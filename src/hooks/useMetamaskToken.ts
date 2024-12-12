@@ -66,7 +66,7 @@ export const useMetamaskToken = () => {
     const generateMetamaskToken = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/login`, { address });
+            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/login`, { address });
             if (data.nonce) {
                 const signInResponse = await signInWithEthereum(data.nonce);
                 if (signInResponse) {
@@ -87,7 +87,7 @@ export const useMetamaskToken = () => {
             const headersData = JSON.stringify({ 'siwe': sig, 'message': msg })
             const headers = { 'x-siwe': headersData }
 
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/authenticate`,
+            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/authenticate`,
                 { address, clientId: localStorage.getItem("clientId") },
                 { headers }
             );

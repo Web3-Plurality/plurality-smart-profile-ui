@@ -21,7 +21,7 @@ export default function useStychLogin(email: string, setEmailId?: (id: string) =
 
             localStorage.setItem("user", email);
 
-            const url = `${API_BASE_URL}/user/auth/otp/login`
+            const url = `${API_BASE_URL}/auth/otp/login`
             const { data } = await axios.post(url, { email })
             if (data?.redirectToGoogle) {
                 // inform user to use google login method instead of stytch
