@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useRef, useState } from 'react';
 import { ProfileData } from '../types';
-import { getPlatformImage } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getPlatformImage } from '../utils/Helpers';
 import CustomIcon from './customIcon';
 import styled from 'styled-components';
 import useResponsive from '../hooks/useResponsive';
+import { CLIENT_ID } from '../utils/EnvConfig';
 
 type Platform = {
     active: boolean,
@@ -104,6 +105,11 @@ const SocialProfiles = ({
     const circleRef = useRef<HTMLDivElement>(null);
     const [circleRadius, setCircleRadius] = useState(153);
 
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
     const { isExtraSmallScreen, isMobileScreen, isTabScreen } = useResponsive()
     const isIframe = window.self !== window.top;
 
@@ -115,29 +121,34 @@ const SocialProfiles = ({
         }
     }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen, isIframe]);
 
-    const socailIcons = localStorage.getItem("platforms");
-    const parsedSocailIcons = socailIcons ? JSON.parse(socailIcons) : [];
 
-    const angle = (360 / parsedSocailIcons.length) * (Math.PI / 180);
+    const { platforms: socailIcons } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const angle = (360 / socailIcons?.length) * (Math.PI / 180);
 
     const updateLocalStoragePlatforms = (activeStates: boolean[]) => {
-        const platforms = localStorage.getItem("platforms");
-        const parsedPlatforms = platforms ? JSON.parse(platforms) : [];
+        const { platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-        const updatedPlatforms = parsedPlatforms.map((platform: Platform) => ({
+        const updatedPlatforms = platforms?.map((platform: Platform) => ({
             ...platform,
             active: platform.active ? true : activeStates[platform.id] || false
         }));
 
-        localStorage.setItem("platforms", JSON.stringify(updatedPlatforms));
+        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+        existingData = {
+            ...existingData,
+            platforms: updatedPlatforms
+        }
+        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
     };
 
     useEffect(() => {
         updateLocalStoragePlatforms(activeStates);
     }, [activeStates]);
 
-    const smartProfileData = localStorage.getItem('smartProfileData');
-    const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : [];
+    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const connectedPlatforms = smartProfileData?.data?.smartProfile?.connectedPlatforms || [];
 
     const plaformImg = getPlatformImage()
 
@@ -146,7 +157,7 @@ const SocialProfiles = ({
             <div className='mid-icon'>
                 <img className="app-logo-center" src={plaformImg} alt='' />
             </div>
-            {parsedSocailIcons && parsedSocailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }, index: number) => {
+            {socailIcons && socailIcons.map(({ iconName, id, icon, activeIcon }: { iconName: string, id: number, icon: string, activeIcon: string }, index: number) => {
                 const x = circleRadius * Math.cos(angle * index);
                 const y = circleRadius * Math.sin(angle * index);
                 return (
@@ -164,7 +175,7 @@ const SocialProfiles = ({
                         <CustomIcon
                             path={
                                 activeStates[id] ||
-                                    parsedSocailIcons.find((x: ProfileData) => x.id === id)?.active ||
+                                    socailIcons.find((x: ProfileData) => x.id === id)?.active ||
                                     connectedPlatforms?.includes(iconName)
                                     ? activeIcon : icon} />
                     </div>

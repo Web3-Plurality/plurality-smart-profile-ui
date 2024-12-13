@@ -9,11 +9,13 @@ import styled from "styled-components";
 import { PayloadDataType } from "../types";
 import axios from "axios";
 import { API_BASE_URL } from "../utils/EnvConfig";
-import { getLocalStorageValue, setLocalStorageValue } from "./../utils/Helpers";
+import { setLocalStorageValue } from "./../utils/Helpers";
 import { message } from "antd";
+import { CLIENT_ID } from "../utils/EnvConfig";
+import { getLocalStorageValueofClient } from "../utils/Helpers";
 
 interface OTPVerificationProps {
-    emailId: string;
+    emailId: string
     handleFinalPayload: (data: PayloadDataType) => void;
 }
 
@@ -74,7 +76,11 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
     const [error, setError] = useState(false);
     const [timer, setTimer] = useState(30);
     const [timerExpired, setTimerExpired] = useState(false);
-    const email = localStorage.getItem('user');
+
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { email } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const dispatch = useDispatch();
     const { sendPasscode } = useStychLogin(email || '');
@@ -105,15 +111,15 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
     const handleOTPVerification = async () => {
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_VERFICATION }));
-            const url = `${API_BASE_URL}/auth/otp/authenticate`
+            const { user } = getLocalStorageValueofClient(`clientID-${clientId}`)
+            const url = `${API_BASE_URL}/user/auth/otp/authenticate`
             const payload = {
                 code: otp,
                 email_id: emailId,
-                email: getLocalStorageValue('user'),
+                email: user,
                 subscribe: true,
-                clientId: getLocalStorageValue("clientId")
+                clientId
             };
-
             const response = await axios.post(url, payload)
 
             if (!response) {
@@ -123,13 +129,20 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
             }
 
             if (response.data?.success && response.data?.stytchToken) {
-                setLocalStorageValue("token", response.data?.token)
                 handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });
-                localStorage.setItem('tool', 'lit');
+
+                let existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+                existingData = {
+                    ...existingData,
+                    tool: 'lit',
+                    token: response.data?.pluralityToken
+                }
+                setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
             }
         } catch (err) {
             setError(true);
-            console.log(err);
+            console.error(err);
         } finally {
             dispatch(setLoadingState({ loadingState: false, text: '' }));
         }

@@ -15,7 +15,6 @@ import {
     GetSessionSigsProps,
     IRelayPKP,
     SessionSigs,
-    // AuthCallbackParams,
 } from '@lit-protocol/types';
 
 export const DOMAIN = import.meta.env.VITE_APP_PUBLIC_DOMAIN || 'localhost';

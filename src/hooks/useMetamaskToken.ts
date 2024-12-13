@@ -3,27 +3,28 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
-import { message } from 'antd';
-import { useAccount, useDisconnect } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
 import { AuthUserInformation } from '@useorbis/db-sdk';
-import { useNavigate } from 'react-router-dom';
-import { isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { domain, origin, statement } from '../utils/Constants';
-import { useDispatch } from 'react-redux';
-import { resetSteps } from '../Slice/stepperSlice';
+import { CLIENT_ID } from '../utils/EnvConfig';
+import { useLogoutUser } from './useLogoutUser';
 
+function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
+    return typeof err === 'object' && err !== null && 'code' in err;
+}
 
 export const useMetamaskToken = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [ceramicError, setCeramicError] = useState(false);
 
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
+    const handleLogoutUser = useLogoutUser()
 
     const { address } = useAccount();
-    const { disconnectAsync } = useDisconnect();
+
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
 
     // Create Siwe message
     const createSiweMessage = useCallback(async (address: string, nonce: string) => {
@@ -49,18 +50,25 @@ export const useMetamaskToken = () => {
                 const userAddress = await signer.getAddress();
                 const message = await createSiweMessage(userAddress, nonce);
                 const signature = await signer.signMessage(message);
-                localStorage.setItem('tool', 'metamask');
+
+                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                existingData = {
+                    ...existingData,
+                    tool: 'metamask',
+                }
+                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
                 return { message, signature };
             } catch (err: unknown) {
-                if (err && typeof err === 'object') {
-                    const errorWithCode = err as { code: number };
-                    if (errorWithCode.code === 4001) {
+                if (isEthereumError(err)) {
+                    if (err.code === 4001 || err.info?.error?.code === 4001) {
                         setError(true);
                     }
                 }
             }
         }
-    }, [createSiweMessage]);
+    }, []);
 
     // Handle MetaMask sign-in using nonce
     const generateMetamaskToken = useCallback(async () => {
@@ -79,7 +87,7 @@ export const useMetamaskToken = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [address, signInWithEthereum]);
+    }, [address]);
 
     // Post signature response to API
     const signatureResponseApi = useCallback(async (msg: string, sig: string) => {
@@ -87,62 +95,48 @@ export const useMetamaskToken = () => {
             const headersData = JSON.stringify({ 'siwe': sig, 'message': msg })
             const headers = { 'x-siwe': headersData }
 
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/authenticate`,
-                { address, clientId: localStorage.getItem("clientId") },
+            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/authenticate`,
+                { address, clientId },
                 { headers }
             );
 
-            const { success, user } = data;
+            const { success } = data;
 
             if (success) {
-                console.log('User: ', user)
-                localStorage.setItem('token', data.token)
+                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                existingData = {
+                    ...existingData,
+                    token: data.token,
+                }
+                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
                 const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
                 if (result === "error") {
                     // Handle error case if needed
                     console.error("Error connecting to Orbis");
                     setCeramicError(true)
                 } else if (result && result.did) {
-                    localStorage.setItem('userDid', JSON.stringify(result?.did))
+                    const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+                    let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                    existingData = {
+                        ...existingData,
+                        userDid: result?.did,
+                    }
+                    localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
                     setCeramicError(false)
                 } else {
                     setCeramicError(true)
                 }
             } else {
-                handleLogout();
+                handleLogoutUser("Authentication failed. Please try signing in again.");
             }
         } catch (err) {
-            handleLogout();
+            handleLogoutUser("Something went wrong. Please try again.");
             console.error("Error posting signature response:", err);
         }
     }, [address]);
-
-    async function handleLogout() {
-        const litSignature = localStorage.getItem("signature")
-        if (!litSignature) {
-            try {
-                await disconnectAsync();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-        const smartprofileData = localStorage.getItem("smartProfileData")
-        const tool = localStorage.getItem("tool")
-        const clientId = localStorage.getItem("clientId")
-        localStorage.clear();
-        localStorage.setItem("smartProfileData", smartprofileData || '')
-        localStorage.setItem("tool", tool || '')
-        let path = '/'
-        if (isRsmPlatform()) {
-            path = `/rsm?clientId=${clientId}`;
-        } else if (isProfileConnectPlatform()) {
-            path = `/profile-connect?clientId=${clientId}`;
-        }
-
-        dispatch(resetSteps())
-        navigate(path, { replace: true });
-        message.error("Something went wrong, please contact the team")
-    }
 
     return {
         generateMetamaskToken,

@@ -7,23 +7,25 @@ import useSession from "../hooks/useSession"
 
 import Loader from "./Loader"
 import { PayloadDataType } from "../types"
-import { useDispatch } from "react-redux"
-import { goToStep } from "../Slice/stepperSlice"
 import { message } from "antd"
 import { ErrorMessages } from "../utils/Constants"
-import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
+import { getLocalStorageValueofClient, isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
 import { AuthMethodType } from "@lit-protocol/constants"
+import { CLIENT_ID } from "../utils/EnvConfig"
+import { useStepper } from "../hooks/useStepper"
 interface EmailLoginProps {
     finalPayload: PayloadDataType
 }
 
 const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     const navigate = useNavigate();
-    const dispatch = useDispatch()
-    const googleToken = getLocalStorageValue('googleJwtToken')
+    const { goToStep } = useStepper()
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { googleJwtToken: googleToken } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const handleNavigation = () => {
-        const clientId = localStorage.getItem('clientId')
         let path = window.location.pathname
         if (isRsmPlatform() || isProfileConnectPlatform()) {
             path = `${window.location.pathname}?client_id=${clientId}`
@@ -79,9 +81,7 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
 
     useEffect(() => {
         // If user is authenticated, fetch accounts
-        console.log('Enyere here 1')
         if (authMethod) {
-            console.log('Enyere here')
             handleNavigation()
             fetchAccounts(authMethod);
         }
@@ -91,7 +91,14 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         // If user is authenticated and has selected an account, initialize session
         if (authMethod && accounts.length) {
             initSession(authMethod, accounts[0]);
-            localStorage.setItem("pkpKey", JSON.stringify(accounts[0]))
+            const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+            existingData = {
+                ...existingData,
+                pkpKey: accounts[0]
+            }
+            localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
         } else if (authMethod && !accounts.length && isFetchTriggered) {
             goToSignUp();
         }
@@ -111,11 +118,11 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         return <Loader message={'Securing your session...'} />;
     }
     if (accounts.length && sessionSigs) {
-        dispatch(goToStep("dashboard"))
+        goToStep("dashboard")
     }
 
     if (error) {
-        dispatch(goToStep("home"))
+        goToStep("home")
         message.error(ErrorMessages.GENERAL_ERROR);
         return null
     }

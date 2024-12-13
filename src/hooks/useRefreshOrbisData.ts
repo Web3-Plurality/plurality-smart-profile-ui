@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_BASE_URL } from "../utils/EnvConfig";
+import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig";
 import { ProfileData } from "../types";
 import { encryptData } from "../services/EncryptionDecryption/encryption";
 import { decryptData } from "../services/EncryptionDecryption/decryption";
-import { autoConnect } from "../services/orbis/autoConnect";
 import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
-import { goToStep } from "../Slice/stepperSlice";
 import { updateHeader } from "../Slice/headerSlice";
+import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
+import { useStepper } from "./useStepper";
 
 type Platform = {
     platform: string,
@@ -17,24 +17,33 @@ type Platform = {
 }
 
 const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, step: string) => {
-    const [socialIcons, setSocialIcons] = useState(() => {
-        const platforms = localStorage.getItem('platforms');
-        return platforms ? JSON.parse(platforms) : null;
-    });
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+    const { platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const [socialIcons, setSocialIcons] = useState(platforms || [])
 
     const [loading, setLoading] = useState(true)
-
     const dispatch = useDispatch()
+    const { goToStep } = useStepper()
 
     useEffect(() => {
-        if (socialIcons) {
-            localStorage.setItem('platforms', JSON.stringify(socialIcons));
+        if (socialIcons && profileTypeStreamId) {
+            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+            existingData = {
+                ...existingData,
+                platforms: socialIcons,
+            }
+            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
         } else {
             localStorage.removeItem('platforms');
         }
-    }, [socialIcons]);
+    }, [socialIcons, profileTypeStreamId]);
 
-    const getSmartProfileFromOrbis = async (stream_id: string) => {
+    const getSmartProfileFromOrbis = async (stream_id: string, userDid: string) => {
         setLoading(true)
         const selectResult = await select(stream_id);
         if (!selectResult) {
@@ -45,26 +54,25 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
         if (!rows || !rows.length) {
             throw new Error("No rows returned from select()");
         }
-        console.log(JSON.parse(rows?.[0]?.platforms))
 
         const orbisData = JSON.parse(rows?.[0]?.platforms || [])
         if (orbisData) {
-            const activePlatforms = JSON.parse(localStorage.getItem("platforms")!)?.filter((button: ProfileData) =>
+            const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+            const { platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+            const activePlatforms = platforms?.filter((button: ProfileData) =>
                 orbisData.some((platform: Platform) =>
                     platform.platform.toLowerCase().replace(/\s+/g, '') === button?.displayName?.toLowerCase().replace(/\s+/g, '')
                 )
             );
             setSocialIcons(activePlatforms)
-
-
-            //////////////////////////////////////////
-            await autoConnect()
-            const response = await selectSmartProfiles(stream_id);
+            await reGenerateUserDidAddress()
+            const response = await selectSmartProfiles(stream_id, userDid);
 
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
-                const token = localStorage.getItem('token')
-                const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")
+
+                const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
                 const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -73,12 +81,13 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                 })
 
                 if (data.success) {
-                    const litSignature = localStorage.getItem("signature")
+                    const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     let publicKey;
                     if (!litSignature) {
                         publicKey = await getPublicKey();
                     }
                     const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
+                    await reGenerateUserDidAddress()
                     const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), stream_id)
                     // save smart profile in local storage along with the returned stream id
                     if (insertionResult) {
@@ -86,51 +95,72 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             streamId: insertionResult?.id,
                             data: { smartProfile: data.smartProfile }
                         }
-                        localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                        existingData = {
+                            ...existingData,
+                            smartProfileData: objData,
+                        }
+                        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                         dispatch(updateHeader())
                         setLoading(false)
-                        dispatch(goToStep(step))
+                        goToStep(step);
                     }
                 }
             }
             else {
                 // user has a smart profile in orbis
-                const smartprofileData = localStorage.getItem("smartProfileData")
+                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 if (smartprofileData) {
-                    const { streamId } = JSON.parse(smartprofileData)
+                    const { streamId } = smartprofileData
                     if (streamId === response.rows[0].stream_id) {
                         setLoading(false)
-                        dispatch(goToStep(step))
+                        goToStep(step)
                     } else {
                         const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                         if (decryptedData.code === -32603) {
-                            dispatch(goToStep('success'))
-
+                            goToStep('success')
                             return
                         }
                         const objData = {
                             streamId: response.rows[0].stream_id,
                             data: { smartProfile: decryptedData }
                         }
-                        localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                        existingData = {
+                            ...existingData,
+                            smartProfileData: objData,
+                        }
+                        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                         dispatch(updateHeader())
                         setLoading(false)
-                        dispatch(goToStep(step))
+                        goToStep(step)
                     }
                 } else {
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     if (decryptedData.code === -32603) {
-                        dispatch(goToStep('success'))
+                        goToStep('success')
                         return
                     }
                     const objData = {
                         streamId: response.rows[0].stream_id,
                         data: { smartProfile: decryptedData }
                     }
-                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                    let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                    existingData = {
+                        ...existingData,
+                        smartProfileData: objData,
+                    }
+                    localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                     dispatch(updateHeader())
                     setLoading(false)
-                    dispatch(goToStep(step))
+                    goToStep(step)
                 }
             }
         }

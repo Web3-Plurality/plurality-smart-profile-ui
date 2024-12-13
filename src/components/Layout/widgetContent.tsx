@@ -6,10 +6,9 @@ import MobileHeader from "../Header/mobileHeader";
 import useResponsive from "../../hooks/useResponsive";
 import Loader from "../Loader";
 import { selectLoader } from "../../selectors/userDataSelector";
-import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentStep } from "../../selectors/stepperSelector";
+import { useSelector } from "react-redux";
 import BackButton from "./backButton";
-import { goBack } from "../../Slice/stepperSlice";
+import { useStepper } from "../../hooks/useStepper";
 
 
 interface WidgetContentWrapperProps {
@@ -48,14 +47,14 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
 
 const WidgetContent = ({ children }: { children: ReactNode }) => {
     const isIframe = window.self !== window.top;
-    const dispatch = useDispatch()
+    const { goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
-    const currentStep = useSelector(selectCurrentStep)
     const plaformImg = getPlatformImage()
     const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' : (currentStep !== 'socialConnect' && currentStep !== 'profileSettings')
     const { isTabScreen, isMobileScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)
+
 
     const isSmallScreen = isTabScreen || isMobileScreen
 
@@ -69,7 +68,7 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
                     {isSmallScreen && <MobileHeader isSmallScreen={isSmallScreen} />}
                     <WidgetHeader />
                     {children}
-                    {isVisible && isIframe && <BackButton text={text} handleClick={() => dispatch(goBack())} />}
+                    {isVisible && isIframe && <BackButton text={text} handleClick={() => goBack()} />}
 
                 </>
             )}

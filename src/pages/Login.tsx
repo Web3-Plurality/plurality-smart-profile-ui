@@ -1,10 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
-import { checkPreviousLoginMode, isProfileConnectPlatform, isRsmPlatform, showHeader } from "../utils/Helpers"
-import { goToStep, resetSteps } from "../Slice/stepperSlice"
-import { selectCurrentStep } from "../selectors/stepperSelector"
+import { checkPreviousLoginMode, getLocalStorageValueofClient, showHeader } from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useRef, useState } from "react"
 import OTPVerification from "../components/otpVerification"
@@ -14,10 +12,8 @@ import Dashboard from "../components/dashboard"
 import AuthSuccess from "../components/authSuccess"
 import SocialConnect from "../components/socialConnect"
 import { socialConnectButtons } from "../utils/Constants"
-// import { MessageType } from "antd/es/message/interface"
 import { message } from "antd"
 import { useRegisterEvent } from "../hooks/useEventListner"
-// import useResponsive from "../hooks/useResponsive"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
@@ -28,13 +24,13 @@ import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
-// import axiosInstance from "../services/Api"
 import axios from "axios"
 import { MessageType } from "antd/es/message/interface"
+import { useLogoutUser } from "../hooks/useLogoutUser"
+import { useStepper } from "../hooks/useStepper"
 
 
 const Login = () => {
-    // const [methodId, setMethodId] = useState<string>('')
     const [emailId, setEmailId] = useState<string>('')
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
@@ -48,17 +44,19 @@ const Login = () => {
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
 
+    const { currentStep, goToStep } = useStepper()
+
     const dispatch = useDispatch()
     const navigate = useNavigate()
-    const currentStep = useSelector(selectCurrentStep)
+
+    const handleLogoutUser = useLogoutUser()
 
     const { disconnectAsync } = useDisconnect();
     const { connect, connectors } = useConnect();
     const { address: metamaskAddress, isConnected } = useAccount();
 
-    const storedLitAccount = localStorage.getItem('lit-wallet-sig')
-    const token = localStorage.getItem('token')
-
+    const { token, litWalletSig: storedLitAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
     const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
     const isIframe = window.self !== window.top;
@@ -79,9 +77,7 @@ const Login = () => {
     useEffect(() => {
         // We need tp use this clientId to load the logo
         if (clientId) {
-            // setIsLoading(true)
             dispatch(setLoadingState({ loadingState: true, text: 'Loading your profile!' }))
-            localStorage.setItem('clientId', clientId)
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
@@ -91,29 +87,42 @@ const Login = () => {
                             'x-domain': domain
                         }
                     })
+
                     if (!data.data) return
                     if (data.error) {
                         message.error(data.error)
                         return
                     }
-                    // store the streamID, log and links in localstorage
-                    localStorage.setItem('profileTypeStreamId', data.data.streamId)
-                    localStorage.setItem('logo', data.data.logo)
-                    localStorage.setItem('links', data.data.links)
-                    localStorage.setItem('incentives', data.data.incentiveType)
 
+                    const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const ClientIdData = {
+                        ...existingData,
+                        profileTypeStreamId: data.data.streamId,
+                        clientId,
+                        logo: data.data.logo,
+                        links: data.data.links,
+                        incentives: data.data.incentiveType,
+                    }
+
+                    localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
                     //firstly initilize the roulette constant
                     const selectedResult = await select(data.data.streamId)
                     if (selectedResult?.neededPlatforms) {
                         setSocialButtons(selectedResult?.neededPlatforms);
                     }
-                    // store those in localhsot
-                    console.log(selectedResult)
-                    localStorage.setItem("platforms", JSON.stringify(selectedResult?.neededPlatforms))
-                    localStorage.setItem("platformName", JSON.stringify(selectedResult?.rows[0].profile_name))
-                    localStorage.setItem("platformDescription", JSON.stringify(selectedResult?.rows[0].description))
+
+                    const existingDataStreamId = getLocalStorageValueofClient(`streamID-${data.data.streamId}`)
+                    const ProfileTypeStreamData = {
+                        ...existingDataStreamId,
+                        clientId,
+                        platforms: selectedResult?.neededPlatforms,
+                        platformName: selectedResult?.rows[0].profile_name,
+                        platformDescription: selectedResult?.rows[0].description
+
+                    }
+
+                    localStorage.setItem(`streamID-${data.data.streamId}`, JSON.stringify(ProfileTypeStreamData))
                 } catch (fetchError) {
-                    // message.error('API request failed!');
                     console.error("Fetch error:", fetchError);
                     navigate('/unauthorized')
                 } finally {
@@ -122,9 +131,6 @@ const Login = () => {
 
             }
             fetchData()
-        } else {
-            setSocialButtons(socialConnectButtons);
-            localStorage.setItem("platforms", JSON.stringify(socialConnectButtons))
         }
     }, [clientId]);
 
@@ -136,33 +142,26 @@ const Login = () => {
     }, [isConnected])
 
     useEffect(() => {
-        const profileData = localStorage.getItem('smartProfileData')
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
         if (profileData) {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
     }, [])
 
-
     useEffect(() => {
         if (metamaskAddress && currentStep === "home") {
-            dispatch(goToStep("success"))
-        } else if (litAddress || metamaskAddress) {
-            dispatch(goToStep(currentStep))
+            goToStep("success")
+        } else if (storedLitAccount || metamaskAddress) {
+            goToStep(currentStep!)
         } else {
             if (showHeader(currentStep)) {
-                dispatch(goToStep("home"))
+                goToStep("home")
             }
         }
-    }, [metamaskAddress, currentStep])
+    }, [metamaskAddress, currentStep, storedLitAccount])
 
 
-
-
-
-    let litAddress = ''
-    if (storedLitAccount) {
-        litAddress = JSON.parse(storedLitAccount).address
-    }
 
     const handleLitConnect = () => {
         if (isIframe) {
@@ -174,7 +173,7 @@ const Login = () => {
 
         } else {
             checkPreviousLoginMode('lit')
-            dispatch(goToStep('litLogin'))
+            goToStep('litLogin')
         }
     }
     const handleGoogleConnect = () => {
@@ -220,10 +219,10 @@ const Login = () => {
 
     const handleIconClick = (index: number) => {
         const handleSocialConnectClick = () => {
-            const smartProfileData = localStorage.getItem('smartProfileData')
-            const platforms = localStorage.getItem('platforms')
-            const parsedPlatforms = platforms ? JSON.parse(platforms) : []
-            const connectedPlatforms = smartProfileData ? JSON.parse(smartProfileData).data.smartProfile.connectedPlatforms : []
+            const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+            const { smartProfileData, platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+            const parsedPlatforms = platforms || []
+            const connectedPlatforms = smartProfileData?.data?.smartProfile?.connectedPlatforms || []
             const filteredProfile = socialButtons.filter((button: ProfileData) => button.id === index)
             const clickedIconDisplayName = filteredProfile[0]?.displayName?.toLowerCase().replace(/\s+/g, '');
             const activePlatforms: string[] = []
@@ -238,7 +237,7 @@ const Login = () => {
                     registerEvent(clickedIconDisplayName);
                 }
             } else if (window.location.pathname === '/rsm' || window.location.pathname === '/') {
-                const storedUrls = localStorage.getItem('links')
+                const { links: storedUrls } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
                 const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);
                 const clickedIconDisplayName = clickedIcon?.displayName?.toLowerCase().replace(/\s+/g, '')
@@ -257,13 +256,12 @@ const Login = () => {
                 newActiveStates[activeIndex] = !newActiveStates[activeIndex];
             }
             setActiveStates(newActiveStates);
-            // dispatch(setLoadingState({ loadingState: false, text: '' }))
         }
     }, [eventMessage, app]);
 
     useEffect(() => {
         if (finalPayload.session) {
-            dispatch(goToStep('verification'));
+            goToStep('verification')
         }
     }, [finalPayload.session])
 
@@ -274,7 +272,7 @@ const Login = () => {
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification emailId={ localStorage?.getItem('emailId') ?? emailId} handleFinalPayload={handleFinalPayload} />
+                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification finalPayload={finalPayload} />
             case 'dashboard':
@@ -290,32 +288,6 @@ const Login = () => {
         }
     }
 
-    async function handleLogout() {
-        try {
-            await disconnectAsync();
-        } catch (err) {
-            console.error(err);
-        }
-        const smartprofileData = localStorage.getItem("smartProfileData")
-        const clientId = localStorage.getItem("clientId")
-        const tool = localStorage.getItem("tool")
-        localStorage.clear();
-        if (smartprofileData) {
-            localStorage.setItem("smartProfileData", smartprofileData || '')
-        }
-        localStorage.setItem("tool", tool || '')
-        let path = '/'
-        if (isRsmPlatform()) {
-            path = `/rsm?client_id=${clientId}`;
-        } else if (isProfileConnectPlatform()) {
-            path = `/profile-connect?client_id=${clientId}`;
-        }
-        window.location.reload()
-        dispatch(resetSteps())
-        navigate(path, { replace: true });
-    }
-
-
     const handleOk = async () => {
         if (ceramicError) {
             const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
@@ -323,7 +295,14 @@ const Login = () => {
                 console.error("Error connecting to Orbis");
                 setCeramicError(true)
             } else if (result && result.did) {
-                localStorage.setItem('userDid', JSON.stringify(result?.did))
+                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                existingData = {
+                    ...existingData,
+                    userDid: result?.did
+                }
+                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
                 setCeramicError(false)
             } else {
                 setCeramicError(true)
@@ -332,14 +311,13 @@ const Login = () => {
             generateMetamaskToken()
             setError(false)
         }
-
     }
+
     const handleCancel = async () => {
-        await handleLogout()
+        await handleLogoutUser()
         setError(false)
         setCeramicError(false)
     }
-
 
     return (
         <>

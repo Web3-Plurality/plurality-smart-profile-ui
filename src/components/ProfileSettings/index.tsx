@@ -8,20 +8,23 @@ import './styles.css'
 import { UserAvatar } from "../Avatar"
 import CustomInputField from "../customInputField"
 import { useMetamaskPublicKey } from "../../hooks/useMetamaskPublicKey"
-import { API_BASE_URL } from "../../utils/EnvConfig"
+import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import { encryptData } from "../../services/EncryptionDecryption/encryption"
 import CustomButtom from "../customButton"
-import { autoConnect } from "../../services/orbis/autoConnect"
-import { insertSmartProfile } from "../../services/orbis/insertQueries"
-import { useDispatch } from "react-redux"
-import { goBack } from "../../Slice/stepperSlice"
+import { updateSmartProfile } from "../../services/orbis/updateQuery"
+import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../../utils/Helpers"
+import { useStepper } from "../../hooks/useStepper"
 
 const ProfileSettings = () => {
-    const dispatch = useDispatch()
+    const { goBack } = useStepper()
     const { getPublicKey } = useMetamaskPublicKey()
     const [loading, setLoading] = useState(false)
-    const userOrbisData = localStorage.getItem('smartProfileData')
-    const parsedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
+
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { profileTypeStreamId, litAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     const name = parsedUserOrbisData?.data?.smartProfile?.username
     const userAvatar = parsedUserOrbisData?.data?.smartProfile?.avatar
@@ -31,7 +34,6 @@ const ProfileSettings = () => {
     const [profilePic, setProfilePic] = useState<string>(userAvatar || '')
     const [userBio, setUserBio] = useState(bio || '')
 
-    const litAccount = localStorage.getItem('lit-wallet-sig')
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
 
@@ -73,7 +75,7 @@ const ProfileSettings = () => {
     const submitData = async () => {
         try {
             setLoading(true)
-            const token = localStorage.getItem('token')
+            const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
             const payLoaddata = {
                 username,
                 profileImg: profilePic === userAvatar ? "" : profilePic,
@@ -82,33 +84,43 @@ const ProfileSettings = () => {
             const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    'x-profile-type-stream-id': localStorage.getItem("profileTypeStreamId"),
+                    'x-profile-type-stream-id': profileTypeStreamId,
                 }
             })
 
             const { success, smartProfile } = data
             if (success) {
-                const litSignature = localStorage.getItem("signature")
+                const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 let publicKey;
                 if (!litSignature) {
                     publicKey = await getPublicKey();
                 }
                 const result = await encryptData(JSON.stringify(smartProfile), publicKey)
-                await autoConnect()
+                await reGenerateUserDidAddress()
 
-                const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")!
-                const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), profileTypeStreamId)
-                // save smart profile in local storage along with the returned stream id
-                if (insertionResult) {
+                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), streamData.smartProfileData.streamId)
+
+                if (updationResult) {
                     const objData = {
-                        streamId: insertionResult?.id,
+                        streamId: updationResult?.id,
                         data: { smartProfile: smartProfile }
                     }
-                    localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                    let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                    existingData = {
+                        ...existingData,
+                        smartProfileData: objData,
+                    }
+
+                    localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                     message.success("Profile updated successfully!")
 
                     setLoading(false)
-                    dispatch(goBack())
+                    goBack()
                 }
             }
         } catch (err) {

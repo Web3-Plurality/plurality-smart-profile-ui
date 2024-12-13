@@ -3,14 +3,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { message } from "antd";
 import { useAccount } from "wagmi";
 
-import { goToStep } from "../Slice/stepperSlice";
 import { setMetamaskPublicKey } from "../Slice/userDataSlice";
 import { selectPublicKey } from "../selectors/userDataSelector";
 import { ErrorMessages } from "../utils/Constants";
+import { useStepper } from "./useStepper";
 
 export const useRetrieveMetamaskPublicKey = () => {
     const { address } = useAccount();
     const dispatch = useDispatch()
+    const { goToStep } = useStepper()
 
     const storedPublicKey = useSelector(selectPublicKey)
 
@@ -43,7 +44,7 @@ export const useRetrieveMetamaskPublicKey = () => {
         } else {
             message.error(ErrorMessages.GENERAL_ERROR);
         }
-        dispatch(goToStep('success'));
+        goToStep('success');
     };
 
     return {

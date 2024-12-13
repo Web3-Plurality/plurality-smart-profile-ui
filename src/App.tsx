@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import { ErrorMessages } from './utils/Constants';
 import Unauthorized from './pages/UnAuthorizedDomain';
 import EventListener from './components/EventListener';
+import { StepperProvider } from './contexts/stepper';
 
 
 
@@ -45,19 +46,21 @@ function App() {
         <WagmiProvider config={client}>
           <QueryClientProvider client={queryClient}>
             <StytchProvider stytch={stytch}>
-              <Router>
-                {!isTabScreen && !isMobileScreen && <Header />}
-                <EventListener />
-                <Routes>
-                  <Route path="/rsm" element={<Login />} />
-                  <Route path="/" element={<Login />} />
-                  <Route path="/profile-connect" element={<Login />} />
-                  <Route path="/auth-callback" element={<CallBackUrl />} />
-                  <Route path="/auth-start" element={<AuthStart />} />
-                  <Route path="/unauthorized" element={<Unauthorized />} />
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </Router>
+              <StepperProvider>
+                <Router>
+                  {!isTabScreen && !isMobileScreen && <Header />}
+                  <EventListener />
+                  <Routes>
+                    <Route path="/rsm" element={<Login />} />
+                    <Route path="/" element={<Login />} />
+                    <Route path="/profile-connect" element={<Login />} />
+                    <Route path="/auth-callback" element={<CallBackUrl />} />
+                    <Route path="/auth-start" element={<AuthStart />} />
+                    <Route path="/unauthorized" element={<Unauthorized />} />
+                    <Route path="*" element={<PageNotFound />} />
+                  </Routes>
+                </Router>
+              </StepperProvider>
             </StytchProvider>
           </QueryClientProvider>
         </WagmiProvider>

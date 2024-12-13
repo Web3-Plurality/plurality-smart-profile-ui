@@ -1,11 +1,16 @@
-import { useDispatch } from 'react-redux';
-import { goToStep } from '../Slice/stepperSlice';
+
+
 import CustomButtom from './customButton'
+import { getLocalStorageValueofClient } from '../utils/Helpers';
+import { CLIENT_ID } from '../utils/EnvConfig';
+import { useStepper } from '../hooks/useStepper';
 
 const AuthSuccess = () => {
-    const dispatch = useDispatch()
-    const userDid = localStorage.getItem("userDid")
-    const litSession = localStorage.getItem('sessionSigs')
+    const { goToStep } = useStepper()
+    const queryParams = new URLSearchParams(location.search);
+    const clientTypeId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { litSession, userDid } = getLocalStorageValueofClient(`clientID-${clientTypeId}`)
 
     let isDisbaled;
 
@@ -16,7 +21,7 @@ const AuthSuccess = () => {
     }
 
     return (
-        <CustomButtom text={`Let's Go`} handleClick={() => dispatch(goToStep('socialConnect'))} isDisable={!isDisbaled} />
+        <CustomButtom text={`Let's Go`} handleClick={() => goToStep('socialConnect')} isDisable={!isDisbaled} />
     )
 }
 

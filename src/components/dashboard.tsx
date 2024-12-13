@@ -3,10 +3,11 @@ import CustomButtom from "./customButton";
 import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
 import { AuthUserInformation } from '@useorbis/db-sdk';
 import { useDispatch } from "react-redux"
-import { goToStep } from "../Slice/stepperSlice"
 import { setLoadingState } from "../Slice/userDataSlice";
 import { LoaderMessages } from '../utils/Constants';
-import { getLocalStorageValue } from '../utils/Helpers';
+import { CLIENT_ID } from '../utils/EnvConfig';
+import { getLocalStorageValueofClient } from '../utils/Helpers';
+import { useStepper } from '../hooks/useStepper';
 
 interface DashboardProps {
     currentAccount: string;
@@ -16,7 +17,10 @@ export default function Dashboard({
     currentAccount
 }: DashboardProps) {
     const dispatch = useDispatch()
-    const didExists = getLocalStorageValue('userDid')
+    const { goToStep } = useStepper()
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     useEffect(() => {
         const connectToOris = async () => {
@@ -25,14 +29,24 @@ export default function Dashboard({
             if (result === "error") {
                 dispatch(setLoadingState({ loadingState: false, text: '' }))
             } else if (result && result.did) {
-                localStorage.setItem('userDid', JSON.stringify(result.did))
+                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                existingData = {
+                    ...existingData,
+                    userDid: result.did
+                }
+                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
+                dispatch(setLoadingState({ loadingState: false, text: '' }))
+            } else {
                 dispatch(setLoadingState({ loadingState: false, text: '' }))
             }
         }
-        if (!didExists) {
+
+        if (!userDid) {
             connectToOris()
         }
-    }, [didExists])
+    }, [])
 
     return (
         <div className="dashboard-container">
@@ -43,7 +57,7 @@ export default function Dashboard({
             </div>
             <div className="divider"></div>
             <div className="message-card">
-                <CustomButtom text='Next' handleClick={() => dispatch(goToStep('success'))} />
+                <CustomButtom text='Next' handleClick={() => goToStep('success')} />
             </div>
         </div>
     );

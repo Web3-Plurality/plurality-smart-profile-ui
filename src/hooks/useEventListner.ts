@@ -1,23 +1,28 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useMetamaskPublicKey } from './useMetamaskPublicKey'
-import { API_BASE_URL } from '../utils/EnvConfig'
-import { RouteMapper, setLocalStorageValue } from '../utils/Helpers'
+import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
+import { RouteMapper, getLocalStorageValueofClient, reGenerateUserDidAddress, setLocalStorageValue } from '../utils/Helpers'
 import { encryptData } from '../services/EncryptionDecryption/encryption'
-import { autoConnect } from '../services/orbis/autoConnect'
-import { insertIndividualProfile, insertSmartProfile } from '../services/orbis/insertQueries'
+import { insertIndividualProfile } from '../services/orbis/insertQueries'
+import { updateSmartProfile } from '../services/orbis/updateQuery'
 import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
-import { goToStep } from '../Slice/stepperSlice'
+import { useStepper } from './useStepper'
 
 export const useRegisterEvent = () => {
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [app, setApp] = useState('')
 
-
+    const { goToStep } = useStepper()
     const dispatch = useDispatch()
+
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    let existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
 
 
     const { getPublicKey } = useMetamaskPublicKey()
@@ -33,13 +38,21 @@ export const useRegisterEvent = () => {
                 if (message === "received" && app === 'google' && emailId) {
                     // if emailId is comming  means this user already been logged in with stytch but now trying to login with google,
                     // so we have to redirect him to otp page
-                    localStorage.setItem('emailId', emailId)
-                    dispatch(goToStep('otp'))
+                    existingData = {
+                        ...existingData,
+                        emailId
+                    }
+                    setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
+                    goToStep('otp');
                 } else if (message === "received" && app === 'google') {
-                    localStorage.setItem('token', token)
-                    localStorage.setItem('googleJwtToken', googleJwtToken)
-                    dispatch(goToStep('verification'))
-                }else if (message === "received") {
+                    existingData = {
+                        ...existingData,
+                        token: pluralityToken,
+                        googleJwtToken
+                    }
+                    setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
+                    goToStep('verification');
+                } else if (message === "received") {
                     fetchUserInfo(app, auth)
                 } else if (appName === '') {
                     console.log("Gooogle o oauth")
@@ -88,7 +101,7 @@ export const useRegisterEvent = () => {
     const fetchUserInfo = async (appName: string, auth: string) => {
         const AppRoute = RouteMapper(appName)
         const infoUrl = `${API_BASE_URL}${AppRoute}/info`
-        const token = localStorage.getItem('token')
+        const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
         try {
             dispatch(setLoadingState({ loadingState: true, text: "Updating your profile" }));
             const { data } = await axios.get(infoUrl, {
@@ -100,25 +113,25 @@ export const useRegisterEvent = () => {
             if (data.message === 'success') {
                 const individualProfileData = data.individualProfile
                 const scores = individualProfileData.scores
-                const litSignature = localStorage.getItem("signature")
+                const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
                 let publicKey;
                 if (!litSignature) {
                     publicKey = await getPublicKey();
                 }
                 const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
-                await autoConnect()
-                const individualresult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
 
-                if (individualresult) {
-                    const token = localStorage.getItem('token')
-                    const localSmartProfile = localStorage.getItem('smartProfileData')
+                await reGenerateUserDidAddress()
+                const updationResult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
+
+                if (updationResult) {
+                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     let payload;
 
                     if (localSmartProfile) {
-                        payload = JSON.parse(localSmartProfile).data.smartProfile
+                        payload = localSmartProfile.data.smartProfile
                     }
-                    const profileTypeStreamId = localStorage.getItem("profileTypeStreamId")
 
                     const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
                         headers: {
@@ -128,21 +141,31 @@ export const useRegisterEvent = () => {
                     })
 
                     if (smartProfileResponse.success) {
-                        const litSignature = localStorage.getItem("signature")
+                        // const litSignature = localStorage.getItem("signature")
+                        const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
                         let publicKey
                         if (!litSignature) {
                             publicKey = await getPublicKey();
                         }
                         const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
-                        await autoConnect()
-                        const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connectedPlatforms), profileTypeStreamId!)
+                        await reGenerateUserDidAddress()
+                        const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connectedPlatforms), localSmartProfile.streamId)
                         // save smart profile in local storage along with the returned stream id
-                        if (insertionResult) {
+                        if (updationResult) {
                             const objData = {
-                                streamId: insertionResult?.id,
+                                streamId: updationResult?.id,
                                 data: { smartProfile: smartProfileResponse.smartProfile }
                             }
-                            localStorage.setItem('smartProfileData', JSON.stringify(objData))
+                            const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                            existingData = {
+                                ...existingData,
+                                smartProfileData: objData,
+                            }
+
+                            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                         }
                     }
                 }

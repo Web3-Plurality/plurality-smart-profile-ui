@@ -1,3 +1,4 @@
+import { AuthUserInformation } from "@useorbis/db-sdk";
 import {
     AIDRESSING_ROUTE,
     ARTIFICIAL_ROME_ROUTE,
@@ -13,13 +14,15 @@ import {
     TIKTOK_ROUTE,
     TWITTER_ROUTE
 } from "./Constants"
-// import HeaderLogo from './../assets/svgIcons/app-logo.png'
+import { CLIENT_ID } from "./EnvConfig";
+import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
+import { message } from "antd";
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
 
-const showHeader = (currentStep: string) => {
-    return headerSteps.has(currentStep);
+const showHeader = (currentStep: string | undefined) => {
+    return headerSteps.has(currentStep!);
 }
 
 const showBackButton = (currentStep: string) => {
@@ -55,7 +58,12 @@ const RouteMapper = (app: string) => {
 
 // Component Title Mapper
 const getTitleText = (currentStep: string) => {
-    const platformName = localStorage.getItem('platformName')
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { platformName } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
     const isIframe = window.self !== window.top;
     switch (currentStep) {
         case 'home':
@@ -67,7 +75,7 @@ const getTitleText = (currentStep: string) => {
         case 'otp':
             return 'Register Your Account';
         case 'success':
-            return `Welcome to ${platformName ? JSON.parse(platformName) : ''}`;
+            return `Welcome to ${platformName || ''}`;
         case 'socialConnect':
             return 'Connect Your Platforms';
         case 'digitalWardrobeConnect':
@@ -85,14 +93,18 @@ const getTitleText = (currentStep: string) => {
 
 // Component Description Mapper
 const getDescription = (currentStep: string) => {
-    const platformDescription = localStorage.getItem('platformDescription')
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { platformDescription } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
     switch (currentStep) {
         case 'litLogin':
-            return 'A verification code will be sent to your emaill'
+            return 'A verification code will be sent to your email'
         case 'otp':
             return 'Enter the 6 digit code sent to your email';
         case 'success':
-            return platformDescription ? JSON.parse(platformDescription) : ''
+            return platformDescription || ''
         case 'digitalWardrobe':
             return 'Collection';
         case 'digitalWardrobeConnect':
@@ -108,28 +120,28 @@ const isLitLogin = (val: string) => {
 }
 
 const checkPreviousLoginMode = (account: string) => {
-    const prevTool = localStorage.getItem('tool')
+    const queryParams = new URLSearchParams(location.search);
+    const allKeys = Object.keys(localStorage);
+
+    const keysToKeep = allKeys.filter(key => key.startsWith('clientID') || key.startsWith('streamID'));
+
+    const keysAndValues: Record<string, string> = {};
+
+    keysToKeep.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+            keysAndValues[key] = value;
+        }
+    });
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { tool: prevTool } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     if (prevTool && prevTool !== account) {
-        const profileTypeStreamId = localStorage.getItem('profileTypeStreamId')
-        const logo = localStorage.getItem('logo')
-        const links = localStorage.getItem('links')
-        const platforms = localStorage.getItem("platforms")
-        const clientId = localStorage.getItem("clientId")
-        const incentiveType = localStorage.getItem('incentives')
-        const platformName = localStorage.getItem('platformName')
-        const platformDescription = localStorage.getItem('platformDescription')
-
         localStorage.clear();
 
-        localStorage.setItem('profileTypeStreamId', profileTypeStreamId || '')
-        localStorage.setItem('logo', logo || '')
-        localStorage.setItem('links', links || '')
-        localStorage.setItem('platforms', platforms || '')
-        localStorage.setItem('clientId', clientId || '')
-        localStorage.setItem('incentives', incentiveType || '')
-        localStorage.setItem('platformName', platformName || '')
-        localStorage.setItem('platformDescription', platformDescription || '')
+        Object.keys(keysAndValues).forEach(key => {
+            localStorage.setItem(key, keysAndValues[key]);
+        });
     }
 }
 
@@ -151,9 +163,90 @@ const isProfileConnectPlatform = () => {
     return window.location.pathname === '/profile-connect'
 }
 
+const getLocalStorageValueofClient = (storageID: string) => {
+    const storageData = getLocalStorageValue(storageID)
+
+    return storageData ? JSON.parse(storageData) : {}
+}
 const getPlatformImage = () => {
-    const platformLogo = localStorage.getItem('logo')
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { logo: platformLogo } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
     return platformLogo ?? ''
+}
+
+const handleLocalStorageOnLogout = (currentClientId: string) => {
+    const allKeys = Object.keys(localStorage);
+    const keysToKeep = allKeys.filter(key => key.startsWith('clientID') || key.startsWith('streamID'));
+
+    const keysAndValues: Record<string, string> = {};
+
+    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+
+    const updatedData = {
+        clientId,
+        incentives,
+        links,
+        logo,
+        profileTypeStreamId
+    };
+
+    setLocalStorageValue(`clientID-${currentClientId}`, JSON.stringify(updatedData));
+
+    keysToKeep.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+            keysAndValues[key] = value;
+        }
+    })
+
+    localStorage.clear();
+
+    Object.keys(keysAndValues).forEach(key => {
+        setLocalStorageValue(key, keysAndValues[key]);
+    });
+}
+
+const addGlobalLitData = (currentClientId: string) => {
+    const { litWalletSig, litSessionKey } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    setLocalStorageValue('lit-wallet-sig', litWalletSig)
+    setLocalStorageValue('lit-session-key', litSessionKey)
+}
+
+const removeGlobalLitData = () => {
+    localStorage.removeItem('lit-wallet-sig')
+    localStorage.removeItem('lit-session-key')
+}
+
+const redirectUserOnLogout = (currentClientId: string) => {
+    let path = '/'
+    if (isRsmPlatform()) {
+        path = `/rsm?client_id=${currentClientId}`;
+    } else if (isProfileConnectPlatform()) {
+        path = `/profile-connect?client_id=${currentClientId}`;
+    }
+    return path
+}
+
+const reGenerateUserDidAddress = async () => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const userDidAddress: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
+    if (userDidAddress === "error") {
+        message.error('Something went Wrong!')
+    } else if (userDidAddress && userDidAddress.did) {
+        const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+        existingData = {
+            ...existingData,
+            userDid: userDidAddress?.did
+        }
+        localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
+    }
 }
 
 export {
@@ -170,5 +263,11 @@ export {
     isBackBtnVisible,
     isRsmPlatform,
     isProfileConnectPlatform,
-    getPlatformImage
+    getPlatformImage,
+    getLocalStorageValueofClient,
+    handleLocalStorageOnLogout,
+    addGlobalLitData,
+    removeGlobalLitData,
+    redirectUserOnLogout,
+    reGenerateUserDidAddress
 }
