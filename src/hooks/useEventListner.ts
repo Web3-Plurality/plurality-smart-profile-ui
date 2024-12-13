@@ -47,7 +47,7 @@ export const useRegisterEvent = () => {
                 } else if (message === "received" && app === 'google') {
                     existingData = {
                         ...existingData,
-                        token: pluralityToken,
+                        token,
                         googleJwtToken
                     }
                     setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))

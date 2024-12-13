@@ -112,7 +112,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
         try {
             dispatch(setLoadingState({ loadingState: true, text: LoaderMessages.STYCH_OTP_VERFICATION }));
             const { user } = getLocalStorageValueofClient(`clientID-${clientId}`)
-            const url = `${API_BASE_URL}/user/auth/otp/authenticate`
+            const url = `${API_BASE_URL}/auth/otp/authenticate`
             const payload = {
                 code: otp,
                 email_id: emailId,
@@ -136,7 +136,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
                 existingData = {
                     ...existingData,
                     tool: 'lit',
-                    token: response.data?.pluralityToken
+                    token: response.data?.token
                 }
                 setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
             }

@@ -4,32 +4,38 @@ import { orbisdb } from "./orbisConfig";
 import { OrbisConnectResult } from "@useorbis/db-sdk";
 import { getLocalStorageValueofClient } from "../../utils/Helpers";
 import { CLIENT_ID } from "../../utils/EnvConfig";
+import { autoConnect } from "./autoConnect";
 
 export async function connectOrbisDidPkh() {
     let auth;
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { signature: sessionSigs } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    try {
-        if (sessionSigs) {
-            const pkpWallet = await generatePkpWalletInstance();
-            auth = new OrbisEVMAuth(pkpWallet!);
-        } else {
-            auth = new OrbisEVMAuth(window.ethereum);
-        }
+    const { signature: sessionSigs, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const currentUser = await autoConnect()
 
-        const authResult: OrbisConnectResult = await orbisdb.connectUser({ auth });
+    if (!currentUser || currentUser?.did !== userDid) {
+        try {
+            if (sessionSigs) {
+                const pkpWallet = await generatePkpWalletInstance();
+                auth = new OrbisEVMAuth(pkpWallet!);
+            } else {
+                auth = new OrbisEVMAuth(window.ethereum);
+            }
 
-        if (authResult) {
-            return authResult.user;
-        }
-    } catch (err: unknown) {
-        if (err && typeof err === 'object') {
-            const errorWithCode = err as { code: number };
-            if (errorWithCode.code === 4001) {
-                return 'error'
+            const authResult: OrbisConnectResult = await orbisdb.connectUser({ auth });
+
+            if (authResult) {
+                return authResult.user;
+            }
+        } catch (err: unknown) {
+            if (err && typeof err === 'object') {
+                const errorWithCode = err as { code: number };
+                if (errorWithCode.code === 4001) {
+                    return 'error'
+                }
             }
         }
     }
+
 }

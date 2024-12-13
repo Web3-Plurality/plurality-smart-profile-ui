@@ -95,7 +95,7 @@ export const useMetamaskToken = () => {
             const headersData = JSON.stringify({ 'siwe': sig, 'message': msg })
             const headers = { 'x-siwe': headersData }
 
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/user/auth/siwe/authenticate`,
+            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/authenticate`,
                 { address, clientId },
                 { headers }
             );
