@@ -31,7 +31,7 @@ import { useStepper } from "../hooks/useStepper"
 
 
 const Login = () => {
-    const [emailId, setEmailId] = useState<string>('')
+
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
         session: '',
         userId: '',
@@ -64,7 +64,9 @@ const Login = () => {
     const {
         message: eventMessage,
         app,
+        emailId,
         registerEvent,
+        setEmailId
     } = useRegisterEvent()
     const {
         generateMetamaskToken,

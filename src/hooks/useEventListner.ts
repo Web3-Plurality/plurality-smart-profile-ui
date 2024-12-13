@@ -12,6 +12,7 @@ import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
 
 export const useRegisterEvent = () => {
+    const [emailId, setEmailId] = useState<string>('')
     const [error, setError] = useState('')
     const [message, setMessage] = useState('')
     const [app, setApp] = useState('')
@@ -44,6 +45,7 @@ export const useRegisterEvent = () => {
                     }
                     setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
                     goToStep('otp');
+                    setEmailId(emailId)
                 } else if (message === "received" && app === 'google') {
                     existingData = {
                         ...existingData,
@@ -185,6 +187,8 @@ export const useRegisterEvent = () => {
         message,
         app,
         error,
+        emailId,
+        setEmailId,
         registerEvent,
     }
 
