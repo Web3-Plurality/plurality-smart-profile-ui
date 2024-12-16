@@ -2,7 +2,7 @@
 import { useDispatch } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
-import { checkPreviousLoginMode, getLocalStorageValueofClient, showHeader } from "../utils/Helpers"
+import { checkPreviousLoginMode, getLocalStorageValueofClient, setLocalStorageValue, showHeader } from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useRef, useState } from "react"
 import OTPVerification from "../components/otpVerification"
@@ -55,7 +55,7 @@ const Login = () => {
     const { connect, connectors } = useConnect();
     const { address: metamaskAddress, isConnected } = useAccount();
 
-    const { token, litWalletSig: storedLitAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token, litWalletSig: storedLitAccount, tool } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
     const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
@@ -137,8 +137,15 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (isConnected && !token) {
+        if (isConnected && !token && tool !== 'lit') {
             generateMetamaskToken()
+            const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
+            const updatedData = {
+                ...existingData,
+                metamaskAddress
+            }
+            setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData))
+
         }
         window.parent.postMessage({ eventName: 'metamaskConnection', data: { isConnected } }, parentUrl);
     }, [isConnected])
@@ -152,7 +159,7 @@ const Login = () => {
     }, [])
 
     useEffect(() => {
-        if (metamaskAddress && currentStep === "home") {
+        if (metamaskAddress && currentStep === "home" && tool !== 'lit') {
             goToStep("success")
         } else if (storedLitAccount || metamaskAddress) {
             goToStep(currentStep!)
