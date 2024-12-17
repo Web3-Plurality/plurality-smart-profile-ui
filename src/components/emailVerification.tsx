@@ -1,18 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { message } from "antd"
+import { useAccount } from "wagmi"
+import { AuthMethodType } from "@lit-protocol/constants"
+
 import useAuthenticate from "../hooks/useAuthenticate"
 import useAccounts from "../hooks/useAccount"
 import useSession from "../hooks/useSession"
+import { useStepper } from "../hooks/useStepper"
 
 import Loader from "./Loader"
 import { PayloadDataType } from "../types"
-import { message } from "antd"
 import { ErrorMessages } from "../utils/Constants"
-import { getLocalStorageValueofClient, isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
-import { AuthMethodType } from "@lit-protocol/constants"
+import {
+    getLocalStorageValueofClient,
+    isProfileConnectPlatform,
+    isRsmPlatform
+} from "../utils/Helpers"
 import { CLIENT_ID } from "../utils/EnvConfig"
-import { useStepper } from "../hooks/useStepper"
+
 interface EmailLoginProps {
     finalPayload: PayloadDataType
 }
@@ -20,6 +27,8 @@ interface EmailLoginProps {
 const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     const navigate = useNavigate();
     const { goToStep } = useStepper()
+    const { address: metamaskAddress } = useAccount();
+
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
@@ -38,6 +47,7 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         authMethod,
         setAuthMethod,
         authWithStytch,
+        authWithEthWallet,
         loading: authLoading,
         error: authError,
     } = useAuthenticate();
@@ -66,17 +76,20 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     }
 
     useEffect(() => {
-        const registerInBackend = async () => {
-            await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
-        }
-        if (googleToken) {
-            setAuthMethod({
-                authMethodType: AuthMethodType.GoogleJwt,
-                accessToken: googleToken
-            })
-        } else {
-            registerInBackend()
-        }
+        const authenticate = async () => {
+            if (googleToken) {
+                setAuthMethod({
+                    authMethodType: AuthMethodType.GoogleJwt,
+                    accessToken: googleToken,
+                });
+            } else if (metamaskAddress) {
+                await authWithEthWallet();
+            } else {
+                await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
+            }
+        };
+
+        authenticate();
     }, [googleToken])
 
     useEffect(() => {

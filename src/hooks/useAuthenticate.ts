@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
+import { ethers } from 'ethers';
 import { AuthMethod } from '@lit-protocol/types';
-import { authenticateWithStytch } from '../services/Lit';
+import { authenticateWithEthWallet, authenticateWithStytch } from '../services/Lit';
 import { useLogoutUser } from './useLogoutUser';
 
 export default function useAuthenticate() {
@@ -37,8 +38,40 @@ export default function useAuthenticate() {
     []
   );
 
+  /**
+ * Authenticate with Ethereum wallet
+ */
+  const authWithEthWallet = useCallback(
+    async (): Promise<void> => {
+      setLoading(true);
+      setError(false);
+      setAuthMethod(undefined);
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const userAddress = await signer.getAddress();
+        const signMessage = async (message: string) => {
+          const sig = await signer.signMessage(message);
+          return sig;
+        };
+        const result: AuthMethod | undefined = await authenticateWithEthWallet(
+          userAddress,
+          signMessage
+        );
+        setAuthMethod(result);
+      } catch (err) {
+        setError(true);
+        console.log("Error", err)
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
   return {
     authWithStytch,
+    authWithEthWallet,
     setAuthMethod,
     authMethod,
     loading,

@@ -4,11 +4,10 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { useAccount } from 'wagmi';
-import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
-import { AuthUserInformation } from '@useorbis/db-sdk';
 import { domain, origin, statement } from '../utils/Constants';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useLogoutUser } from './useLogoutUser';
+import { useStepper } from './useStepper';
 
 function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
     return typeof err === 'object' && err !== null && 'code' in err;
@@ -20,6 +19,7 @@ export const useMetamaskToken = () => {
     const [ceramicError, setCeramicError] = useState(false);
 
     const handleLogoutUser = useLogoutUser()
+    const { goToStep } = useStepper()
 
     const { address } = useAccount();
 
@@ -111,24 +111,7 @@ export const useMetamaskToken = () => {
                     token: data.token,
                 }
                 localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-                const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
-                if (result === "error") {
-                    // Handle error case if needed
-                    console.error("Error connecting to Orbis");
-                    setCeramicError(true)
-                } else if (result && result.did) {
-                    const existingDataString = localStorage.getItem(`clientID-${clientId}`)
-                    let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                    existingData = {
-                        ...existingData,
-                        userDid: result?.did,
-                    }
-                    localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-                    setCeramicError(false)
-                } else {
-                    setCeramicError(true)
-                }
+                goToStep("verification")
             } else {
                 handleLogoutUser("Authentication failed. Please try signing in again.");
             }
