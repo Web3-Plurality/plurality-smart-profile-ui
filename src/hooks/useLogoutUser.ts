@@ -1,5 +1,5 @@
-import { useDisconnect } from "wagmi";
-import { getLocalStorageValueofClient, handleLocalStorageOnLogout, redirectUserOnLogout } from "../utils/Helpers";
+import { useAccount, useDisconnect } from "wagmi";
+import { handleLocalStorageOnLogout, redirectUserOnLogout } from "../utils/Helpers";
 import { CLIENT_ID } from "../utils/EnvConfig";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
@@ -10,6 +10,7 @@ export const useLogoutUser = () => {
 
     const { goToStep, resetSteps } = useStepper()
 
+    const { address: metamaskAddress } = useAccount();
     const { disconnectAsync } = useDisconnect();
 
     const queryParams = new URLSearchParams(location.search);
@@ -25,7 +26,6 @@ export const useLogoutUser = () => {
 
     async function handleLogout(errorMessage = '', litRedirect = false) {
         // Check if user is cinnected via Metamask
-        const { metamaskAddress } = getLocalStorageValueofClient(`clientID-${clientId}`)
         if (metamaskAddress) {
             await disconnectMetamask()
         }

@@ -121,12 +121,27 @@ const isLitLogin = (val: string) => {
 
 const checkPreviousLoginMode = (account: string) => {
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const allKeys = Object.keys(localStorage);
 
+    const keysToKeep = allKeys.filter(key => key.startsWith('clientID') || key.startsWith('streamID'));
+
+    const keysAndValues: Record<string, string> = {};
+
+    keysToKeep.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) {
+            keysAndValues[key] = value;
+        }
+    });
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { tool: prevTool } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     if (prevTool && prevTool !== account) {
-        handleLocalStorageOnLogout(clientId, true)
+        localStorage.clear();
+
+        Object.keys(keysAndValues).forEach(key => {
+            localStorage.setItem(key, keysAndValues[key]);
+        });
     }
 }
 
@@ -162,21 +177,20 @@ const getPlatformImage = () => {
     return platformLogo ?? ''
 }
 
-const handleLocalStorageOnLogout = (currentClientId: string, isToolChanged = false) => {
+const handleLocalStorageOnLogout = (currentClientId: string) => {
     const allKeys = Object.keys(localStorage);
     const keysToKeep = allKeys.filter(key => key.startsWith('clientID') || key.startsWith('streamID'));
 
     const keysAndValues: Record<string, string> = {};
 
-    const { clientId, incentives, links, tool, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
 
     const updatedData = {
         clientId,
         incentives,
         links,
         logo,
-        profileTypeStreamId,
-        ...(isToolChanged ? {} : { tool })
+        profileTypeStreamId
     };
 
     setLocalStorageValue(`clientID-${currentClientId}`, JSON.stringify(updatedData));
@@ -188,17 +202,11 @@ const handleLocalStorageOnLogout = (currentClientId: string, isToolChanged = fal
         }
     })
 
-    if (!isToolChanged) {
-        localStorage.clear();
-    }
+    localStorage.clear();
 
     Object.keys(keysAndValues).forEach(key => {
         setLocalStorageValue(key, keysAndValues[key]);
     });
-
-    if (isToolChanged) {
-        window.location.reload();
-    }
 }
 
 const addGlobalLitData = (currentClientId: string) => {
