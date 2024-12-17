@@ -29,7 +29,6 @@ import { MessageType } from "antd/es/message/interface"
 import { useLogoutUser } from "../hooks/useLogoutUser"
 import { useStepper } from "../hooks/useStepper"
 
-
 const Login = () => {
 
     const [finalPayload, setFinalPayload] = useState<PayloadDataType>({
@@ -43,6 +42,7 @@ const Login = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
+    const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
 
     const { currentStep, goToStep } = useStepper()
 
@@ -170,7 +170,9 @@ const Login = () => {
         }
     }, [metamaskAddress, currentStep, storedLitAccount])
 
-
+    const handlePkpWithMetamaskError = (val: boolean) => {
+        setPkpWithMetamaskError(val)
+    }
 
     const handleLitConnect = () => {
         if (isIframe) {
@@ -283,7 +285,10 @@ const Login = () => {
             case 'otp':
                 return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
-                return <EmailVerification finalPayload={finalPayload} />
+                return <EmailVerification
+                    finalPayload={finalPayload}
+                    pkpWithMetamakError={pkpWithMetamakError}
+                    handlePkpWithMetamaskError={handlePkpWithMetamaskError} />
             case 'dashboard':
                 return <Dashboard currentAccount={litAddress} />
             case 'success':
@@ -316,6 +321,9 @@ const Login = () => {
             } else {
                 setCeramicError(true)
             }
+        } else if (pkpWithMetamakError) {
+            setPkpWithMetamaskError(false)
+            goToStep('verification')
         } else {
             generateMetamaskToken()
             setError(false)
@@ -331,7 +339,7 @@ const Login = () => {
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError || ceramicError}
+                isVisible={metmaskLoginError || ceramicError || pkpWithMetamakError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />

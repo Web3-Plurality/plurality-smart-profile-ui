@@ -22,9 +22,11 @@ import { CLIENT_ID } from "../utils/EnvConfig"
 
 interface EmailLoginProps {
     finalPayload: PayloadDataType
+    pkpWithMetamakError: boolean
+    handlePkpWithMetamaskError: (val: boolean) => void
 }
 
-const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
+const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMetamaskError }: EmailLoginProps) => {
     const navigate = useNavigate();
     const { goToStep } = useStepper()
     const { address: metamaskAddress } = useAccount();
@@ -83,14 +85,15 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
                     accessToken: googleToken,
                 });
             } else if (metamaskAddress) {
-                await authWithEthWallet();
+                if (pkpWithMetamakError) return
+                await authWithEthWallet(handlePkpWithMetamaskError);
             } else {
                 await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
             }
         };
 
         authenticate();
-    }, [googleToken])
+    }, [googleToken, pkpWithMetamakError])
 
     useEffect(() => {
         // If user is authenticated, fetch accounts

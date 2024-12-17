@@ -11,6 +11,11 @@ export default function useAuthenticate() {
 
   const handleLogoutUser = useLogoutUser()
 
+  function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
+    return typeof err === 'object' && err !== null && 'code' in err;
+  }
+
+
   /**
    * Authenticate with Stytch
    */
@@ -42,9 +47,10 @@ export default function useAuthenticate() {
  * Authenticate with Ethereum wallet
  */
   const authWithEthWallet = useCallback(
-    async (): Promise<void> => {
+    async (handlePkpWithMetamaskError: (val: boolean) => void): Promise<void> => {
       setLoading(true);
       setError(false);
+      handlePkpWithMetamaskError(false);
       setAuthMethod(undefined);
       try {
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -59,9 +65,14 @@ export default function useAuthenticate() {
           signMessage
         );
         setAuthMethod(result);
-      } catch (err) {
-        setError(true);
-        console.log("Error", err)
+      } catch (err: unknown) {
+        if (isEthereumError(err)) {
+          if (err.code === 4001 || err.info?.error?.code === 4001) {
+            handlePkpWithMetamaskError(true);
+          }
+        } else {
+          setError(true)
+        }
       } finally {
         setLoading(false);
       }
