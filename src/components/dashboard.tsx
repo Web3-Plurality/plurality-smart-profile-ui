@@ -8,6 +8,7 @@ import { LoaderMessages } from '../utils/Constants';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { getLocalStorageValueofClient } from '../utils/Helpers';
 import { useStepper } from '../hooks/useStepper';
+import { useAccount, useDisconnect } from 'wagmi';
 
 interface DashboardProps {
     currentAccount: string;
@@ -17,6 +18,8 @@ export default function Dashboard({
     currentAccount
 }: DashboardProps) {
     const dispatch = useDispatch()
+    const { address: metamaskAddress } = useAccount();
+    const { disconnectAsync } = useDisconnect();
     const { goToStep } = useStepper()
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -46,6 +49,18 @@ export default function Dashboard({
         if (!userDid) {
             connectToOris()
         }
+
+        const disconnectMetamask = async () => {
+            if (metamaskAddress) {
+                try {
+                    await disconnectAsync();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+
+        disconnectMetamask()
     }, [])
 
     return (
