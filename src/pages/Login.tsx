@@ -55,7 +55,7 @@ const Login = () => {
     const { connect, connectors } = useConnect();
     const { address: metamaskAddress, isConnected } = useAccount();
 
-    const { token, litWalletSig: storedLitAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
     const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
@@ -137,7 +137,7 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (isConnected && !token) {
+        if (isConnected && !token && clientId === id) {
             generateMetamaskToken()
             const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
             const updatedData = {
@@ -159,15 +159,18 @@ const Login = () => {
     }, [])
 
     useEffect(() => {
-        if (metamaskAddress && currentStep === "home") {
-            goToStep("success")
-        } else if (storedLitAccount || metamaskAddress) {
-            goToStep(currentStep!)
-        } else {
-            if (showHeader(currentStep)) {
-                goToStep("home")
+        if (clientId === id) {
+            if (metamaskAddress && currentStep === "home") {
+                goToStep("success")
+            } else if (storedLitAccount || metamaskAddress) {
+                goToStep(currentStep!)
+            } else {
+                if (showHeader(currentStep)) {
+                    goToStep("home")
+                }
             }
         }
+
     }, [metamaskAddress, currentStep, storedLitAccount])
 
     const handlePkpWithMetamaskError = (val: boolean) => {
