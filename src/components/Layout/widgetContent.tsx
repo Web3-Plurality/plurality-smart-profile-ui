@@ -65,7 +65,7 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
                 <Loader message={showLoader.text} />
             ) : (
                 <>
-                    {isSmallScreen && !isIframe && <MobileHeader isSmallScreen={isSmallScreen} />}
+                    {isSmallScreen && <MobileHeader isSmallScreen={isSmallScreen} />}
                     <WidgetHeader />
                     {children}
                     {isVisible && isIframe && <BackButton text={text} handleClick={() => goBack()} />}
