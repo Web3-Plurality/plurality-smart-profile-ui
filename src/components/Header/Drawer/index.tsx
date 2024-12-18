@@ -31,7 +31,7 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
 
     useEffect(() => {
         window.parent.postMessage({ eventName: 'userData', data: { name: username, avatar: userAvatar, rating: ratingValue } }, parentUrl);
-    }, [userAvatar])
+    }, [userAvatar, username, ratingValue, parentUrl])
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);

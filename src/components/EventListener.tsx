@@ -3,16 +3,15 @@ import React, { useEffect } from 'react';
 import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
-import { useDispatch } from 'react-redux';
-import { resetSteps } from '../Slice/stepperSlice';
 import { useNavigate } from 'react-router-dom';
+import { useStepper } from '../hooks/useStepper';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
     const { disconnectAsync } = useDisconnect();
-    const dispatch = useDispatch();
+    const { resetSteps } = useStepper()
     const navigate = useNavigate();
 
     const receiveMessage = async (event: MessageEvent) => {
@@ -194,7 +193,7 @@ const EventListener: React.FC = () => {
             } else if (isProfileConnectPlatform()) {
                 path = `/profile-connect?client_id=${clientId}`;
             }
-            dispatch(resetSteps())
+            resetSteps()
             navigate(path, { replace: true });
             window.location.reload()
         }

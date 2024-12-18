@@ -2,7 +2,13 @@
 import { useDispatch } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
-import { checkPreviousLoginMode, getLocalStorageValueofClient, setLocalStorageValue, getParentUrl, showHeader } from "../utils/Helpers"
+import {
+    checkPreviousLoginMode,
+    getLocalStorageValueofClient,
+    setLocalStorageValue,
+    getParentUrl,
+    showHeader
+} from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useState } from "react"
 import OTPVerification from "../components/otpVerification"
@@ -144,7 +150,6 @@ const Login = () => {
             setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData))
 
         }
-        window.parent.postMessage({ eventName: 'metamaskConnection', data: { isConnected } }, parentUrl);
     }, [isConnected])
 
     useEffect(() => {
@@ -173,14 +178,14 @@ const Login = () => {
     useEffect(() => {
         window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!storedLitAccount } }, parentUrl);
     }, [storedLitAccount])
-    
+
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
     }
 
     const handleLitConnect = () => {
         checkPreviousLoginMode('lit')
-        dispatch(goToStep('litLogin'))
+        goToStep('litLogin')
     }
     const handleGoogleConnect = () => {
         registerEvent('')
