@@ -3,12 +3,11 @@ import { ReactNode } from 'react';
 import PoweredByFooter from './poweredByFooter';
 import BackButton from './backButton';
 import WidgetContent from './widgetContent';
-import { useDispatch, useSelector } from 'react-redux';
-import { selectCurrentStep } from '../../selectors/stepperSelector';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getBtntext, isBackBtnVisible } from '../../utils/Helpers';
 import { selectLoader } from '../../selectors/userDataSelector';
-import { goBack } from '../../Slice/stepperSlice';
+import { useStepper } from '../../hooks/useStepper';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -52,8 +51,8 @@ const WidgetLayoutWrapper = styled.div<WidgetLayoutWrapperProps>`
 const WidgetLayout = ({
     children,
 }: { children: ReactNode }) => {
-    const dispatch = useDispatch()
-    const currentStep = useSelector(selectCurrentStep);
+
+    const { goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
 
     const text = getBtntext(currentStep)
@@ -65,7 +64,7 @@ const WidgetLayout = ({
         <WidgetLayoutWrapper isIframe={isIframe}>
             <div className='widget'>
                 <WidgetContent children={children} />
-                {isVisible && !isIframe && <BackButton text={text} handleClick={() => dispatch(goBack())} />}
+                {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
                 {isIframe && <PoweredByFooter />}
             </div>
             {!isIframe && <PoweredByFooter />}

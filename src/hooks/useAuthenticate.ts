@@ -1,19 +1,20 @@
 import { useCallback, useState } from 'react';
+import { ethers } from 'ethers';
 import { AuthMethod } from '@lit-protocol/types';
-import { authenticateWithStytch } from '../services/Lit';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
-import { goToStep, resetSteps } from '../Slice/stepperSlice';
-import { message } from 'antd';
+import { authenticateWithEthWallet, authenticateWithStytch } from '../services/Lit';
+import { useLogoutUser } from './useLogoutUser';
 
 export default function useAuthenticate() {
   const [authMethod, setAuthMethod] = useState<AuthMethod>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const handleLogoutUser = useLogoutUser()
+
+  function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
+    return typeof err === 'object' && err !== null && 'code' in err;
+  }
+
 
   /**
    * Authenticate with Stytch
@@ -34,7 +35,7 @@ export default function useAuthenticate() {
       } catch (err) {
         setError(true);
         console.log("Error", err)
-        handleLogout()
+        handleLogoutUser("Authentication failed, please contact the team", true)
       } finally {
         setLoading(false);
       }
@@ -42,26 +43,46 @@ export default function useAuthenticate() {
     []
   );
 
-  async function handleLogout() {
-    const smartprofileData = getLocalStorageValue("smartProfileData")
-    const tool = getLocalStorageValue("tool")
-    const clientId = localStorage.getItem('clientId')
-    localStorage.clear();
-    setLocalStorageValue("smartProfileData", smartprofileData || '')
-    setLocalStorageValue("tool", tool || '')
-    dispatch(resetSteps())
-    dispatch(goToStep("litLogin"))
-    let path = window.location.pathname
-    if (isRsmPlatform() || isProfileConnectPlatform()) {
-      path = `${window.location.pathname}?client_id=${clientId}`
-    }
-    navigate(path, { replace: true });
-    message.error("Something went wrong, please contact the team")
-  }
-
+  /**
+ * Authenticate with Ethereum wallet
+ */
+  const authWithEthWallet = useCallback(
+    async (handlePkpWithMetamaskError: (val: boolean) => void): Promise<void> => {
+      setLoading(true);
+      setError(false);
+      handlePkpWithMetamaskError(false);
+      setAuthMethod(undefined);
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const userAddress = await signer.getAddress();
+        const signMessage = async (message: string) => {
+          const sig = await signer.signMessage(message);
+          return sig;
+        };
+        const result: AuthMethod | undefined = await authenticateWithEthWallet(
+          userAddress,
+          signMessage
+        );
+        setAuthMethod(result);
+      } catch (err: unknown) {
+        if (isEthereumError(err)) {
+          if (err.code === 4001 || err.info?.error?.code === 4001) {
+            handlePkpWithMetamaskError(true);
+          }
+        } else {
+          setError(true)
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     authWithStytch,
+    authWithEthWallet,
     setAuthMethod,
     authMethod,
     loading,

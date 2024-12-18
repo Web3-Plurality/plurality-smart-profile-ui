@@ -1,29 +1,42 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { message } from "antd"
+import { useAccount } from "wagmi"
+import { AuthMethodType } from "@lit-protocol/constants"
+
 import useAuthenticate from "../hooks/useAuthenticate"
 import useAccounts from "../hooks/useAccount"
 import useSession from "../hooks/useSession"
+import { useStepper } from "../hooks/useStepper"
 
 import Loader from "./Loader"
 import { PayloadDataType } from "../types"
-import { useDispatch } from "react-redux"
-import { goToStep } from "../Slice/stepperSlice"
-import { message } from "antd"
 import { ErrorMessages } from "../utils/Constants"
-import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform } from "../utils/Helpers"
-import { AuthMethodType } from "@lit-protocol/constants"
+import {
+    getLocalStorageValueofClient,
+    isProfileConnectPlatform,
+    isRsmPlatform
+} from "../utils/Helpers"
+import { CLIENT_ID } from "../utils/EnvConfig"
+
 interface EmailLoginProps {
     finalPayload: PayloadDataType
+    pkpWithMetamakError: boolean
+    handlePkpWithMetamaskError: (val: boolean) => void
 }
 
-const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
+const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMetamaskError }: EmailLoginProps) => {
     const navigate = useNavigate();
-    const dispatch = useDispatch()
-    const googleToken = getLocalStorageValue('googleJwtToken')
+    const { goToStep } = useStepper()
+    const { address: metamaskAddress } = useAccount();
+
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { googleJwtToken: googleToken } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const handleNavigation = () => {
-        const clientId = localStorage.getItem('clientId')
         let path = window.location.pathname
         if (isRsmPlatform() || isProfileConnectPlatform()) {
             path = `${window.location.pathname}?client_id=${clientId}`
@@ -36,6 +49,7 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         authMethod,
         setAuthMethod,
         authWithStytch,
+        authWithEthWallet,
         loading: authLoading,
         error: authError,
     } = useAuthenticate();
@@ -64,24 +78,26 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
     }
 
     useEffect(() => {
-        const registerInBackend = async () => {
-            await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
-        }
-        if (googleToken) {
-            setAuthMethod({
-                authMethodType: AuthMethodType.GoogleJwt,
-                accessToken: googleToken
-            })
-        } else {
-            registerInBackend()
-        }
-    }, [googleToken])
+        const authenticate = async () => {
+            if (googleToken) {
+                setAuthMethod({
+                    authMethodType: AuthMethodType.GoogleJwt,
+                    accessToken: googleToken,
+                });
+            } else if (metamaskAddress) {
+                if (pkpWithMetamakError) return
+                await authWithEthWallet(handlePkpWithMetamaskError);
+            } else {
+                await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
+            }
+        };
+
+        authenticate();
+    }, [googleToken, pkpWithMetamakError])
 
     useEffect(() => {
         // If user is authenticated, fetch accounts
-        console.log('Enyere here 1')
         if (authMethod) {
-            console.log('Enyere here')
             handleNavigation()
             fetchAccounts(authMethod);
         }
@@ -91,7 +107,14 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         // If user is authenticated and has selected an account, initialize session
         if (authMethod && accounts.length) {
             initSession(authMethod, accounts[0]);
-            localStorage.setItem("pkpKey", JSON.stringify(accounts[0]))
+            const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+            existingData = {
+                ...existingData,
+                pkpKey: accounts[0]
+            }
+            localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
         } else if (authMethod && !accounts.length && isFetchTriggered) {
             goToSignUp();
         }
@@ -111,11 +134,11 @@ const EmailVerification = ({ finalPayload }: EmailLoginProps) => {
         return <Loader message={'Securing your session...'} />;
     }
     if (accounts.length && sessionSigs) {
-        dispatch(goToStep("dashboard"))
+        goToStep("dashboard")
     }
 
     if (error) {
-        dispatch(goToStep("home"))
+        goToStep("home")
         message.error(ErrorMessages.GENERAL_ERROR);
         return null
     }

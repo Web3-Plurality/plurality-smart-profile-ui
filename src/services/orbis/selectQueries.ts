@@ -26,8 +26,7 @@ export async function select(stream_id: string) {
                 neededPlatforms.push(platform)
             }
         }
-        // columns: Array<string>
-        // rows: Array<T | Record<string, any>>
+
         const { columns, rows } = result
         console.log("select first: ", { columns, rows, neededPlatforms });
         return { columns, rows, neededPlatforms };
@@ -55,28 +54,28 @@ export async function selectProfileType() {
         console.log("Error", error)
     }
 }
-export async function selectSmartProfiles(stream_id: string) {
+export async function selectSmartProfiles(stream_id: string, userDid: string) {
     try {
-        const didKey = localStorage.getItem("userDid")
-        const selectStatement = await orbisdb
-            .select()
-            .from(data.models.smart_profile)
-            .where({
-                profile_type_stream_id: stream_id,
-                controller: didKey ? JSON.parse(didKey) : ''
-                ////address
-            })
-            .orderBy(["indexed_at", "desc"])
-            .context(PLURALITY_CONTEXT)
 
-        const query = selectStatement.build()
-        console.log("Query that will be run", query)
-        const result = await selectStatement.run();
-        console.log(result);
-        // columns: Array<string>
-        // rows: Array<T | Record<string, any>>
-        const { columns, rows } = result
-        return { columns, rows };
+        if (userDid) {
+            const selectStatement = await orbisdb
+                .select()
+                .from(data.models.smart_profile)
+                .where({
+                    profile_type_stream_id: stream_id,
+                    controller: JSON.parse(userDid) || ''
+                })
+                .orderBy(["indexed_at", "desc"])
+                .context(PLURALITY_CONTEXT)
+
+            const query = selectStatement.build()
+            console.log("Query that will be run", query)
+            const result = await selectStatement.run();
+            console.log(result);
+            const { columns, rows } = result
+            return { columns, rows };
+        }
+
     }
     catch (error) {
         console.log("Error", error)

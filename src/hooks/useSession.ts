@@ -3,25 +3,25 @@ import { AuthMethod } from '@lit-protocol/types';
 import { LitAbility, LitPKPResource } from '@lit-protocol/auth-helpers';
 import { IRelayPKP } from '@lit-protocol/types';
 import { SessionSigs } from '@lit-protocol/types';
-import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
 import { litNodeClient } from '../services/Lit';
-import { getLocalStorageValue, isProfileConnectPlatform, isRsmPlatform, setLocalStorageValue } from '../utils/Helpers';
-import { useDispatch } from 'react-redux';
-import { goToStep, resetSteps } from '../Slice/stepperSlice';
+import { getLocalStorageValue, getLocalStorageValueofClient, removeGlobalLitData } from '../utils/Helpers';
+import { CLIENT_ID } from '../utils/EnvConfig';
 import axiosInstance from '../services/Api';
-import { globalSessionSigs } from '../Slice/userDataSlice';
+import { useLogoutUser } from './useLogoutUser';
 
 export default function useSession() {
   const [sessionSigs, setSessionSigs] = useState<SessionSigs>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+
+  const handleLogoutUser = useLogoutUser()
+
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
+  const { userPkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
   const getCapacityDelegationAuthSig = async (pkp: IRelayPKP) => {
     try {
-      const userPkp = localStorage.getItem("pkpKey")
       if (userPkp || pkp) {
         const payload = { address: pkp?.ethAddress }
         const { data } = await axiosInstance.post('/user/capacity', payload)
@@ -30,10 +30,11 @@ export default function useSession() {
         }
       }
     } catch (err) {
-      handleLogout();
+      handleLogoutUser("Unable to retrieve authorization. Please try again.", true);
       console.log("Something went wrong!", err)
     }
   }
+
 
   /**
    * Generate session sigs and store new session data
@@ -61,11 +62,24 @@ export default function useSession() {
         });
 
         setSessionSigs(sessionSigs);
-        localStorage.setItem('signature', JSON.stringify(sessionSigs))
-        dispatch(globalSessionSigs(JSON.stringify(sessionSigs)))
+        const existingDataString = localStorage.getItem(`clientID-${clientId}`)
+        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+        const globalLitSession = getLocalStorageValue('lit-session-key')
+        const globalLitWallet = getLocalStorageValue('lit-wallet-sig')
+
+        existingData = {
+          ...existingData,
+          signature: sessionSigs,
+          litWalletSig: globalLitWallet,
+          litSessionKey: globalLitSession
+        }
+
+        localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
+        removeGlobalLitData()
 
       } catch (err) {
-        handleLogout();
+        handleLogoutUser("Failed to initialize session. Please try again", true);
         setError(err as Error);
       } finally {
         setLoading(false);
@@ -73,24 +87,6 @@ export default function useSession() {
     },
     []
   );
-
-  async function handleLogout() {
-    const smartprofileData = getLocalStorageValue("smartProfileData")
-    const tool = getLocalStorageValue("tool")
-    const clientId = localStorage.getItem('clientId')
-    localStorage.clear();
-    setLocalStorageValue("smartProfileData", smartprofileData || '')
-    setLocalStorageValue("tool", tool || '')
-
-    dispatch(resetSteps())
-    dispatch(goToStep("litLogin"))
-    let path = window.location.pathname
-    if (isRsmPlatform() || isProfileConnectPlatform()) {
-      path = `${window.location.pathname}?client_id=${clientId}`
-    }
-    navigate(path, { replace: true });
-    message.error("Something went wrong, please contact the team")
-  }
 
   return {
     initSession,

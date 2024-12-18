@@ -2,6 +2,7 @@ import {
     WebAuthnProvider,
     LitAuthClient,
     BaseProvider,
+    EthWalletProvider,
 } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
@@ -15,7 +16,6 @@ import {
     GetSessionSigsProps,
     IRelayPKP,
     SessionSigs,
-    // AuthCallbackParams,
 } from '@lit-protocol/types';
 
 export const DOMAIN = import.meta.env.VITE_APP_PUBLIC_DOMAIN || 'localhost';
@@ -98,27 +98,25 @@ export async function updateSessionSigs(
  */
 export async function getPKPs(authMethod: AuthMethod): Promise<IRelayPKP[]> {
 
-      if (authMethod.authMethodType === AuthMethodType.GoogleJwt) {
+    if (authMethod.authMethodType === AuthMethodType.GoogleJwt) {
         const provider = litAuthClient.initProvider(ProviderType.Google)
         if (!provider) {
             throw new Error('Provider is undefined');
         }
         const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
-          console.log("Fetched PKP", allPKPs);
-          return allPKPs;
-      }
-      else{
+        console.log("Fetched PKP", allPKPs);
+        return allPKPs;
+    } else {
+        const provider = getProviderByAuthMethod(authMethod);
 
-          const provider = getProviderByAuthMethod(authMethod);
-      
-          if (!provider) {
-              throw new Error('Provider is undefined');
-          }
-      
-          const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
-          return allPKPs;
-      }
-      
+        if (!provider) {
+            throw new Error('Provider is undefined');
+        }
+
+        const allPKPs = await provider.fetchPKPsThroughRelayer(authMethod);
+        return allPKPs;
+    }
+
 }
 
 /**
@@ -165,6 +163,27 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
         ethAddress: response.pkpEthAddress!,
     };
     return newPKP;
+}
+
+/**
+ * Get auth method object by signing a message with an Ethereum wallet
+ */
+export async function authenticateWithEthWallet(
+    address?: string,
+    signMessage?: (message: string) => Promise<string>
+): Promise<AuthMethod | undefined> {
+    const ethWalletProvider = litAuthClient.initProvider<EthWalletProvider>(
+        ProviderType.EthWallet,
+        {
+            domain: DOMAIN,
+            origin: ORIGIN,
+        }
+    );
+    const authMethod = await ethWalletProvider.authenticate({
+        address,
+        signMessage,
+    });
+    return authMethod;
 }
 
 /**

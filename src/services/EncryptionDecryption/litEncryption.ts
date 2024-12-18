@@ -14,8 +14,6 @@ export const litEncryptData = async (message: string):
             {
                 accessControlConditions,
                 dataToEncrypt: message,
-                // chain: 'ethereum',
-                // sessionSigs: sessionSigs
             },
             litNodeClient,
         );
@@ -26,7 +24,6 @@ export const litEncryptData = async (message: string):
             dataToEncryptHash,
         }
     } catch (err) {
-        // alert(err);
         console.error(err);
     }
 }

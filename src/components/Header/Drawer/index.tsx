@@ -3,9 +3,10 @@ import { CopyOutlined } from '@ant-design/icons';
 import settingsIcon from './../../../assets/svgIcons/settings.svg'
 
 import './styles.css'
-import { useDispatch } from 'react-redux';
-import { goToStep } from '../../../Slice/stepperSlice';
 import { UserAvatar } from '../../Avatar';
+import { CLIENT_ID } from '../../../utils/EnvConfig';
+import { getLocalStorageValueofClient } from '../../../utils/Helpers';
+import { useStepper } from '../../../hooks/useStepper';
 
 
 interface DrawerProps {
@@ -15,7 +16,13 @@ interface DrawerProps {
 }
 
 const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
-    const dispatch = useDispatch()
+    const { goToStep } = useStepper()
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { smartProfileData: parssedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);
         message.success('Address copied!');
@@ -25,16 +32,14 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
         if (key === '1') {
             handleCopyAddress()
         } else if (key === '2') {
-            dispatch(goToStep('digitalWardrobe'));
+            goToStep('digitalWardrobe');
         } else if (key === '3') {
-            dispatch(goToStep('profileSettings'))
+            goToStep('profileSettings');
         } else if (key === '4') {
             handleLogout();
         }
     };
 
-    const userOrbisData = localStorage.getItem('smartProfileData')
-    const parssedUserOrbisData = userOrbisData ? JSON.parse(userOrbisData) : ''
 
     const userAvatar = parssedUserOrbisData?.data?.smartProfile.avatar
 

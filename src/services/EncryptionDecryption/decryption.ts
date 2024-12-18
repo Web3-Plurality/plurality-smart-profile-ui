@@ -1,12 +1,17 @@
+import { CLIENT_ID } from "../../utils/EnvConfig";
+import { getLocalStorageValueofClient } from "../../utils/Helpers";
 import { litDecryptData } from "./litDecryption";
 import { metamaskDecryptData } from "./metamaskDecryption";
 
 export const decryptData = async (encryptedData: string) => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { signature: sessionSigs } = getLocalStorageValueofClient(`clientID-${clientId}`)
     let decryptionResult;
-    const sessionSigs = localStorage.getItem("signature")
     if (sessionSigs) {
         if (encryptedData) {
-            const result = await litDecryptData(JSON.parse(sessionSigs), JSON.parse(encryptedData).ciphertext, JSON.parse(encryptedData).dataToEncryptHash);
+            const result = await litDecryptData(sessionSigs, JSON.parse(encryptedData).ciphertext, JSON.parse(encryptedData).dataToEncryptHash);
             if (result && typeof result === 'object') {
                 decryptionResult = JSON.parse(result.decryptedMessage);
             } else {
@@ -18,7 +23,6 @@ export const decryptData = async (encryptedData: string) => {
         if (result.code && result.code === -32603) {
             return result
         }
-        console.log("Resulst", result)
         decryptionResult = JSON.parse(result)
 
     }

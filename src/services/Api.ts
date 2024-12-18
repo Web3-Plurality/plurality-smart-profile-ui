@@ -1,6 +1,6 @@
 import axios from "axios";
-import { API_BASE_URL } from "./../utils/EnvConfig";
-import { getLocalStorageValue, setLocalStorageValue } from "./../utils/Helpers";
+import { API_BASE_URL, CLIENT_ID } from "./../utils/EnvConfig";
+import { getLocalStorageValueofClient, setLocalStorageValue } from "./../utils/Helpers";
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
@@ -11,8 +11,11 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(function (config) {
-    // Retrieve the token dynamically
-    const token = getLocalStorageValue('token');
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,11 +29,16 @@ axios.interceptors.response.use(function (response) {
     return response
 }, function (error) {
     if (error.response.status === 403) {
-        // Trigger logout functionality
-        const smartProfileData = getLocalStorageValue('smartProfile')
+        const queryParams = new URLSearchParams(location.search);
+        const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
         localStorage.clear()
+
         if (smartProfileData) {
-            setLocalStorageValue('smartProfileData', smartProfileData)
+            setLocalStorageValue(`streamID-${profileTypeStreamId}`, JSON.stringify({ smartProfileData }))
         }
         return Promise.reject(error);
     }

@@ -1,9 +1,5 @@
 import { useState } from "react";
 import CustomButtom from "./../customButton";
-// import CustomInputField from "../CustomInputField";
-// import './styles.css';
-// import useStychLogin from "../../hooks/useStychLogin";
-// import Loading from "../LitComponents/Loading";
 import Terms from "./termsOfService";
 import useStychLogin from "../../hooks/useStychLogin";
 import CustomInputField from "../customInputField";

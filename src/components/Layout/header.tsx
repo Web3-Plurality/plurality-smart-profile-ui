@@ -1,8 +1,7 @@
 import classNames from 'classnames'
-import { useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { selectCurrentStep } from '../../selectors/stepperSelector'
 import { getDescription, getTitleText } from '../../utils/Helpers'
+import { useStepper } from '../../hooks/useStepper'
 
 const WidgetHeaderWrapper = styled.div`
   display: flex;
@@ -86,7 +85,7 @@ const defaultProps = {
 }
 
 export default function WidgetHeader() {
-  const currentStep = useSelector(selectCurrentStep)
+  const { currentStep } = useStepper()
   const title = getTitleText(currentStep)
   const description = getDescription(currentStep)
   const isIframe = window.self !== window.top;

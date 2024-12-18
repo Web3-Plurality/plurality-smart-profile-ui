@@ -169,7 +169,7 @@ const EventListener: React.FC = () => {
         return () => {
             window.removeEventListener('message', receiveMessage);
         };
-    }, []); // Empty dependency array ensures the effect runs only once
+    }, []);
     return <div></div>;
 };
 

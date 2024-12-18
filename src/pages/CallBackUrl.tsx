@@ -6,6 +6,7 @@ import { message } from 'antd';
 import { ErrorMessages } from '../utils/Constants';
 import axiosInstance from '../services/Api';
 import { getLocalStorageValue } from '../utils/Helpers';
+import { CLIENT_ID } from '../utils/EnvConfig';
 
 function CallBackUrl() {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,9 +14,11 @@ function CallBackUrl() {
 
     const [searchParams] = useSearchParams();
     const accessTokenID = searchParams.get('token_id');
-    const appName = searchParams.get('app'); 
+    const appName = searchParams.get('app');
     const redirect = searchParams.get('redirect');// redirect to otp page if its true
 
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
 
     const registerEvent = async () => {
         try {
@@ -24,7 +27,7 @@ function CallBackUrl() {
             console.log("redirect", redirect)
             const apiUrl = appName ? `oauth-${appName}` : 'auth/google'
             //if redirect is true, means user already  been loggedIn with stytch so we have to redirect hinm to otp page
-            await axiosInstance.post(`${apiUrl}/event`, { clientId: localStorage.getItem("clientId"), redirect : redirect === 'true' ? true : false }, {
+            await axiosInstance.post(`${apiUrl}/event`, { clientId, redirect: redirect === 'true' ? true : false }, {
                 headers: {
                     'x-sse-id': getLocalStorageValue('sseId'),
                     'x-token-id': accessTokenID,
