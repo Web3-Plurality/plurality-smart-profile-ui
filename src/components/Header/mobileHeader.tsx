@@ -49,8 +49,11 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
 
     return (
         <>
-            {isIframe && <></>}
-            {!isIframe && (
+            {isIframe ? <Drawer
+                handleLogout={handleLogoutUser}
+                address={metamaskAddress || litAddress}
+                isSmallScreen={isSmallScreen}
+            /> : (
                 <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
                     <div className='user-detail-mobile'>
                         <Drawer

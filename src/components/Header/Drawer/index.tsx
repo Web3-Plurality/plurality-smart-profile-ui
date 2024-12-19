@@ -16,6 +16,7 @@ interface DrawerProps {
     isSmallScreen?: boolean
 }
 
+const isIframe = window.location !== window.parent.location
 const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
     const { goToStep } = useStepper()
     const parentUrl = getParentUrl()
@@ -70,19 +71,25 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
         </Menu>
     );
 
+
     return (
-        <Space direction="vertical" className='options-wrapper'>
-            <Space wrap>
-                <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
-                    <div>
-                        {isSmallScreen && <img src={settingsIcon} className='mobile-header-icon' />}
-                        {!isSmallScreen && <div className="avatar">
-                            {userAvatar ? <img src={userAvatar} /> : <UserAvatar address={address} size={46} />}
-                        </div>}
-                    </div>
-                </Dropdown>
-            </Space>
-        </Space>
+        <>
+            {isIframe ? <></> : (
+                <Space direction="vertical" className='options-wrapper'>
+                    <Space wrap>
+                        <Dropdown overlay={menu} placement="bottomLeft" trigger={['click']}>
+                            <div>
+                                {isSmallScreen && <img src={settingsIcon} className='mobile-header-icon' />}
+                                {!isSmallScreen && <div className="avatar">
+                                    {userAvatar ? <img src={userAvatar} /> : <UserAvatar address={address} size={46} />}
+                                </div>}
+                            </div>
+                        </Dropdown>
+                    </Space>
+                </Space>
+            )}
+        </>
+
     )
 }
 
