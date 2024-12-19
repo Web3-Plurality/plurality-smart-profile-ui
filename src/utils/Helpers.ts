@@ -17,6 +17,13 @@ import {
 import { CLIENT_ID } from "./EnvConfig";
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
 import { message } from "antd";
+import { ethers } from "ethers";
+import {
+    EAS,
+    Offchain,
+    OffchainAttestationVersion,
+    OffchainConfig
+  } from '@ethereum-attestation-service/eas-sdk';
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
@@ -255,6 +262,26 @@ const reGenerateUserDidAddress = async () => {
     }
 }
 
+// verifying attestation
+const verifyOffcahinAttestation = (attestation: any) => {
+    try {
+      const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
+      const signerAddress = "0x49B330af2e9B16189a55d45bcf808d2D92bce1f6";
+      // Initialize the sdk with the address of the EAS Schema contract address
+      const eas = new EAS(EASContractAddress);
+      const EAS_CONFIG: OffchainConfig = {
+        address: attestation.domain.verifyingContract,
+        version: attestation.domain.version,
+        chainId: BigInt(attestation.domain.chainId),
+      };
+      const offchain = new Offchain(EAS_CONFIG, OffchainAttestationVersion.Version2, eas);
+      const isValidAttestation = offchain.verifyOffchainAttestationSignature(signerAddress, attestation);
+      return isValidAttestation;
+    } catch (error) {
+      return false;
+    }
+  }
+
 export {
     setLocalStorageValue,
     getLocalStorageValue,
@@ -276,5 +303,6 @@ export {
     addGlobalLitData,
     removeGlobalLitData,
     redirectUserOnLogout,
-    reGenerateUserDidAddress
+    reGenerateUserDidAddress,
+    verifyOffcahinAttestation
 }

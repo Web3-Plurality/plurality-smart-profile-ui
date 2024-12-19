@@ -8,8 +8,9 @@ import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
-import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
+import { getLocalStorageValueofClient, reGenerateUserDidAddress, verifyOffcahinAttestation } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
+import { message } from "antd";
 
 type Platform = {
     platform: string,
@@ -124,6 +125,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             goToStep('success')
                             return
                         }
+                        console.log("aaaaaaaaaaaaaaa",decryptedData)
+                        if( decryptedData?.attestation && Object.keys(decryptedData?.attestation)?.length !== 0 && !verifyOffcahinAttestation(decryptedData?.attestation)){
+                            message.error("attestation of data is not verified");
+                            return
+                        }
                         const objData = {
                             streamId: response.rows[0].stream_id,
                             data: { smartProfile: decryptedData }
@@ -144,6 +150,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                     const decryptedData = await decryptData(response.rows[0].encrypted_profile_data)
                     if (decryptedData.code === -32603) {
                         goToStep('success')
+                        return
+                    }
+                    console.log("vbbbbbbbbbbbbb",decryptedData)
+                    if( decryptedData?.attestation && Object.keys(decryptedData?.attestation)?.length !== 0 && !verifyOffcahinAttestation(decryptedData?.attestation)){
+                        message.error("attestation of data is not verified");
                         return
                     }
                     const objData = {
