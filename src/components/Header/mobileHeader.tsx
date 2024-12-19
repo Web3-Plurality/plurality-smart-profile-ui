@@ -48,25 +48,34 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
     const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connectedPlatforms?.length
 
     return (
-        <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
-            <div className='user-detail-mobile'>
-                <Drawer
-                    handleLogout={handleLogoutUser}
-                    address={metamaskAddress || litAddress}
-                    isSmallScreen={isSmallScreen}
-                />
-            </div>
-            {currentStep !== "profileSettings" && (<div className='mobile-scores'>
-                {incentiveType && incentiveType === 'POINTS' && (
-                    <>
-                        <span>{score || 0}</span>
-                        <CustomIcon path={BadgeIcon} />
-                    </>
-                )}
-                {incentiveType && incentiveType === 'STARS' && <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />}
+        <>
+            {isIframe ? <Drawer
+                handleLogout={handleLogoutUser}
+                address={metamaskAddress || litAddress}
+                isSmallScreen={isSmallScreen}
+            /> : (
+                <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
+                    <div className='user-detail-mobile'>
+                        <Drawer
+                            handleLogout={handleLogoutUser}
+                            address={metamaskAddress || litAddress}
+                            isSmallScreen={isSmallScreen}
+                        />
+                    </div>
+                    {currentStep !== "profileSettings" && (<div className='mobile-scores'>
+                        {incentiveType && incentiveType === 'POINTS' && (
+                            <>
+                                <span>{score || 0}</span>
+                                <CustomIcon path={BadgeIcon} />
+                            </>
+                        )}
+                        {incentiveType && incentiveType === 'STARS' && <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />}
 
-            </div>)}
-        </div>
+                    </div>)}
+                </div>
+            )}
+        </>
+
     )
 }
 

@@ -2,9 +2,15 @@
 import { useDispatch } from "react-redux"
 import Home from "../components/Home/home"
 import WidgetLayout from "../components/Layout/appLayout"
-import { checkPreviousLoginMode, getLocalStorageValueofClient, setLocalStorageValue, showHeader } from "../utils/Helpers"
+import {
+    checkPreviousLoginMode,
+    getLocalStorageValueofClient,
+    setLocalStorageValue,
+    getParentUrl,
+    showHeader
+} from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import OTPVerification from "../components/otpVerification"
 import { PayloadDataType, ProfileData } from "../types"
 import EmailVerification from "../components/emailVerification"
@@ -25,7 +31,6 @@ import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { select } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
 import axios from "axios"
-import { MessageType } from "antd/es/message/interface"
 import { useLogoutUser } from "../hooks/useLogoutUser"
 import { useStepper } from "../hooks/useStepper"
 
@@ -38,7 +43,6 @@ const Login = () => {
     });
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const warningMessageRef = useRef<MessageType | null>(null);
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
@@ -58,8 +62,7 @@ const Login = () => {
     const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
-    const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
-    const isIframe = window.self !== window.top;
+    const parentUrl = getParentUrl()
 
     const {
         message: eventMessage,
@@ -147,7 +150,6 @@ const Login = () => {
             setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData))
 
         }
-        window.parent.postMessage({ eventName: 'metamaskConnection', data: { isConnected } }, parentUrl);
     }, [isConnected])
 
     useEffect(() => {
@@ -173,22 +175,17 @@ const Login = () => {
 
     }, [metamaskAddress, currentStep, storedLitAccount])
 
+    useEffect(() => {
+        window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!storedLitAccount } }, parentUrl);
+    }, [storedLitAccount])
+
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
     }
 
     const handleLitConnect = () => {
-        if (isIframe) {
-            if (warningMessageRef.current) {
-                warningMessageRef.current();
-                warningMessageRef.current = null;
-            }
-            warningMessageRef.current = message.warning('Coming Soon!');
-
-        } else {
-            checkPreviousLoginMode('lit')
-            goToStep('litLogin')
-        }
+        checkPreviousLoginMode('lit')
+        goToStep('litLogin')
     }
     const handleGoogleConnect = () => {
         registerEvent('')

@@ -1,10 +1,21 @@
 import { ethers, verifyMessage } from 'ethers';
 import React, { useEffect } from 'react';
+import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { useDisconnect } from 'wagmi';
+import { CLIENT_ID } from '../utils/EnvConfig';
+import { useNavigate } from 'react-router-dom';
+import { useStepper } from '../hooks/useStepper';
 
 const EventListener: React.FC = () => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+    const { disconnectAsync } = useDisconnect();
+    const { resetSteps } = useStepper()
+    const navigate = useNavigate();
+
     const receiveMessage = async (event: MessageEvent) => {
-        const parentUrl = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
-        // console.log("Inside EventListener", event, parentUrl)
+        const parentUrl = getParentUrl()
         if (event.origin === parentUrl && event.data.type === 'metamaskRequest') {
             const data = event.data;
             let signer = null;
@@ -161,6 +172,30 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
+        } else if (event.origin === parentUrl && event.data.type === 'logoutRequest') {
+            console.log("Logout received", event.data)
+            const { platform } = event.data
+
+            if (platform !== 'lit') {
+                try {
+                    await disconnectAsync();
+                } catch (err) {
+                    console.error(err);
+                }
+                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false } }, parentUrl);
+            }
+
+            handleLocalStorageOnLogout(clientId)
+
+            let path = '/'
+            if (isRsmPlatform()) {
+                path = `/rsm?client_id=${clientId}`;
+            } else if (isProfileConnectPlatform()) {
+                path = `/profile-connect?client_id=${clientId}`;
+            }
+            resetSteps()
+            navigate(path, { replace: true });
+            window.location.reload()
         }
     };
     useEffect(() => {

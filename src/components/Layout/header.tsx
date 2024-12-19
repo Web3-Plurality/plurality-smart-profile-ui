@@ -3,11 +3,13 @@ import styled from 'styled-components'
 import { getDescription, getTitleText } from '../../utils/Helpers'
 import { useStepper } from '../../hooks/useStepper'
 
-const WidgetHeaderWrapper = styled.div`
+const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string }>`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-top: ${({ isIframe, currentStep }) => (isIframe && (currentStep === 'litLogin' || currentStep === 'otp') ? '30%'
+    : isIframe && currentStep === 'dashboard' ? '12%' : '')};
 
   &.toggleShow {
     display: none;
@@ -91,7 +93,7 @@ export default function WidgetHeader() {
   const isIframe = window.self !== window.top;
 
   return (
-    <WidgetHeaderWrapper id="w-header">
+    <WidgetHeaderWrapper id="w-header" isIframe={isIframe} currentStep={currentStep}>
       <h1 className={
         classNames({
           isdescription: description,

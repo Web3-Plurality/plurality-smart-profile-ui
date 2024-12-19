@@ -217,7 +217,7 @@ p.message-card__prompt {
         font-size: 23px;
     }
 
-    .details-card {
+    .outside-iframe {
         width: 260px !important;
     }
 
