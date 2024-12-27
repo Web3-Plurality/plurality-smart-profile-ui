@@ -113,20 +113,20 @@ export const useRegisterEvent = () => {
                 }
             })
             if (data.message === 'success') {
-                const individualProfileData = data.individualProfile
-                const scores = individualProfileData.scores
-                const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                // const individualProfileData = data.individualProfile
+                // const scores = individualProfileData.scores
+                // const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
-                let publicKey;
-                if (!litSignature) {
-                    publicKey = await getPublicKey();
-                }
-                const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
+                // let publicKey;
+                // if (!litSignature) {
+                //     publicKey = await getPublicKey();
+                // }
+                // const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
 
-                await reGenerateUserDidAddress()
-                const updationResult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
+                // await reGenerateUserDidAddress()
+                // const updationResult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
 
-                if (updationResult) {
+                // if (updationResult) {
                     const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     let payload;
@@ -170,7 +170,7 @@ export const useRegisterEvent = () => {
                             localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                         }
                     }
-                }
+                // }
             }
         } catch (err) {
             setError('Error')

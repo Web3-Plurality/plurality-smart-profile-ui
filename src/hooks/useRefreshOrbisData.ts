@@ -8,7 +8,7 @@ import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
-import { getLocalStorageValueofClient, reGenerateUserDidAddress, verifyOffcahinAttestation } from "../utils/Helpers";
+import { getLocalStorageValueofClient, reGenerateUserDidAddress, verifyAttestation, verifyAttestedData, } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
 import { message } from "antd";
 
@@ -125,8 +125,12 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             goToStep('success')
                             return
                         }
-                        console.log("aaaaaaaaaaaaaaa",decryptedData)
-                        if( decryptedData?.attestation && Object.keys(decryptedData?.attestation)?.length !== 0 && !verifyOffcahinAttestation(decryptedData?.attestation)){
+                        // varify attestation
+                        if(!verifyAttestation(decryptedData)){
+                            message.error("attestation of data is not verified");
+                            return
+                        }
+                        if(!verifyAttestedData(decryptedData)){
                             message.error("attestation of data is not verified");
                             return
                         }
@@ -152,11 +156,16 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         goToStep('success')
                         return
                     }
-                    console.log("vbbbbbbbbbbbbb",decryptedData)
-                    if( decryptedData?.attestation && Object.keys(decryptedData?.attestation)?.length !== 0 && !verifyOffcahinAttestation(decryptedData?.attestation)){
+                    //validate attested data
+                    if(!verifyAttestation(decryptedData)){
                         message.error("attestation of data is not verified");
                         return
                     }
+                    if(!verifyAttestedData(decryptedData)){
+                        message.error("attestation of data is not verified");
+                        return
+                    }
+
                     const objData = {
                         streamId: response.rows[0].stream_id,
                         data: { smartProfile: decryptedData }
