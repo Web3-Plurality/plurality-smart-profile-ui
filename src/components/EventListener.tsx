@@ -6,7 +6,8 @@ import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
-import { generatePKPWallet, readFromContract, writeToContract } from "plurality-ethers-helper";
+import * as ethersV5 from 'ethers-v5'
+
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -130,9 +131,22 @@ const EventListener: React.FC = () => {
                 localStorage.setItem(`chainId`, data.chainId)
             }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
-                const { signature: sessionSigs, pkpKey: pkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                // const v7EthersWallet = await generatePKPWallet(pkp.publicKey, sessionSigs)
-                readFromContract(data.address, data.abi, data.method_name, pkp.publicKey, sessionSigs, data.param)
+                const pkpEthersWallet = await generatePkpWalletInstance();
+                await pkpEthersWallet!.setRpc("https://ethereum-sepolia.rpc.subquery.network/public")
+                await pkpEthersWallet!.setChainId(11155111);
+                const hardabi = '[{"inputs":[],"name":"retrieve","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"num","type":"uint256"}],"name":"store","outputs":[],"stateMutability":"nonpayable","type":"function"}]';
+                const hardaddress = "0x8E26aa0b6c7A396C92237C6a87cCD6271F67f937"
+                let contract = new ethersV5.Contract(
+                    hardaddress,
+                    hardabi,
+                    pkpEthersWallet
+                );
+                let response;
+                response = await contract.retrieve({
+                    blockTag: "latest",
+                });
+                console.log("contract read response: ", response)
+                //readFromContract(data.address, data.abi, data.method_name, pkp.publicKey, sessionSigs, data.param)
             }
             else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name) {
                 const { signature: sessionSigs, pkpKey: pkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
