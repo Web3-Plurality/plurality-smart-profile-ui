@@ -1,10 +1,12 @@
-import { ethers, verifyMessage } from 'ethers';
+import { ethers } from 'ethers';
 import React, { useEffect } from 'react';
-import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
+import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
+import { generatePKPWallet, readFromContract, writeToContract } from "plurality-ethers-helper";
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -16,30 +18,20 @@ const EventListener: React.FC = () => {
 
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = getParentUrl()
-        if (event.origin === parentUrl && event.data.type === 'metamaskRequest') {
+        if (event.origin === parentUrl) {
             const data = event.data;
-            let signer = null;
-
-            let provider;
-            if (window.ethereum == null) {
-                window.parent.postMessage({ id: data.id, type: 'noEthersProvider', data: "Please install metamask" }, parentUrl);
-                return;
-            } else {
-                try {
-                    provider = new ethers.BrowserProvider(window.ethereum);
-                    signer = await provider.getSigner();
-                }
-                catch (error) {
-                    console.log((error as Error).toString())
-                    window.parent.postMessage({ type: 'noEthersProvider', data: (error as Error).toString() }, parentUrl);
-                    return;
-                }
+            const pkpWallet = await generatePkpWalletInstance()
+            const rpc = localStorage.getItem(`rpc`)
+            const chainId = localStorage.getItem(`chainId`)
+            if (rpc && chainId) {
+                await pkpWallet!.setRpc(rpc)
+                await pkpWallet!.setChainId(Number(chainId));
             }
-
             if (data.method === 'getAllAccounts') {
                 try {
-                    const accounts = await provider.listAccounts();
-                    window.parent.postMessage({ id: data.id, eventName: 'getAllAccounts', data: accounts }, parentUrl);
+                    // This doesnt make sense with Lit, so we return only 1 account as array
+                    const account = await pkpWallet!.getAddress()
+                    window.parent.postMessage({ id: data.id, eventName: 'getAllAccounts', data: [account] }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -48,8 +40,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getConnectedAccount') {
                 try {
-                    const accounts = await provider.listAccounts();
-                    window.parent.postMessage({ id: data.id, eventName: 'getConnectedAccount', data: accounts[0] }, parentUrl);
+                    const account = await pkpWallet!.getAddress()
+                    window.parent.postMessage({ id: data.id, eventName: 'getConnectedAccount', data: account }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -59,7 +51,7 @@ const EventListener: React.FC = () => {
 
             else if (data.method === 'getMessageSignature' && data.message) {
                 try {
-                    const signature = await signer.signMessage(data.message);
+                    const signature = await pkpWallet!.signMessage(data.message);
                     window.parent.postMessage({ id: data.id, eventName: 'getMessageSignature', data: signature }, parentUrl);
                 }
                 catch (error) {
@@ -69,8 +61,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'verifyMessageSignature' && data.signature && data.message) {
                 try {
-                    const signerAddress = verifyMessage(data.message, data.signature);
-                    if (signerAddress == await signer.getAddress()) {
+                    const signerAddress = ethers.verifyMessage(data.message, data.signature);
+                    if (signerAddress == await pkpWallet!.getAddress()) {
                         window.parent.postMessage({ id: data.id, eventName: 'verifyMessageSignature', data: "true" }, parentUrl);
                     }
                     else {
@@ -84,9 +76,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getBalance') {
                 try {
-                    const connectedAddress = await signer.getAddress();
-                    const balance = await provider.getBalance(connectedAddress);
-                    window.parent.postMessage({ id: data.id, eventName: 'getBalance', data: balance.toString() + 'n' }, parentUrl);
+                    const balance = await pkpWallet?.getBalance();
+                    window.parent.postMessage({ id: data.id, eventName: 'getBalance', data: balance!.toString() + 'n' }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -95,16 +86,19 @@ const EventListener: React.FC = () => {
             }
 
             else if (data.method === 'sendTransaction' && data.sendTo && data.amount) {
-                try {
-                    //let connectedAddress= await signer.getAddress();
-                    // TODO : Error handling - value > 0 , address valid
-                    const tx = await signer.sendTransaction({
+                try {  
+                    const rawTransaction = {
+                        from: await pkpWallet!.getAddress(),
                         to: data.sendTo,
-                        value: data.amount
-                    });
-                    const receipt = await tx.wait();
-                    console.log("Receipt : ", receipt);
-                    window.parent.postMessage({ id: data.id, eventName: 'sendTransaction', data: receipt!.toString() }, parentUrl);
+                        value: ethers.parseEther(data.amount),
+                        gasLimit: 21000,
+                        gasPrice: ethers.parseUnits("50", "gwei"),
+                        chainId: chainId ? Number(chainId) : 175188 // default lit testnet
+                    }
+                    const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
+                    const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction)
+                    const receipt = await sentTransaction.wait();
+                    window.parent.postMessage({ id: data.id, eventName: 'sendTransaction', data: JSON.stringify(receipt) }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -113,8 +107,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getBlockNumber') {
                 try {
-                    const blockNumber = await provider.getBlockNumber();
-                    window.parent.postMessage({ id: data.id, eventName: 'getBlockNumber', data: blockNumber }, parentUrl);
+                    //This method doesnt exist
+                    window.parent.postMessage({ id: data.id, eventName: 'getBlockNumber', data: "not available yet" }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -123,7 +117,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getTransactionCount' && data.address) {
                 try {
-                    const transactionCount = await provider.getTransactionCount(data.address);
+                    const transactionCount = await pkpWallet?.getTransactionCount();
                     window.parent.postMessage({ id: data.id, eventName: 'getTransactionCount', data: transactionCount }, parentUrl);
                 }
                 catch (error) {
@@ -131,46 +125,19 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
+            else if (data.method === 'switchNetwork' && data.rpc && data.chainId) {
+                localStorage.setItem(`rpc`, data.rpc)
+                localStorage.setItem(`chainId`, data.chainId)
+            }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
-                // to be implemented
-                const contract = new ethers.Contract(data.address, data.abi, provider);
-                if (!contract[data.method_name]) {
-                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: "Method name does not exist on this contract" }, parentUrl);
-                    throw new Error(`Method ${data.method_name} does not exist on the contract.`);
-                }
-                try {
-                    let result;
-                    if (!data.method_params) {
-                        result = await contract[data.method_name]();
-                    }
-                    else {
-                        result = await contract[data.method_name](...data.method_params);
-                    }
-                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: result.toString() }, parentUrl);
-                } catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
+                const { signature: sessionSigs, pkpKey: pkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                // const v7EthersWallet = await generatePKPWallet(pkp.publicKey, sessionSigs)
+                readFromContract(data.address, data.abi, data.method_name, pkp.publicKey, sessionSigs, data.param)
             }
             else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name) {
-                const contract = new ethers.Contract(data.address, data.abi, signer);
-                if (!contract[data.method_name]) {
-                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: "Method name does not exist on this contract" }, parentUrl);
-                    throw new Error(`Method ${data.method_name} does not exist on the contract.`);
-                }
-                try {
-                    let result;
-                    if (!data.method_params) {
-                        result = await contract[data.method_name]();
-                    }
-                    else {
-                        result = await contract[data.method_name](...data.method_params);
-                    }
-                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: JSON.stringify(result) }, parentUrl);
-                } catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
+                const { signature: sessionSigs, pkpKey: pkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                // const v7EthersWallet = await generatePKPWallet(pkp.publicKey, sessionSigs)
+                // writeToContract(data.address, data.abi, data.method_name, v7EthersWallet, data.param)
             }
         } else if (event.origin === parentUrl && event.data.type === 'logoutRequest') {
             console.log("Logout received", event.data)
