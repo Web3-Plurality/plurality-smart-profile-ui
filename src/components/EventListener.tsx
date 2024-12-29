@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import React, { useEffect } from 'react';
-import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
@@ -86,15 +86,22 @@ const EventListener: React.FC = () => {
                 }
             }
 
-            else if (data.method === 'sendTransaction' && data.sendTo && data.amount) {
+            else if (data.method === 'sendTransaction' && data.raw_transaction) {
                 try {  
+                    const localChainId = localStorage.getItem(`chainId`)
+                    const raw = JSON.parse(data.raw_transaction)
+                    if(!!raw.value) {
+                        const bigIntValue = BigInt(raw.value)
+                        raw.value = bigIntValue
+                    }
+                    if(!!raw.gasPrice) {
+                        const bigIntGasPrice = BigInt(raw.gasPrice)
+                        raw.gasPrice = bigIntGasPrice
+                    }
                     const rawTransaction = {
                         from: await pkpWallet!.getAddress(),
-                        to: data.sendTo,
-                        value: ethers.parseEther(data.amount),
-                        gasLimit: 21000,
-                        gasPrice: ethers.parseUnits("50", "gwei"),
-                        chainId: chainId ? Number(chainId) : 175188 // default lit testnet
+                        ...raw,
+                        chainId: localChainId ? Number(localChainId) : 175188 // default lit testnet
                     }
                     const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
                     const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction)
@@ -126,32 +133,110 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
-            else if (data.method === 'switchNetwork' && data.rpc && data.chainId) {
-                localStorage.setItem(`rpc`, data.rpc)
-                localStorage.setItem(`chainId`, data.chainId)
+            else if (data.method === 'switchNetwork' && data.rpc && data.chain_id) {
+                try {
+                    localStorage.setItem(`rpc`, data.rpc)
+                    localStorage.setItem(`chainId`, data.chain_id)
+                    const returnMsg = "successfully switched rpc to: " + data.rpc + ", and chainId to: " + data.chain_id
+                    window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: returnMsg }, parentUrl);
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: (error as Error).toString() }, parentUrl);
+                }
             }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
-                const pkpEthersWallet = await generatePkpWalletInstance();
-                await pkpEthersWallet!.setRpc("https://ethereum-sepolia.rpc.subquery.network/public")
-                await pkpEthersWallet!.setChainId(11155111);
-                const hardabi = '[{"inputs":[],"name":"retrieve","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"num","type":"uint256"}],"name":"store","outputs":[],"stateMutability":"nonpayable","type":"function"}]';
-                const hardaddress = "0x8E26aa0b6c7A396C92237C6a87cCD6271F67f937"
-                let contract = new ethersV5.Contract(
-                    hardaddress,
-                    hardabi,
-                    pkpEthersWallet
-                );
-                let response;
-                response = await contract.retrieve({
-                    blockTag: "latest",
-                });
-                console.log("contract read response: ", response)
-                //readFromContract(data.address, data.abi, data.method_name, pkp.publicKey, sessionSigs, data.param)
+                try {
+                    const pkpEthersWallet = await generatePkpWalletInstance();
+                    const localRpc = localStorage.getItem(`rpc`)
+                    // if the rpc is specified in the api call
+                    if (!!data.rpc) {
+                        // we switch the network
+                        await pkpEthersWallet!.setRpc(data.rpc)
+                        // if the local rpc is a different one
+                        if (localRpc !== data.rpc) {
+                            // we update the local rpc
+                            localStorage.setItem(`rpc`, data.rpc)
+                        }
+                    } else if (!!localRpc) { // if rpc is not specified in the call but we have a local rpc setup
+                        await pkpEthersWallet!.setRpc(localRpc) // we switch the network
+                    }
+                    const localChainId = localStorage.getItem(`chainId`)
+                    if (data.chain_id !== "") { // if the chain id is specified in the api call
+                        // we switch the chain id
+                        await pkpEthersWallet!.setChainId(+data.chain_id);
+                        // if the local chain id is a different one
+                        if (localChainId !== data.chain_id) {
+                            // we update the local chain id
+                            localStorage.setItem(`chainId`, data.chain_id)
+                        }
+                    } else if (!!localChainId) { // if chain id is not specified in the call but we have a local chain id
+                        await pkpEthersWallet!.setChainId(+localChainId) // we switch the network
+                    } 
+                    // contract initialization           
+                    let contract = new ethersV5.Contract(
+                        data.address,
+                        data.abi,
+                        pkpEthersWallet
+                    );
+                    const response = await contract[data.method_name]({
+                        blockTag: "latest",
+                    });
+                    console.log("contract read response: ", response)
+                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: response!.toString() }, parentUrl);
+                }  catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: (error as Error).toString() }, parentUrl);
+                }
             }
-            else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name) {
-                const { signature: sessionSigs, pkpKey: pkp } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                // const v7EthersWallet = await generatePKPWallet(pkp.publicKey, sessionSigs)
-                // writeToContract(data.address, data.abi, data.method_name, v7EthersWallet, data.param)
+            else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
+                try {
+                    const pkpEthersWallet = await generatePkpWalletInstance();
+                    const localRpc = localStorage.getItem(`rpc`)
+                    if (data.rpc !== "") {
+                        await pkpEthersWallet!.setRpc(data.rpc)
+                        if (localRpc !== data.rpc) {
+                            localStorage.setItem(`rpc`, data.rpc)
+                        }
+                    } else if (!!localRpc) {
+                        await pkpEthersWallet!.setRpc(localRpc)
+                    }
+                    const localChainId = localStorage.getItem(`chainId`)
+                    if (data.chain_id !== "") {
+                        await pkpEthersWallet!.setChainId(+data.chain_id);
+                        if (localChainId !== data.chain_id) {
+                            localStorage.setItem(`chainId`, data.chain_id)
+                        }
+                    } else if (!!localChainId) {
+                        await pkpEthersWallet!.setChainId(+localChainId)
+                    }         
+                    let contract = new ethersV5.Contract(
+                        data.address,
+                        data.abi,
+                        pkpEthersWallet
+                    );
+                    const methodParams = JSON.parse(data.method_params)
+                    const txOptions = JSON.parse(data.options)
+                    const response = await contract[data.method_name](...methodParams, {
+                        ...txOptions
+                    });
+                    console.log("contract write response: ", response)
+                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: response!.toString() }, parentUrl);
+                } catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
+                }
+            }
+            else if (data.method === 'fetchNetwork') {
+                try {
+                    const rpc = localStorage.getItem(`rpc`) ?? "https://chain-rpc.litprotocol.com/http"
+                    const chain_id = localStorage.getItem(`chainId`) ?? "175177"
+                    window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: {rpc, chain_id} }, parentUrl);
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: (error as Error).toString() }, parentUrl);
+                }
             }
         } else if (event.origin === parentUrl && event.data.type === 'logoutRequest') {
             console.log("Logout received", event.data)
