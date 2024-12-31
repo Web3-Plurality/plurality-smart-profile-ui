@@ -146,37 +146,36 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
                 try {
-                    const pkpEthersWallet = await generatePkpWalletInstance();
                     const localRpc = localStorage.getItem(`rpc`)
                     // if the rpc is specified in the api call
                     if (!!data.rpc) {
                         // we switch the network
-                        await pkpEthersWallet!.setRpc(data.rpc)
+                        await pkpWallet!.setRpc(data.rpc)
                         // if the local rpc is a different one
                         if (localRpc !== data.rpc) {
                             // we update the local rpc
                             localStorage.setItem(`rpc`, data.rpc)
                         }
                     } else if (!!localRpc) { // if rpc is not specified in the call but we have a local rpc setup
-                        await pkpEthersWallet!.setRpc(localRpc) // we switch the network
+                        await pkpWallet!.setRpc(localRpc) // we switch the network
                     }
                     const localChainId = localStorage.getItem(`chainId`)
                     if (data.chain_id !== "") { // if the chain id is specified in the api call
                         // we switch the chain id
-                        await pkpEthersWallet!.setChainId(+data.chain_id);
+                        await pkpWallet!.setChainId(+data.chain_id);
                         // if the local chain id is a different one
                         if (localChainId !== data.chain_id) {
                             // we update the local chain id
                             localStorage.setItem(`chainId`, data.chain_id)
                         }
                     } else if (!!localChainId) { // if chain id is not specified in the call but we have a local chain id
-                        await pkpEthersWallet!.setChainId(+localChainId) // we switch the network
+                        await pkpWallet!.setChainId(+localChainId) // we switch the network
                     } 
                     // contract initialization           
                     let contract = new ethersV5.Contract(
                         data.address,
                         data.abi,
-                        pkpEthersWallet
+                        pkpWallet
                     );
                     const response = await contract[data.method_name]({
                         blockTag: "latest",
@@ -190,29 +189,28 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
                 try {
-                    const pkpEthersWallet = await generatePkpWalletInstance();
                     const localRpc = localStorage.getItem(`rpc`)
                     if (data.rpc !== "") {
-                        await pkpEthersWallet!.setRpc(data.rpc)
+                        await pkpWallet!.setRpc(data.rpc)
                         if (localRpc !== data.rpc) {
                             localStorage.setItem(`rpc`, data.rpc)
                         }
                     } else if (!!localRpc) {
-                        await pkpEthersWallet!.setRpc(localRpc)
+                        await pkpWallet!.setRpc(localRpc)
                     }
                     const localChainId = localStorage.getItem(`chainId`)
                     if (data.chain_id !== "") {
-                        await pkpEthersWallet!.setChainId(+data.chain_id);
+                        await pkpWallet!.setChainId(+data.chain_id);
                         if (localChainId !== data.chain_id) {
                             localStorage.setItem(`chainId`, data.chain_id)
                         }
                     } else if (!!localChainId) {
-                        await pkpEthersWallet!.setChainId(+localChainId)
+                        await pkpWallet!.setChainId(+localChainId)
                     }         
                     let contract = new ethersV5.Contract(
                         data.address,
                         data.abi,
-                        pkpEthersWallet
+                        pkpWallet
                     );
                     const methodParams = JSON.parse(data.method_params)
                     const txOptions = JSON.parse(data.options)
