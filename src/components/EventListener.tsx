@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import React, { useEffect } from 'react';
 import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
@@ -6,7 +5,7 @@ import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
-import * as ethersV5 from 'ethers-v5'
+import * as ethersV5 from 'ethers-v5';
 
 
 const EventListener: React.FC = () => {
@@ -62,7 +61,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'verifyMessageSignature' && data.signature && data.message) {
                 try {
-                    const signerAddress = ethers.verifyMessage(data.message, data.signature);
+                    const signerAddress = ethersV5.utils.verifyMessage(data.message, data.signature);
                     if (signerAddress == await pkpWallet!.getAddress()) {
                         window.parent.postMessage({ id: data.id, eventName: 'verifyMessageSignature', data: "true" }, parentUrl);
                     }
