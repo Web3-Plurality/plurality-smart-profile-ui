@@ -87,7 +87,13 @@ const EventListener: React.FC = () => {
 
             else if (data.method === 'sendTransaction' && data.raw_transaction) {
                 try {  
-                    const localChainId = localStorage.getItem(`chainId`)
+                    if (!data.rpc) {
+                        throw new Error("rpc is empty")
+                    }
+                    await pkpWallet!.setRpc(data.rpc)
+                    if (!data.chain_id) {
+                        throw new Error("chain id is empty")
+                    } 
                     const raw = JSON.parse(data.raw_transaction)
                     if(!!raw.value) {
                         const bigIntValue = BigInt(raw.value)
@@ -100,7 +106,7 @@ const EventListener: React.FC = () => {
                     const rawTransaction = {
                         from: await pkpWallet!.getAddress(),
                         ...raw,
-                        chainId: localChainId ? Number(localChainId) : 175188 // default lit testnet
+                        chainId: data.chain_id
                     }
                     const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
                     const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction)
@@ -124,6 +130,14 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getTransactionCount' && data.address) {
                 try {
+                    if (!data.rpc) {
+                        throw new Error("rpc is empty")
+                    }
+                    await pkpWallet!.setRpc(data.rpc)
+                    if (!data.chain_id) {
+                        throw new Error("chain id is empty")
+                    } 
+                    await pkpWallet!.setChainId(+data.chain_id);
                     const transactionCount = await pkpWallet?.getTransactionCount();
                     window.parent.postMessage({ id: data.id, eventName: 'getTransactionCount', data: transactionCount }, parentUrl);
                 }
@@ -132,45 +146,28 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
-            else if (data.method === 'switchNetwork' && data.rpc && data.chain_id) {
-                try {
-                    localStorage.setItem(`rpc`, data.rpc)
-                    localStorage.setItem(`chainId`, data.chain_id)
-                    const returnMsg = "successfully switched rpc to: " + data.rpc + ", and chainId to: " + data.chain_id
-                    window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: returnMsg }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: (error as Error).toString() }, parentUrl);
-                }
-            }
+            // else if (data.method === 'switchNetwork' && data.rpc && data.chain_id) {
+            //     try {
+            //         localStorage.setItem(`rpc`, data.rpc)
+            //         localStorage.setItem(`chainId`, data.chain_id)
+            //         const returnMsg = "successfully switched rpc to: " + data.rpc + ", and chainId to: " + data.chain_id
+            //         window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: returnMsg }, parentUrl);
+            //     }
+            //     catch (error) {
+            //         console.error(error);
+            //         window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: (error as Error).toString() }, parentUrl);
+            //     }
+            // }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
                 try {
-                    const localRpc = localStorage.getItem(`rpc`)
-                    // if the rpc is specified in the api call
-                    if (!!data.rpc) {
-                        // we switch the network
-                        await pkpWallet!.setRpc(data.rpc)
-                        // if the local rpc is a different one
-                        if (localRpc !== data.rpc) {
-                            // we update the local rpc
-                            localStorage.setItem(`rpc`, data.rpc)
-                        }
-                    } else if (!!localRpc) { // if rpc is not specified in the call but we have a local rpc setup
-                        await pkpWallet!.setRpc(localRpc) // we switch the network
+                    if (!data.rpc) {
+                        throw new Error("rpc is empty")
                     }
-                    const localChainId = localStorage.getItem(`chainId`)
-                    if (data.chain_id !== "") { // if the chain id is specified in the api call
-                        // we switch the chain id
-                        await pkpWallet!.setChainId(+data.chain_id);
-                        // if the local chain id is a different one
-                        if (localChainId !== data.chain_id) {
-                            // we update the local chain id
-                            localStorage.setItem(`chainId`, data.chain_id)
-                        }
-                    } else if (!!localChainId) { // if chain id is not specified in the call but we have a local chain id
-                        await pkpWallet!.setChainId(+localChainId) // we switch the network
+                    await pkpWallet!.setRpc(data.rpc)
+                    if (!data.chain_id) {
+                        throw new Error("chain id is empty")
                     } 
+                    await pkpWallet!.setChainId(+data.chain_id);
                     // contract initialization           
                     let contract = new ethersV5.Contract(
                         data.address,
@@ -189,24 +186,14 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
                 try {
-                    const localRpc = localStorage.getItem(`rpc`)
-                    if (data.rpc !== "") {
-                        await pkpWallet!.setRpc(data.rpc)
-                        if (localRpc !== data.rpc) {
-                            localStorage.setItem(`rpc`, data.rpc)
-                        }
-                    } else if (!!localRpc) {
-                        await pkpWallet!.setRpc(localRpc)
+                    if (!data.rpc) {
+                        throw new Error("rpc is empty")
                     }
-                    const localChainId = localStorage.getItem(`chainId`)
-                    if (data.chain_id !== "") {
-                        await pkpWallet!.setChainId(+data.chain_id);
-                        if (localChainId !== data.chain_id) {
-                            localStorage.setItem(`chainId`, data.chain_id)
-                        }
-                    } else if (!!localChainId) {
-                        await pkpWallet!.setChainId(+localChainId)
-                    }         
+                    await pkpWallet!.setRpc(data.rpc)
+                    if (!data.chain_id) {
+                        throw new Error("chain id is empty")
+                    } 
+                    await pkpWallet!.setChainId(+data.chain_id);    
                     let contract = new ethersV5.Contract(
                         data.address,
                         data.abi,
@@ -224,17 +211,17 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
                 }
             }
-            else if (data.method === 'fetchNetwork') {
-                try {
-                    const rpc = localStorage.getItem(`rpc`) ?? "https://chain-rpc.litprotocol.com/http"
-                    const chain_id = localStorage.getItem(`chainId`) ?? "175177"
-                    window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: {rpc, chain_id} }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: (error as Error).toString() }, parentUrl);
-                }
-            }
+            // else if (data.method === 'fetchNetwork') {
+            //     try {
+            //         const rpc = localStorage.getItem(`rpc`) ?? "https://chain-rpc.litprotocol.com/http"
+            //         const chain_id = localStorage.getItem(`chainId`) ?? "175177"
+            //         window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: {rpc, chain_id} }, parentUrl);
+            //     }
+            //     catch (error) {
+            //         console.error(error);
+            //         window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: (error as Error).toString() }, parentUrl);
+            //     }
+            // }
         } else if (event.origin === parentUrl && event.data.type === 'logoutRequest') {
             console.log("Logout received", event.data)
             const { platform } = event.data
