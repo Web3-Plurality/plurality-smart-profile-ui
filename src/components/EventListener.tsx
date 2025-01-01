@@ -103,10 +103,14 @@ const EventListener: React.FC = () => {
                         const bigIntGasPrice = BigInt(raw.gasPrice)
                         raw.gasPrice = bigIntGasPrice
                     }
+                    if(!!raw.gasLimit) {
+                        const bigIntGasLimit = BigInt(raw.gasLimit)
+                        raw.gasLimit = bigIntGasLimit
+                    }
                     const rawTransaction = {
                         from: await pkpWallet!.getAddress(),
                         ...raw,
-                        chainId: data.chain_id
+                        chainId: +data.chain_id
                     }
                     const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
                     const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction)
