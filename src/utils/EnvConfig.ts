@@ -6,7 +6,6 @@ export const CERAMIC_URL = import.meta.env.VITE_APP_CERAMIC_URL
 export const ORBIS_NODE_URL = import.meta.env.VITE_APP_ORBIS_NODE_URL
 export const ORBIS_ENV = import.meta.env.VITE_APP_ORBIS_ENV
 export const PLURALITY_CONTEXT = import.meta.env.VITE_APP_PLURALITY_CONTEXT
-export const INDIVIDUAL_PROFILE_MODEL = import.meta.env.VITE_APP_INDIVIDUAL_PROFILE_MODEL
 export const SMART_PROFILE_MODEL = import.meta.env.VITE_APP_SMART_PROFILE_MODEL
 export const PROFILE_TYPE_MODEL = import.meta.env.VITE_PROFILE_TYPE_MODEL
 export const PROFILE_TYPE_STREAM_ID = import.meta.env.VITE_APP_PROFILE_TYPE_STREAM_ID
