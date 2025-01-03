@@ -11,6 +11,7 @@ import { updateHeader } from "../Slice/headerSlice";
 import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
 import { normalizeSmartProfile, PluralityAttestation } from "@plurality-network/smart-profile-utils";
+import { message } from "antd";
 
 type Platform = {
     platform: string,
@@ -44,6 +45,45 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
         }
     }, [socialIcons, profileTypeStreamId]);
 
+    const getSmartProfileFromServer = async (stream_id:string) =>{
+        const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'x-profile-type-stream-id': profileTypeStreamId,
+            }
+        })
+
+        if (data.success) {
+            const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
+            let publicKey;
+            if (!litSignature) {
+                publicKey = await getPublicKey();
+            }
+            const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
+            await reGenerateUserDidAddress()
+            const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), stream_id)
+            // save smart profile in local storage along with the returned stream id
+            if (insertionResult) {
+                const objData = {
+                    streamId: insertionResult?.id,
+                    data: { smartProfile: data.smartProfile }
+                }
+                const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+
+                existingData = {
+                    ...existingData,
+                    smartProfileData: objData,
+                }
+                localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+                dispatch(updateHeader())
+                setLoading(false)
+                goToStep(step);
+            }
+        }
+    }
+
     const getSmartProfileFromOrbis = async (stream_id: string, userDid: string) => {
         setLoading(true)
         const selectResult = await select(stream_id);
@@ -71,44 +111,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
 
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
-
-                const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-
-                const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'x-profile-type-stream-id': profileTypeStreamId,
-                    }
-                })
-
-                if (data.success) {
-                    const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    let publicKey;
-                    if (!litSignature) {
-                        publicKey = await getPublicKey();
-                    }
-                    const result = await encryptData(JSON.stringify(data.smartProfile), publicKey)
-                    await reGenerateUserDidAddress()
-                    const insertionResult = await insertSmartProfile(JSON.stringify(result), JSON.stringify(data.smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), stream_id)
-                    // save smart profile in local storage along with the returned stream id
-                    if (insertionResult) {
-                        const objData = {
-                            streamId: insertionResult?.id,
-                            data: { smartProfile: data.smartProfile }
-                        }
-                        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-                        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                        existingData = {
-                            ...existingData,
-                            smartProfileData: objData,
-                        }
-                        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-                        dispatch(updateHeader())
-                        setLoading(false)
-                        goToStep(step);
-                    }
-                }
+                await getSmartProfileFromServer(stream_id)
             }
             else {
                 // user has a smart profile in orbis
@@ -152,6 +155,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             // 2. we would call POST /smart-profile with {} to get a fresh profile with old name and bio etc (from smart profile map) but no other data
                             // 3. update the resetted profile at same stream id
                             console.log("Need to re-create profile after this because old one is not valid")
+                            message.info("your SmartProfile corrupted, reseting your smartProfile.")
+                            await getSmartProfileFromServer(stream_id)
+
                         }
                         const objData = {
                             streamId: response.rows[0].stream_id,
@@ -187,6 +193,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                     }
                     else{
                         console.log("Need to re-create profile after this because old one is not valid")
+                        message.info("your SmartProfile corrupted, reseting your smartProfile.")
+                        await getSmartProfileFromServer(stream_id)
+                        
                     }
 
                     const objData = {
