@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig";
+import { API_BASE_URL, CLIENT_ID, EAS_BLOCKCHAIN_RPC, EAS_CONTRACT_ADDRESS, OWNER_WALLET_ADDRESS } from "../utils/EnvConfig";
 import { ProfileData } from "../types";
 import { encryptData } from "../services/EncryptionDecryption/encryption";
 import { decryptData } from "../services/EncryptionDecryption/decryption";
@@ -118,9 +118,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                 const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const pluralityAttestation = new PluralityAttestation({
-                    signerAddress:import.meta.env.VITE_APP_OWNER_WALLET_ADDRESS || '',
-                    easContractAddress: import.meta.env.VITE_APP_EAS_CONTRACT_ADDRESS || '',
-                    rpcProvider: import.meta.env.VITE_APP_EAS_BLOCKCHAIN_RPC || '',
+                    signerAddress: OWNER_WALLET_ADDRESS || '',
+                    easContractAddress: EAS_CONTRACT_ADDRESS || '',
+                    rpcProvider: EAS_BLOCKCHAIN_RPC || '',
                   });
                 if (smartprofileData) {
                     const { streamId } = smartprofileData

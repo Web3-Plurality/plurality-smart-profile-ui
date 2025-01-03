@@ -10,4 +10,6 @@ export const SMART_PROFILE_MODEL = import.meta.env.VITE_APP_SMART_PROFILE_MODEL
 export const PROFILE_TYPE_MODEL = import.meta.env.VITE_PROFILE_TYPE_MODEL
 export const PROFILE_TYPE_STREAM_ID = import.meta.env.VITE_APP_PROFILE_TYPE_STREAM_ID
 export const CLIENT_ID = import.meta.env.VITE_APP_CLIENT_ID
-
+export const OWNER_WALLET_ADDRESS = import.meta.env.VITE_APP_OWNER_WALLET_ADDRESS
+export const EAS_CONTRACT_ADDRESS = import.meta.env.VITE_APP_EAS_CONTRACT_ADDRESS
+export const EAS_BLOCKCHAIN_RPC = import.meta.env.VITE_APP_EAS_BLOCKCHAIN_RPC
