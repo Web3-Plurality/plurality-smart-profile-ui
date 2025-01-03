@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
 import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
-import { PluralityAttestation } from "@plurality-network/smart-profile-utils";
+import { normalizeSmartProfile, PluralityAttestation } from "@plurality-network/smart-profile-utils";
 
 type Platform = {
     platform: string,
@@ -135,15 +135,14 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         // verify attestation
                           //TODO: I think we can wrap this logic into a functions into verifySmartProfileAttestation and use that instead
                           // update the imported package to create verifySmartProfileAttestation and use it here
-                        const isVerifiedPublicAttestaion = await pluralityAttestation.verifyPublicAttestation(
-                            decryptedData,
+                            const smartProfile = normalizeSmartProfile(decryptedData)
+                          const isVerifiedSmartProfileAttestaion = await pluralityAttestation.verifySmartProfileAttestation(
+                            smartProfile,
                             pkpKey.ethAddress,
                         );
-                        const isVerifiedPrivateAttestaion = await pluralityAttestation.verifyPrivateAttestation(
-                            decryptedData.privateData,
-                            pkpKey.ethAddress,
-                        );
-                        if (isVerifiedPublicAttestaion && isVerifiedPrivateAttestaion) {
+
+
+                        if (isVerifiedSmartProfileAttestaion) {
                             console.log('Attestation Checked'); 
                         }
                         else{
@@ -178,15 +177,12 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                     }
                     // TODO: same comments as above apply here
                     // verify attestation
-                    const isVerifiedPublicAttestaion = await pluralityAttestation.verifyPublicAttestation(
-                        decryptedData,
+                    const smartProfile = normalizeSmartProfile(decryptedData)
+                    const isVerifiedSmartProfileAttestaion = await pluralityAttestation.verifySmartProfileAttestation(
+                        smartProfile,
                         pkpKey.ethAddress,
                     );
-                    const isVerifiedPrivateAttestaion = await pluralityAttestation.verifyPrivateAttestation(
-                        decryptedData.privateData,
-                        pkpKey.ethAddress,
-                    );
-                    if (isVerifiedPublicAttestaion && isVerifiedPrivateAttestaion) {
+                    if (isVerifiedSmartProfileAttestaion) {
                         console.log('Attestation Checked'); 
                     }
                     else{
