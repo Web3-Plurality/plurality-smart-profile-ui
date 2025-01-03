@@ -8,9 +8,9 @@ import { select, selectSmartProfiles } from "../services/orbis/selectQueries";
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
-import { getLocalStorageValueofClient, reGenerateUserDidAddress, verifyAttestation, verifyAttestedData, } from "../utils/Helpers";
+import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
-import { message } from "antd";
+import { PluralityAttestation } from "@plurality-network/smart-profile-utils";
 
 type Platform = {
     platform: string,
@@ -112,10 +112,17 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
             }
             else {
                 // user has a smart profile in orbis
-                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const pluralityAttestation = new PluralityAttestation({
+                    signerAddress:import.meta.env.VITE_APP_OWNER_WALLET_ADDRESS || '',
+                    easContractAddress: import.meta.env.VITE_APP_EAS_CONTRACT_ADDRESS || '',
+                    rpcProvider: import.meta.env.VITE_APP_EAS_BLOCKCHAIN_RPC || '',
+                  });
                 if (smartprofileData) {
                     const { streamId } = smartprofileData
+                    //TODO: Update this check as now we are creating new commits on exisiting streams instead of adding a new one everytime
+                    // Lets discuss it how we can do that in orbis 
                     if (streamId === response.rows[0].stream_id) {
                         setLoading(false)
                         goToStep(step)
@@ -125,14 +132,27 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             goToStep('success')
                             return
                         }
-                        // varify attestation
-                        if(!verifyAttestation(decryptedData)){
-                            message.error("attestation of data is not verified");
-                            return
+                        // verify attestation
+                          //TODO: I think we can wrap this logic into a functions into verifySmartProfileAttestation and use that instead
+                          // update the imported package to create verifySmartProfileAttestation and use it here
+                        const isVerifiedPublicAttestaion = await pluralityAttestation.verifyPublicAttestation(
+                            decryptedData,
+                            pkpKey.ethAddress,
+                        );
+                        const isVerifiedPrivateAttestaion = await pluralityAttestation.verifyPrivateAttestation(
+                            decryptedData.privateData,
+                            pkpKey.ethAddress,
+                        );
+                        if (isVerifiedPublicAttestaion && isVerifiedPrivateAttestaion) {
+                            console.log('Attestation Checked'); 
                         }
-                        if(!verifyAttestedData(decryptedData)){
-                            message.error("attestation of data is not verified");
-                            return
+                        else{
+                            // TODOS:
+                            // We need to handle if we hit this block
+                            // 1. show a popup on UI that exisitng profile can not be verified so we would initiate the profile creation again
+                            // 2. we would call POST /smart-profile with {} to get a fresh profile with old name and bio etc (from smart profile map) but no other data
+                            // 3. update the resetted profile at same stream id
+                            console.log("Need to re-create profile after this because old one is not valid")
                         }
                         const objData = {
                             streamId: response.rows[0].stream_id,
@@ -156,14 +176,21 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         goToStep('success')
                         return
                     }
-                    //validate attested data
-                    if(!verifyAttestation(decryptedData)){
-                        message.error("attestation of data is not verified");
-                        return
+                    // TODO: same comments as above apply here
+                    // verify attestation
+                    const isVerifiedPublicAttestaion = await pluralityAttestation.verifyPublicAttestation(
+                        decryptedData,
+                        pkpKey.ethAddress,
+                    );
+                    const isVerifiedPrivateAttestaion = await pluralityAttestation.verifyPrivateAttestation(
+                        decryptedData.privateData,
+                        pkpKey.ethAddress,
+                    );
+                    if (isVerifiedPublicAttestaion && isVerifiedPrivateAttestaion) {
+                        console.log('Attestation Checked'); 
                     }
-                    if(!verifyAttestedData(decryptedData)){
-                        message.error("attestation of data is not verified");
-                        return
+                    else{
+                        console.log("Need to re-create profile after this because old one is not valid")
                     }
 
                     const objData = {

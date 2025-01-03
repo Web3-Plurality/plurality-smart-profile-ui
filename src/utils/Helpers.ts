@@ -17,16 +17,6 @@ import {
 import { CLIENT_ID } from "./EnvConfig";
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
 import { message } from "antd";
-import { ethers } from "ethers";
-import {
-    EAS,
-    MerkleValueWithSalt,
-    Offchain,
-    OffchainAttestationVersion,
-    OffchainConfig,
-    PrivateData,
-    SchemaEncoder
-} from '@ethereum-attestation-service/eas-sdk';
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
@@ -265,151 +255,6 @@ const reGenerateUserDidAddress = async () => {
     }
 }
 
-// verifying attestation
-const verifyAttestation = (profile: any) => {
-    let isVerifiedPublicAttestaion = false
-    let isVerifiedPrivateCredAttestaion = false
-    let isVerifiedPrivatePlatformsIdAttestaion = false
-
-    //  verification of public attestation
-    if (Object.keys(profile?.attestation)?.length > 0) {
-        isVerifiedPublicAttestaion = verifyOffcahinAttestation(profile?.attestation)
-    } else {
-        // if no attestation exist then dont need to veify
-        isVerifiedPublicAttestaion = true
-    }
-
-    //  verification of private cred attestation
-    if (Object.keys(profile?.privateData?.attestedCred?.attestation)?.length > 0) {
-        isVerifiedPrivateCredAttestaion = verifyOffcahinAttestation(profile?.privateData?.attestedCred?.attestation)
-    } else {
-        // if no attestation exist then dont need to veify
-        isVerifiedPrivateCredAttestaion = true
-    }
-
-    //  verification of private plaforms Ids attestation
-    if (Object.keys(profile?.privateData?.attestedPlatformIds?.attestation)?.length > 0) {
-        isVerifiedPrivatePlatformsIdAttestaion = verifyOffcahinAttestation(profile?.privateData?.attestedPlatformIds?.attestation)
-    } else {
-        // if no attestation exist then dont need to veify
-        isVerifiedPrivatePlatformsIdAttestaion = true
-    }
-
-    return isVerifiedPublicAttestaion && isVerifiedPrivateCredAttestaion && isVerifiedPrivatePlatformsIdAttestaion
-}
-
-const verifyOffcahinAttestation = (attestation: any) => {
-    try {
-        const EASContractAddress = '0xC2679fBD37d54388Ce493F1DB75320D236e1815e'; // Sepolia v0.26
-        const signerAddress = "0x49B330af2e9B16189a55d45bcf808d2D92bce1f6";
-        // Initialize the sdk with the address of the EAS Schema contract address
-        const eas = new EAS(EASContractAddress);
-        const EAS_CONFIG: OffchainConfig = {
-            address: attestation.domain.verifyingContract,
-            version: attestation.domain.version,
-            chainId: BigInt(attestation.domain.chainId),
-        };
-        const offchain = new Offchain(EAS_CONFIG, OffchainAttestationVersion.Version2, eas);
-        const isValidAttestation = offchain.verifyOffchainAttestationSignature(signerAddress, attestation);
-        return isValidAttestation;
-    } catch (error) {
-        return false;
-    }
-}
-
-//  verify attested data
-const verifyAttestedData = (smartProfile: any) =>{
-    try {
-        const isValidPublicData: boolean = verifyPublicAttestedData(smartProfile);
-        const isValidPrivateData: boolean = verifyPrivateAttestedData(smartProfile);
-        return isValidPublicData && isValidPrivateData
-      } catch (error) {
-        console.log(error)
-        return false
-      }
-}
-
-
-const verifyPublicAttestedData = (profile: any): boolean => {
-    try {
-        const schemaEncoder = new SchemaEncoder(
-            'string username,string bio,string avatar,string scores,string connectedPlatforms,string profileTypeStreamId,string version',
-        );
-        const encodedData = schemaEncoder.encodeData([
-            { name: 'username', value: profile.username, type: 'string' },
-            { name: 'bio', value: profile.bio, type: 'string' },
-            { name: 'avatar', value: profile.avatar, type: 'string' },
-            { name: 'scores', value: JSON.stringify(profile.scores), type: 'string' },
-            { name: 'connectedPlatforms', value: JSON.stringify(profile.connectedPlatforms), type: 'string' },
-            { name: 'profileTypeStreamId', value: profile.profileTypeStreamId, type: 'string' },
-            { name: 'version', value: JSON.stringify(profile.version), type: 'string' },
-        ]);
-
-        return profile?.attestation?.message?.data === encodedData;
-    } catch (error) {
-        return false;
-    }
-}
-
-const verifyPrivateAttestedData = (profile: any): boolean => {
-    try {
-
-        const credSchema = attestationCredSchema(profile);
-        const platfomSchema = attestationPlatformIdSchema(profile)
-        let validCredsData = false
-        let validPlatformsData = false
-        //validating crerds data
-        if (credSchema?.length > 0) {
-            const privateData = new PrivateData(credSchema);
-            const fullTree = privateData.getFullTree();
-            const schemaEncoder = new SchemaEncoder('bytes32 privateData');
-            const encodedData = schemaEncoder.encodeData([{ name: 'privateData', value: fullTree.root, type: 'bytes32' }]);
-            validCredsData = profile.privateData.attestedCred.attestation.message.data === encodedData
-        } else {
-            //if no data then dont need to validate it
-            validCredsData = true
-        }
-        //validating platform data
-        if (platfomSchema?.length > 0) {
-            const privateData = new PrivateData(platfomSchema);
-            const fullTree = privateData.getFullTree();
-            const schemaEncoder = new SchemaEncoder('bytes32 privateData');
-            const encodedData = schemaEncoder.encodeData([{ name: 'privateData', value: fullTree.root, type: 'bytes32' }]);
-            validPlatformsData = profile.privateData.attestedPlatformIds.attestation.message.data === encodedData
-        } else {
-            //if no data then dont need to validate it
-            validPlatformsData = true
-        }
-
-        return validPlatformsData && validCredsData;
-    } catch (error) {
-        return false;
-    }
-}
-
-function attestationCredSchema(smartProfile: any): MerkleValueWithSalt[] {
-    return [
-        { name: 'interests', value: JSON.stringify(smartProfile.privateData.attestedCred.interests), type: 'string', salt: smartProfile.privateData.attestedCred.salt.interests },
-        { name: 'reputationTags', value: JSON.stringify(smartProfile.privateData.attestedCred.reputationTags), type: 'string', salt: smartProfile.privateData.attestedCred.salt.reputationTags},
-        { name: 'badges', value: JSON.stringify(smartProfile.privateData.attestedCred.badges), type: 'string', salt:  smartProfile.privateData.attestedCred.salt.badges},
-        { name: 'collections', value: JSON.stringify(smartProfile.privateData.attestedCred.collections), type: 'string', salt: smartProfile.privateData.attestedCred.salt.collections},
-    ];
-}
-
-function attestationPlatformIdSchema(smartProfile: any): MerkleValueWithSalt[] {
-    const platformIdSchema = smartProfile.privateData.attestedPlatformIds.connectedProfiles.map((profile: any) => {
-        return {
-            name: profile.platformType,
-            value: JSON.stringify(profile),
-            type: 'string',
-            salt: smartProfile.privateData.attestedPlatformIds.salt[profile.platformType],
-        }
-    })
-
-    return platformIdSchema;
-}
-
-
 export {
     setLocalStorageValue,
     getLocalStorageValue,
@@ -431,7 +276,5 @@ export {
     addGlobalLitData,
     removeGlobalLitData,
     redirectUserOnLogout,
-    reGenerateUserDidAddress,
-    verifyAttestation,
-    verifyAttestedData
+    reGenerateUserDidAddress
 }
