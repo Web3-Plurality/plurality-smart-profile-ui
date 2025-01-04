@@ -4,28 +4,19 @@ import { data, orbisdb } from "./orbisConfig";
 type ValidationResult = { valid: true } | { valid: false; error: string };
 
 export async function insertSmartProfile(
-    encrypted_profile_data: string,
-    scores: string,
-    version = '1',
-    connectedPlatforms: string,
-    profileTypeStreamId: string
-) {
-    console.log(encrypted_profile_data,
-        scores,
-        connectedPlatforms,
-        version,
-        profileTypeStreamId)
+    smartProfile: any) {
+    
+    // Serialize the profile object to required format
+    smartProfile.scores = JSON.stringify(smartProfile.scores), 
+    smartProfile.connectedPlatforms = JSON.stringify(smartProfile.connectedPlatforms), 
+    smartProfile.extendedPublicData = JSON.stringify(smartProfile.extendedPublicData),
+    smartProfile.attestation = JSON.stringify(smartProfile.attestation),
+    smartProfile.privateData = JSON.stringify(smartProfile.privateData)
+
+    //insert
     const insertStatement = await orbisdb
         .insert(data.models.smart_profile)
-        .value(
-            {
-                encrypted_profile_data,
-                scores,
-                connected_platforms: connectedPlatforms,
-                version,
-                profile_type_stream_id: profileTypeStreamId
-            }
-        )
+        .value(smartProfile)
         .context(PLURALITY_CONTEXT);
 
     // Perform local JSON Schema validation before running the query

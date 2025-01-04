@@ -95,14 +95,22 @@ const ProfileSettings = () => {
                 if (!litSignature) {
                     publicKey = await getPublicKey();
                 }
-                const result = await encryptData(JSON.stringify(smartProfile), publicKey)
+                const privateDataObj = smartProfile.privateData
+                const encryptedPrivateData = await encryptData(JSON.stringify(smartProfile.privateData), publicKey)
+                smartProfile.privateData=encryptedPrivateData
                 await reGenerateUserDidAddress()
 
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), streamData.smartProfileData.streamId)
+                const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
 
                 if (updationResult) {
+                    // Deserialize smart profile object
+                    smartProfile.scores = JSON.parse(smartProfile.scores)
+                    smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms)
+                    smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData)
+                    smartProfile.attestation = JSON.parse(smartProfile.attestation)
+                    smartProfile.privateData = privateDataObj
                     const objData = {
                         streamId: updationResult?.id,
                         data: { smartProfile: smartProfile }

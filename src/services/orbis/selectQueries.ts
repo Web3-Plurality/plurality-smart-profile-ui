@@ -1,9 +1,9 @@
 import { ProfileData } from "../../types";
 import { socialConnectButtons } from "../../utils/Constants";
-import { PLURALITY_CONTEXT, PROFILE_TYPE_STREAM_ID } from "../../utils/EnvConfig";
+import { PLURALITY_CONTEXT } from "../../utils/EnvConfig";
 import { data, orbisdb } from "./orbisConfig";
 
-export async function select(stream_id: string) {
+export async function selectProfileType(stream_id: string) {
     try {
         const selectStatement = await orbisdb
             .select()
@@ -36,24 +36,24 @@ export async function select(stream_id: string) {
     }
 }
 
-export async function selectProfileType() {
-    try {
-        const selectStatement = await orbisdb
-            .select()
-            .from(data.models.profile_type)
-            .where({
-                stream_id: PROFILE_TYPE_STREAM_ID
-            })
-            .context(PLURALITY_CONTEXT)
+// export async function selectProfileType() {
+//     try {
+//         const selectStatement = await orbisdb
+//             .select()
+//             .from(data.models.profile_type)
+//             .where({
+//                 stream_id: PROFILE_TYPE_STREAM_ID
+//             })
+//             .context(PLURALITY_CONTEXT)
 
-        const result = await selectStatement.run();
-        const { columns, rows } = result
-        return { columns, rows };
-    }
-    catch (error) {
-        console.log("Error", error)
-    }
-}
+//         const result = await selectStatement.run();
+//         const { columns, rows } = result
+//         return { columns, rows };
+//     }
+//     catch (error) {
+//         console.log("Error", error)
+//     }
+// }
 export async function selectSmartProfiles(stream_id: string, userDid: string) {
     try {
 
@@ -62,7 +62,7 @@ export async function selectSmartProfiles(stream_id: string, userDid: string) {
                 .select()
                 .from(data.models.smart_profile)
                 .where({
-                    profile_type_stream_id: stream_id,
+                    profileTypeStreamId: stream_id,
                     controller: JSON.parse(userDid) || ''
                 })
                 .orderBy(["indexed_at", "desc"])

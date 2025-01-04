@@ -28,7 +28,7 @@ import { AuthUserInformation } from "@useorbis/db-sdk"
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
-import { select } from "../services/orbis/selectQueries"
+import { selectProfileType } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
 import axios from "axios"
 import { useLogoutUser } from "../hooks/useLogoutUser"
@@ -111,7 +111,7 @@ const Login = () => {
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
                     //firstly initilize the roulette constant
-                    const selectedResult = await select(data.data.streamId)
+                    const selectedResult = await selectProfileType(data.data.streamId)
                     if (selectedResult?.neededPlatforms) {
                         setSocialButtons(selectedResult?.neededPlatforms);
                     }
