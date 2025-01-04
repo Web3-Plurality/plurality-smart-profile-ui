@@ -143,16 +143,25 @@ export const useRegisterEvent = () => {
 
                     if (smartProfileResponse.success) {
                         // const litSignature = localStorage.getItem("signature")
+                        const smartProfile = smartProfileResponse.smartProfile
                         const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
                         let publicKey
                         if (!litSignature) {
                             publicKey = await getPublicKey();
                         }
-                        const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
+                        const privateDataObj = smartProfile.privateData
+                        const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj), publicKey)
+                        smartProfile.privateData=encryptedPrivateData
                         await reGenerateUserDidAddress()
-                        const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connectedPlatforms), localSmartProfile.streamId)
+                        const updationResult = await updateSmartProfile(smartProfile, localSmartProfile.streamId)
                         // save smart profile in local storage along with the returned stream id
                         if (updationResult) {
+                            // Deserialize smart profile object
+                            smartProfile.scores = JSON.parse(smartProfile.scores)
+                            smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms)
+                            smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData)
+                            smartProfile.attestation = JSON.parse(smartProfile.attestation)
+                            smartProfile.privateData = privateDataObj
                             const objData = {
                                 streamId: updationResult?.id,
                                 data: { smartProfile: smartProfileResponse.smartProfile }

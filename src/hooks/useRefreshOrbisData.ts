@@ -117,6 +117,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
                 await createAndPublishSmartProfile(profileTypeStreamId)
+                
             }
             else {
                 // user has a smart profile in orbis
@@ -197,6 +198,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         else{
                             message.info("Could not validate your profile, Let's reset your profile")
                             await createAndPublishSmartProfile(profileTypeStreamId)
+                        
                         }
                     }
                 } else {
