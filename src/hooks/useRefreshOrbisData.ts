@@ -8,7 +8,7 @@ import { selectProfileType, selectSmartProfiles } from "../services/orbis/select
 import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
-import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
+import { deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
 import { normalizeSmartProfile, PluralityAttestation } from "@plurality-network/smart-profile-utils";
 import { message } from "antd";
@@ -66,12 +66,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
             const insertionResult = await insertSmartProfile(data.smartProfile)
             // save smart profile in local storage along with the returned stream id
             if (insertionResult) {
-                // Deserialize smart profile object
-                data.smartProfile.scores = JSON.parse(data.smartProfile.scores)
-                data.smartProfile.connectedPlatforms = JSON.parse(data.smartProfile.connectedPlatforms)
-                data.smartProfile.extendedPublicData = JSON.parse(data.smartProfile.extendedPublicData)
-                data.smartProfile.attestation = JSON.parse(data.smartProfile.attestation)
-                data.smartProfile.privateData = privateDataObj
+                await deserializeSmartProfile(data.smartProfile, privateDataObj);
                 const objData = {
                     streamId: insertionResult?.id,
                     data: { smartProfile: data.smartProfile }
@@ -164,12 +159,9 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                             goToStep('success')
                             return
                         }
-                        // Deserialize smart profile object
-                        orbisSmartProfile.privateData = decryptedData
-                        orbisSmartProfile.scores = JSON.parse(orbisSmartProfile.scores)
-                        orbisSmartProfile.connectedPlatforms = JSON.parse(orbisSmartProfile.connectedPlatforms)
-                        orbisSmartProfile.extendedPublicData = JSON.parse(orbisSmartProfile.extendedPublicData)
-                        orbisSmartProfile.attestation = JSON.parse(orbisSmartProfile.attestation)
+
+                        await deserializeSmartProfile(orbisSmartProfile, decryptedData);
+
                         // verify attestation
                         const smartProfile = normalizeSmartProfile(orbisSmartProfile)
                         const isVerifiedSmartProfileAttestaion = await pluralityAttestation.verifySmartProfileAttestation(
@@ -208,12 +200,8 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         return
                     }
                     orbisSmartProfile.privateData = decryptedData
-                    // Deserialize smart profile object
-                    orbisSmartProfile.privateData = decryptedData
-                    orbisSmartProfile.scores = JSON.parse(orbisSmartProfile.scores)
-                    orbisSmartProfile.connectedPlatforms = JSON.parse(orbisSmartProfile.connectedPlatforms)
-                    orbisSmartProfile.extendedPublicData = JSON.parse(orbisSmartProfile.extendedPublicData)
-                    orbisSmartProfile.attestation = JSON.parse(orbisSmartProfile.attestation)
+                    await deserializeSmartProfile(orbisSmartProfile, decryptedData);
+
                     // verify attestation
                     const smartProfile = normalizeSmartProfile(orbisSmartProfile)
                     const isVerifiedSmartProfileAttestaion = await pluralityAttestation.verifySmartProfileAttestation(

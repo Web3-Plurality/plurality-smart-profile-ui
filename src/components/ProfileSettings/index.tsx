@@ -12,7 +12,7 @@ import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import { encryptData } from "../../services/EncryptionDecryption/encryption"
 import CustomButtom from "../customButton"
 import { updateSmartProfile } from "../../services/orbis/updateQuery"
-import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../../utils/Helpers"
+import { deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
 
 const ProfileSettings = () => {
@@ -105,12 +105,7 @@ const ProfileSettings = () => {
                 const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
 
                 if (updationResult) {
-                    // Deserialize smart profile object
-                    smartProfile.scores = JSON.parse(smartProfile.scores)
-                    smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms)
-                    smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData)
-                    smartProfile.attestation = JSON.parse(smartProfile.attestation)
-                    smartProfile.privateData = privateDataObj
+                    await deserializeSmartProfile(smartProfile, privateDataObj);
                     const objData = {
                         streamId: updationResult?.id,
                         data: { smartProfile: smartProfile }
