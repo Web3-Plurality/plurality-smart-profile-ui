@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
 import { deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
-import { normalizeSmartProfile, PluralityAttestation } from "@plurality-network/smart-profile-utils";
+import { normalizeSmartProfile, PluralityAttestation, SmartProfile } from "@plurality-network/smart-profile-utils";
 import { message } from "antd";
 
 type Platform = {
@@ -84,7 +84,8 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                 goToStep(step);
             }
         }
-    }
+    }    
+
     const getSmartProfileFromOrbis = async (profileTypeStreamId: string, userDid: string) => {
         setLoading(true)
         const selectResult = await selectProfileType(profileTypeStreamId);
