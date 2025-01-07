@@ -6,12 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
 import * as ethersV5 from 'ethers-v5';
-import useRefreshOrbisData from '../hooks/useRefreshOrbisData';
 import { encryptData } from '../services/EncryptionDecryption/encryption';
 import { insertSmartProfile } from '../services/orbis/insertQueries';
 import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
-import { SmartProfile } from '@plurality-network/smart-profile-utils';
-
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -22,7 +19,7 @@ const EventListener: React.FC = () => {
     const navigate = useNavigate();
     const { getPublicKey } = useMetamaskPublicKey()
     
-    const publishSmartProfile = async (profileTypeStreamId: string, smartProfile: SmartProfile) => {
+    const publishSmartProfile = async (profileTypeStreamId: string, smartProfile: any) => {
 
         const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
         let publicKey;
@@ -256,7 +253,7 @@ const EventListener: React.FC = () => {
             else if (data.method === 'setPublicData') {
                 try {
 
-                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.extendedPublicData[data?.key] = data?.value;
@@ -271,7 +268,7 @@ const EventListener: React.FC = () => {
             else if (data.method === 'getPublicData') {
                 try {
 
-                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     if (localSmartProfile?.data?.smartProfile?.extendedPublicData[data?.key]) {
                         window.parent.postMessage({ id: data.id, eventName: 'getPublicData', data: localSmartProfile?.data?.smartProfile?.extendedPublicData[data?.key] }, parentUrl);
@@ -286,7 +283,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'setPrivateData') {
                 try {
-                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.privateData.extendedPrivateData[data?.key] = data?.value;
@@ -300,7 +297,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getPrivateData') {
                 try {
-                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     if (smartProfile.privateData.extendedPrivateData[data?.key]) {
