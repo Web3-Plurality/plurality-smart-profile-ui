@@ -21,3 +21,35 @@ export async function updateSmartProfile(
         console.log(error);
     }
 }
+
+
+export async function updatePublicDataSmartProfile(
+    smartProfile: any,
+    streamId: string) {
+
+    await serializeSmartProfile(smartProfile);
+    
+    // update    
+    const updateStatement = await orbisdb
+        .update(streamId)
+        .set({
+            username: smartProfile.username,
+            avatar: smartProfile.avatar,
+            bio: smartProfile.bio,
+            scores: smartProfile.scores,
+            connectedPlatforms: smartProfile.connectedPlatforms,
+            profileTypeStreamId: smartProfile.profileTypeStreamId,
+            version: smartProfile.version,
+            extendedPublicData: smartProfile.extendedPublicData,
+            attestation: smartProfile.attestation,
+        })
+
+    try {
+        const result = await updateStatement.run();
+        console.log(result);
+        return result
+    }
+    catch (error) {
+        console.log(error);
+    }
+}

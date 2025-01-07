@@ -5,9 +5,8 @@ import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
-import * as ethersV5 from 'ethers-v5';
-import { encryptData } from '../services/EncryptionDecryption/encryption';
-import { insertSmartProfile } from '../services/orbis/insertQueries';
+import * as ethersV5 from 'ethers-v5'
+import { updatePublicDataSmartProfileAction, updateSmartProfileAction } from '../utils/orbis-service';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -16,35 +15,6 @@ const EventListener: React.FC = () => {
     const { disconnectAsync } = useDisconnect();
     const { resetSteps } = useStepper()
     const navigate = useNavigate();
-    
-    const publishSmartProfile = async (profileTypeStreamId: string, smartProfile: any) => {
-        const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-        if (!litSignature) {
-            console.log("Lit signatures not found")
-        }
-        const privateDataObj = smartProfile.privateData
-        const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
-        smartProfile.privateData = encryptedPrivateData
-        await reGenerateUserDidAddress()
-        const insertionResult = await insertSmartProfile(smartProfile)
-        // save smart profile in local storage along with the returned stream id
-        if (insertionResult) {
-            await deserializeSmartProfile(smartProfile, privateDataObj);
-            const objData = {
-                streamId: insertionResult?.id,
-                data: { smartProfile: smartProfile }
-            }
-            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-            existingData = {
-                ...existingData,
-                smartProfileData: objData,
-            }
-            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-
-        }
-    }
 
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = getParentUrl()
@@ -253,7 +223,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.extendedPublicData[data?.key] = data?.value;
-                    await publishSmartProfile(profileTypeStreamId, smartProfile)
+                    await updatePublicDataSmartProfileAction(profileTypeStreamId, smartProfile)
                     window.parent.postMessage({ id: data.id, eventName: 'setPublicData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {
@@ -283,7 +253,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.privateData.extendedPrivateData[data?.key] = data?.value;
-                    await publishSmartProfile(profileTypeStreamId, smartProfile)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
                     window.parent.postMessage({ id: data.id, eventName: 'setPrivateData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {

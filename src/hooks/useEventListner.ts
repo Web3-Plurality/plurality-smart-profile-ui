@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
-import { RouteMapper, deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress, setLocalStorageValue } from '../utils/Helpers'
-import { encryptData } from '../services/EncryptionDecryption/encryption'
-import { updateSmartProfile } from '../services/orbis/updateQuery'
+import { RouteMapper, getLocalStorageValueofClient, setLocalStorageValue } from '../utils/Helpers'
 import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
+import { updateSmartProfileAction } from '../utils/orbis-service'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')
@@ -126,34 +125,10 @@ export const useRegisterEvent = () => {
                 if (smartProfileResponse.success) {
                     // const litSignature = localStorage.getItem("signature")
                     const smartProfile = smartProfileResponse.smartProfile
-                    const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    if (!litSignature) {
-                        console.log('Lit signatures not found')
-                    }
-                    const privateDataObj = smartProfile.privateData
-                    const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
-                    smartProfile.privateData=encryptedPrivateData
-                    await reGenerateUserDidAddress()
-                    const updationResult = await updateSmartProfile(smartProfile, localSmartProfile.streamId)
-                    // save smart profile in local storage along with the returned stream id
-                    if (updationResult) {
-                        await deserializeSmartProfile(smartProfile, privateDataObj);
-                        const objData = {
-                            streamId: updationResult?.id,
-                            data: { smartProfile: smartProfileResponse.smartProfile }
-                        }
-                        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-                        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                        existingData = {
-                            ...existingData,
-                            smartProfileData: objData,
-                        }
-
-                        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-                    }
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
                 }
+                
             }
         } catch (err) {
             setError('Error')
