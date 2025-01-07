@@ -9,14 +9,12 @@ interface LoaderData {
 
 interface StepState {
     litSigs: string
-    publicKey: string
     isLoading: LoaderData
     userDid: string
 }
 
 export const initialState: StepState = {
     litSigs: '',
-    publicKey: '',
     isLoading: {
         loadingState: false,
         text: ''
@@ -31,9 +29,6 @@ export const UserDataSlice = createSlice({
         globalSessionSigs: (state, action: PayloadAction<string>) => {
             state.litSigs = action.payload
         },
-        setMetamaskPublicKey: (state, action: PayloadAction<string>) => {
-            state.publicKey = action.payload
-        },
         setLoadingState: (state, action: PayloadAction<LoaderData>) => {
             const { loadingState, text } = action.payload
             state.isLoading.loadingState = loadingState
@@ -47,7 +42,6 @@ export const UserDataSlice = createSlice({
 
 export const {
     globalSessionSigs,
-    setMetamaskPublicKey,
     setLoadingState,
     setUserDID
 } = UserDataSlice.actions

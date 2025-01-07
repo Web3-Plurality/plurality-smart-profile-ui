@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useMetamaskPublicKey } from './useMetamaskPublicKey'
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
 import { RouteMapper, deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress, setLocalStorageValue } from '../utils/Helpers'
 import { encryptData } from '../services/EncryptionDecryption/encryption'
@@ -23,9 +22,6 @@ export const useRegisterEvent = () => {
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
     let existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
-
-
-    const { getPublicKey } = useMetamaskPublicKey()
 
     const registerEvent = async (appName: string) => {
         try {
@@ -131,12 +127,11 @@ export const useRegisterEvent = () => {
                     // const litSignature = localStorage.getItem("signature")
                     const smartProfile = smartProfileResponse.smartProfile
                     const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    let publicKey
                     if (!litSignature) {
-                        publicKey = await getPublicKey();
+                        console.log('Lit signatures not found')
                     }
                     const privateDataObj = smartProfile.privateData
-                    const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj), publicKey)
+                    const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
                     smartProfile.privateData=encryptedPrivateData
                     await reGenerateUserDidAddress()
                     const updationResult = await updateSmartProfile(smartProfile, localSmartProfile.streamId)

@@ -18,7 +18,7 @@ type Platform = {
     authentication: boolean
 }
 
-const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, step: string) => {
+const useRefreshOrbisData = (step: string) => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
@@ -55,12 +55,11 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
         })
         if (data.success) {
             const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-            let publicKey;
             if (!litSignature) {
-                publicKey = await getPublicKey();
+                console.log('Lit signatures not found')
             }
             const privateDataObj = data.smartProfile.privateData
-            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj), publicKey)
+            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
             data.smartProfile.privateData=encryptedPrivateData
             await reGenerateUserDidAddress()
             const insertionResult = await insertSmartProfile(data.smartProfile)
@@ -141,7 +140,7 @@ const useRefreshOrbisData = (getPublicKey: () => Promise<string | undefined>, st
                         attestation,
                         privateData 
                     }))(response.rows[0]);
-                    //orbisSmartProfile.attestation = JSON.parse(orbisSmartProfile.attestation)
+                    
                 const pluralityAttestation = new PluralityAttestation({
                     signerAddress: OWNER_WALLET_ADDRESS || '',
                     easContractAddress: EAS_CONTRACT_ADDRESS || '',

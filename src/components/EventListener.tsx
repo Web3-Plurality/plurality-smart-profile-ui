@@ -8,7 +8,6 @@ import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
 import * as ethersV5 from 'ethers-v5';
 import { encryptData } from '../services/EncryptionDecryption/encryption';
 import { insertSmartProfile } from '../services/orbis/insertQueries';
-import { useMetamaskPublicKey } from '../hooks/useMetamaskPublicKey';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -17,17 +16,14 @@ const EventListener: React.FC = () => {
     const { disconnectAsync } = useDisconnect();
     const { resetSteps } = useStepper()
     const navigate = useNavigate();
-    const { getPublicKey } = useMetamaskPublicKey()
     
     const publishSmartProfile = async (profileTypeStreamId: string, smartProfile: any) => {
-
         const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-        let publicKey;
         if (!litSignature) {
-            publicKey = await getPublicKey();
+            console.log("Lit signatures not found")
         }
         const privateDataObj = smartProfile.privateData
-        const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj), publicKey)
+        const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
         smartProfile.privateData = encryptedPrivateData
         await reGenerateUserDidAddress()
         const insertionResult = await insertSmartProfile(smartProfile)

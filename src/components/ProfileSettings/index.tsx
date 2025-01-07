@@ -7,7 +7,6 @@ import { useAccount } from "wagmi"
 import './styles.css'
 import { UserAvatar } from "../Avatar"
 import CustomInputField from "../customInputField"
-import { useMetamaskPublicKey } from "../../hooks/useMetamaskPublicKey"
 import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import { encryptData } from "../../services/EncryptionDecryption/encryption"
 import CustomButtom from "../customButton"
@@ -17,7 +16,6 @@ import { useStepper } from "../../hooks/useStepper"
 
 const ProfileSettings = () => {
     const { goBack } = useStepper()
-    const { getPublicKey } = useMetamaskPublicKey()
     const [loading, setLoading] = useState(false)
 
     const queryParams = new URLSearchParams(location.search);
@@ -91,12 +89,11 @@ const ProfileSettings = () => {
             const { success, smartProfile } = data
             if (success) {
                 const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                let publicKey;
                 if (!litSignature) {
-                    publicKey = await getPublicKey();
+                    console.log('Lit signatures not found')
                 }
                 const privateDataObj = smartProfile.privateData
-                const encryptedPrivateData = await encryptData(JSON.stringify(smartProfile.privateData), publicKey)
+                const encryptedPrivateData = await encryptData(JSON.stringify(smartProfile.privateData))
                 smartProfile.privateData=encryptedPrivateData
                 await reGenerateUserDidAddress()
 
