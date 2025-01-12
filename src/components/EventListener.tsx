@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform, reGenerateUserDidAddress } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
-import * as ethersV5 from 'ethers-v5';
-
+import * as ethersV5 from 'ethers-v5'
+import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -86,24 +86,24 @@ const EventListener: React.FC = () => {
             }
 
             else if (data.method === 'sendTransaction' && data.raw_transaction) {
-                try {  
+                try {
                     if (!data.rpc) {
                         throw new Error("rpc is empty")
                     }
                     await pkpWallet!.setRpc(data.rpc)
                     if (!data.chain_id) {
                         throw new Error("chain id is empty")
-                    } 
+                    }
                     const raw = JSON.parse(data.raw_transaction)
-                    if(!!raw.value) {
+                    if (!!raw.value) {
                         const bigIntValue = BigInt(raw.value)
                         raw.value = bigIntValue
                     }
-                    if(!!raw.gasPrice) {
+                    if (!!raw.gasPrice) {
                         const bigIntGasPrice = BigInt(raw.gasPrice)
                         raw.gasPrice = bigIntGasPrice
                     }
-                    if(!!raw.gasLimit) {
+                    if (!!raw.gasLimit) {
                         const bigIntGasLimit = BigInt(raw.gasLimit)
                         raw.gasLimit = bigIntGasLimit
                     }
@@ -140,7 +140,7 @@ const EventListener: React.FC = () => {
                     await pkpWallet!.setRpc(data.rpc)
                     if (!data.chain_id) {
                         throw new Error("chain id is empty")
-                    } 
+                    }
                     await pkpWallet!.setChainId(+data.chain_id);
                     const transactionCount = await pkpWallet?.getTransactionCount();
                     window.parent.postMessage({ id: data.id, eventName: 'getTransactionCount', data: transactionCount }, parentUrl);
@@ -170,7 +170,7 @@ const EventListener: React.FC = () => {
                     await pkpWallet!.setRpc(data.rpc)
                     if (!data.chain_id) {
                         throw new Error("chain id is empty")
-                    } 
+                    }
                     await pkpWallet!.setChainId(+data.chain_id);
                     // contract initialization           
                     let contract = new ethersV5.Contract(
@@ -183,7 +183,7 @@ const EventListener: React.FC = () => {
                     });
                     console.log("contract read response: ", response)
                     window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: response!.toString() }, parentUrl);
-                }  catch (error) {
+                } catch (error) {
                     console.error(error);
                     window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: (error as Error).toString() }, parentUrl);
                 }
@@ -196,8 +196,8 @@ const EventListener: React.FC = () => {
                     await pkpWallet!.setRpc(data.rpc)
                     if (!data.chain_id) {
                         throw new Error("chain id is empty")
-                    } 
-                    await pkpWallet!.setChainId(+data.chain_id);    
+                    }
+                    await pkpWallet!.setChainId(+data.chain_id);
                     let contract = new ethersV5.Contract(
                         data.address,
                         data.abi,
@@ -213,6 +213,68 @@ const EventListener: React.FC = () => {
                 } catch (error) {
                     console.error(error);
                     window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
+                }
+            }
+            // EAS Event
+            else if (data.method === 'setPublicData') {
+                try {
+
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                    const smartProfile = smartProfileData.data.smartProfile
+                    smartProfile.extendedPublicData[data?.key] = data?.value;
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+                    window.parent.postMessage({ id: data.id, eventName: 'setPublicData', data: "recieved" }, parentUrl);
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
+                }
+            }
+            else if (data.method === 'getPublicData') {
+                try {
+
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                    if (localSmartProfile?.data?.smartProfile?.extendedPublicData[data?.key]) {
+                        window.parent.postMessage({ id: data.id, eventName: 'getPublicData', data: localSmartProfile?.data?.smartProfile?.extendedPublicData[data?.key] }, parentUrl);
+                    } else {
+                        window.parent.postMessage({ id: data.id, eventName: 'getPublicData', data: "no data found against this key" }, parentUrl);
+                    }
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
+                }
+            }
+            else if (data.method === 'setPrivateData') {
+                try {
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                    const smartProfile = smartProfileData.data.smartProfile
+                    smartProfile.privateData.extendedPrivateData[data?.key] = data?.value;
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+                    window.parent.postMessage({ id: data.id, eventName: 'setPrivateData', data: "recieved" }, parentUrl);
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
+                }
+            }
+            else if (data.method === 'getPrivateData') {
+                try {
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                    const smartProfile = smartProfileData.data.smartProfile
+                    if (smartProfile.privateData.extendedPrivateData[data?.key]) {
+                        window.parent.postMessage({ id: data.id, eventName: 'getPrivateData', data: smartProfile.privateData.extendedPrivateData[data?.key] }, parentUrl);
+                    } else {
+                        window.parent.postMessage({ id: data.id, eventName: 'getPrivateData', data: "no data found against this key" }, parentUrl);
+                    }
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
             // else if (data.method === 'fetchNetwork') {

@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
 import { useAccount } from 'wagmi';
 import { domain, origin, statement } from '../utils/Constants';
-import { CLIENT_ID } from '../utils/EnvConfig';
+import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig';
 import { useLogoutUser } from './useLogoutUser';
 import { useStepper } from './useStepper';
 
@@ -74,7 +74,7 @@ export const useMetamaskToken = () => {
     const generateMetamaskToken = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/login`, { address });
+            const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/login`, { address });
             if (data.nonce) {
                 const signInResponse = await signInWithEthereum(data.nonce);
                 if (signInResponse) {
@@ -95,7 +95,7 @@ export const useMetamaskToken = () => {
             const headersData = JSON.stringify({ 'siwe': sig, 'message': msg })
             const headers = { 'x-siwe': headersData }
 
-            const { data } = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/auth/siwe/authenticate`,
+            const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/authenticate`,
                 { address, clientId },
                 { headers }
             );

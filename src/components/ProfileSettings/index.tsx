@@ -7,17 +7,14 @@ import { useAccount } from "wagmi"
 import './styles.css'
 import { UserAvatar } from "../Avatar"
 import CustomInputField from "../customInputField"
-import { useMetamaskPublicKey } from "../../hooks/useMetamaskPublicKey"
 import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
-import { encryptData } from "../../services/EncryptionDecryption/encryption"
 import CustomButtom from "../customButton"
-import { updateSmartProfile } from "../../services/orbis/updateQuery"
-import { getLocalStorageValueofClient, reGenerateUserDidAddress } from "../../utils/Helpers"
+import { getLocalStorageValueofClient } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
+import { updatePublicSmartProfileAction } from "../../utils/SmartProfile"
 
 const ProfileSettings = () => {
     const { goBack } = useStepper()
-    const { getPublicKey } = useMetamaskPublicKey()
     const [loading, setLoading] = useState(false)
 
     const queryParams = new URLSearchParams(location.search);
@@ -59,7 +56,6 @@ const ProfileSettings = () => {
         }
     }
 
-
     const handleDataSumbit = () => {
         // if (
         //     username === userData?.username &&
@@ -90,39 +86,13 @@ const ProfileSettings = () => {
 
             const { success, smartProfile } = data
             if (success) {
-                const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                let publicKey;
-                if (!litSignature) {
-                    publicKey = await getPublicKey();
-                }
-                const result = await encryptData(JSON.stringify(smartProfile), publicKey)
-                await reGenerateUserDidAddress()
-
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfile.scores), '1', JSON.stringify(data.smartProfile.connectedPlatforms), streamData.smartProfileData.streamId)
-
-                if (updationResult) {
-                    const objData = {
-                        streamId: updationResult?.id,
-                        data: { smartProfile: smartProfile }
-                    }
-                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-                    let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                    existingData = {
-                        ...existingData,
-                        smartProfileData: objData,
-                    }
-
-                    localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-                    message.success("Profile updated successfully!")
-
-                    setLoading(false)
-                    goBack()
-                }
+                await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+                message.success("Profile updated successfully!")
+                setLoading(false)
+                goBack()
             }
+
         } catch (err) {
             console.log("Some Error:", err)
         }

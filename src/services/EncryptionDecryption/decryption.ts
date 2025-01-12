@@ -1,7 +1,6 @@
 import { CLIENT_ID } from "../../utils/EnvConfig";
 import { getLocalStorageValueofClient } from "../../utils/Helpers";
 import { litDecryptData } from "./litDecryption";
-import { metamaskDecryptData } from "./metamaskDecryption";
 
 export const decryptData = async (encryptedData: string) => {
     const queryParams = new URLSearchParams(location.search);
@@ -19,12 +18,7 @@ export const decryptData = async (encryptedData: string) => {
             }
         }
     } else {
-        const result = await metamaskDecryptData(encryptedData)
-        if (result.code && result.code === -32603) {
-            return result
-        }
-        decryptionResult = JSON.parse(result)
-
+        console.log('Lit signatures not found')
     }
     return decryptionResult
 }

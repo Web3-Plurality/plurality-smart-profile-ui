@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { useMetamaskPublicKey } from './useMetamaskPublicKey'
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
-import { RouteMapper, getLocalStorageValueofClient, reGenerateUserDidAddress, setLocalStorageValue } from '../utils/Helpers'
-import { encryptData } from '../services/EncryptionDecryption/encryption'
-import { insertIndividualProfile } from '../services/orbis/insertQueries'
-import { updateSmartProfile } from '../services/orbis/updateQuery'
+import { RouteMapper, getLocalStorageValueofClient, setLocalStorageValue } from '../utils/Helpers'
 import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
+import { updateSmartProfileAction } from '../utils/SmartProfile'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')
@@ -24,9 +21,6 @@ export const useRegisterEvent = () => {
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
     let existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
-
-
-    const { getPublicKey } = useMetamaskPublicKey()
 
     const registerEvent = async (appName: string) => {
         try {
@@ -113,64 +107,28 @@ export const useRegisterEvent = () => {
                 }
             })
             if (data.message === 'success') {
-                const individualProfileData = data.individualProfile
-                const scores = individualProfileData.scores
-                const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                let payload;
 
-                let publicKey;
-                if (!litSignature) {
-                    publicKey = await getPublicKey();
+                if (localSmartProfile) {
+                    payload = localSmartProfile.data.smartProfile
                 }
-                const encryptedIndividualProfile = await encryptData(JSON.stringify(data.individualProfile), publicKey)
 
-                await reGenerateUserDidAddress()
-                const updationResult = await insertIndividualProfile(JSON.stringify(encryptedIndividualProfile), JSON.stringify(scores), '1', data.app)
-
-                if (updationResult) {
-                    const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    const { smartProfileData: localSmartProfile } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                    let payload;
-
-                    if (localSmartProfile) {
-                        payload = localSmartProfile.data.smartProfile
+                const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'x-profile-type-stream-id': profileTypeStreamId,
                     }
+                })
 
-                    const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'x-profile-type-stream-id': profileTypeStreamId,
-                        }
-                    })
-
-                    if (smartProfileResponse.success) {
-                        // const litSignature = localStorage.getItem("signature")
-                        const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                        let publicKey
-                        if (!litSignature) {
-                            publicKey = await getPublicKey();
-                        }
-                        const result = await encryptData(JSON.stringify(smartProfileResponse.smartProfile), publicKey)
-                        await reGenerateUserDidAddress()
-                        const updationResult = await updateSmartProfile(JSON.stringify(result), JSON.stringify(smartProfileResponse.smartProfile.scores), '1', JSON.stringify(smartProfileResponse.smartProfile.connectedPlatforms), localSmartProfile.streamId)
-                        // save smart profile in local storage along with the returned stream id
-                        if (updationResult) {
-                            const objData = {
-                                streamId: updationResult?.id,
-                                data: { smartProfile: smartProfileResponse.smartProfile }
-                            }
-                            const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-                            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                            existingData = {
-                                ...existingData,
-                                smartProfileData: objData,
-                            }
-
-                            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-                        }
-                    }
+                if (smartProfileResponse.success) {
+                    // const litSignature = localStorage.getItem("signature")
+                    const smartProfile = smartProfileResponse.smartProfile
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
                 }
+                
             }
         } catch (err) {
             setError('Error')

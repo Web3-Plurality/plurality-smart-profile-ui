@@ -255,6 +255,28 @@ const reGenerateUserDidAddress = async () => {
     }
 }
 
+const serializeSmartProfile = (smartProfile: any) => {
+    smartProfile.scores = JSON.stringify(smartProfile.scores);
+    smartProfile.connectedPlatforms = JSON.stringify(smartProfile.connectedPlatforms);
+    smartProfile.extendedPublicData = JSON.stringify(smartProfile.extendedPublicData);
+    smartProfile.attestation = JSON.stringify(smartProfile.attestation);
+    if (smartProfile.privateData!=='') {
+        smartProfile.privateData = JSON.stringify(smartProfile.privateData);
+    }
+}
+
+const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: any) => {
+    smartProfile.scores = JSON.parse(smartProfile.scores);
+    smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms);
+    smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData);
+    smartProfile.attestation = JSON.parse(smartProfile.attestation);
+    if (unecryptedPrivateDataObj) {
+        smartProfile.privateData = unecryptedPrivateDataObj;
+    }else{
+        smartProfile.privateData = JSON.parse(smartProfile.privateData);
+    }
+}
+
 export {
     setLocalStorageValue,
     getLocalStorageValue,
@@ -276,5 +298,7 @@ export {
     addGlobalLitData,
     removeGlobalLitData,
     redirectUserOnLogout,
-    reGenerateUserDidAddress
+    reGenerateUserDidAddress,
+    serializeSmartProfile,
+    deserializeSmartProfile
 }

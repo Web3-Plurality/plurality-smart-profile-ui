@@ -17,6 +17,7 @@ import {
     IRelayPKP,
     SessionSigs,
 } from '@lit-protocol/types';
+import { PUBLIC_STYTCH_PROJECT_ID } from '../utils/EnvConfig';
 
 export const DOMAIN = import.meta.env.VITE_APP_PUBLIC_DOMAIN || 'localhost';
 export const ORIGIN =
@@ -47,11 +48,11 @@ export async function authenticateWithStytch(
     let provider: BaseProvider
     if (method === "email") {
         provider = litAuthClient.initProvider(ProviderType.StytchEmailFactorOtp, {
-            appId: import.meta.env.VITE_APP_PUBLIC_STYTCH_PROJECT_ID,
+            appId: PUBLIC_STYTCH_PROJECT_ID,
         });
     } else {
         provider = litAuthClient.initProvider(ProviderType.StytchSmsFactorOtp, {
-            appId: import.meta.env.VITE_APP_PUBLIC_STYTCH_PROJECT_ID
+            appId: PUBLIC_STYTCH_PROJECT_ID
         });
     }
 

@@ -1,22 +1,48 @@
+import { serializeSmartProfile } from "../../utils/Helpers";
 import { orbisdb } from "./orbisConfig";
 
 export async function updateSmartProfile(
-    encrypted_profile_data: string,
-    scores: string,
-    version = '1',
-    connectedPlatforms: string,
-    stream_id: string) {
-    // This will replace the provided row with provided values
+    smartProfile: any,
+    streamId: string) {
+
+    await serializeSmartProfile(smartProfile);
+    
+    // update    
     const updateStatement = await orbisdb
-        .update(stream_id)
-        .set(
-            {
-                encrypted_profile_data,
-                scores,
-                connected_platforms: connectedPlatforms,
-                version,
-            }
-        )
+        .update(streamId)
+        .set(smartProfile)
+
+    try {
+        const result = await updateStatement.run();
+        console.log(result);
+        return result
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+
+export async function updatePublicSmartProfile(
+    smartProfile: any,
+    streamId: string) {
+
+    await serializeSmartProfile(smartProfile);
+    
+    // update    
+    const updateStatement = await orbisdb
+        .update(streamId)
+        .set({
+            username: smartProfile.username,
+            avatar: smartProfile.avatar,
+            bio: smartProfile.bio,
+            scores: smartProfile.scores,
+            connectedPlatforms: smartProfile.connectedPlatforms,
+            profileTypeStreamId: smartProfile.profileTypeStreamId,
+            version: smartProfile.version,
+            extendedPublicData: smartProfile.extendedPublicData,
+            attestation: smartProfile.attestation,
+        })
 
     try {
         const result = await updateStatement.run();
