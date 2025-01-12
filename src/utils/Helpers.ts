@@ -260,7 +260,9 @@ const serializeSmartProfile = (smartProfile: any) => {
     smartProfile.connectedPlatforms = JSON.stringify(smartProfile.connectedPlatforms);
     smartProfile.extendedPublicData = JSON.stringify(smartProfile.extendedPublicData);
     smartProfile.attestation = JSON.stringify(smartProfile.attestation);
-    smartProfile.privateData = JSON.stringify(smartProfile.privateData);
+    if (smartProfile.privateData!=='') {
+        smartProfile.privateData = JSON.stringify(smartProfile.privateData);
+    }
 }
 
 const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: any) => {
@@ -271,7 +273,7 @@ const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: a
     if (unecryptedPrivateDataObj) {
         smartProfile.privateData = unecryptedPrivateDataObj;
     }else{
-        smartProfile.privateData = JSON.parse(smartProfile.privateData );
+        smartProfile.privateData = JSON.parse(smartProfile.privateData);
     }
 }
 

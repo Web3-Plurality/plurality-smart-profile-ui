@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { API_BASE_URL, CLIENT_ID, EAS_BLOCKCHAIN_RPC, EAS_CONTRACT_ADDRESS, OWNER_WALLET_ADDRESS } from "../utils/EnvConfig";
+import { CLIENT_ID, EAS_BLOCKCHAIN_RPC, EAS_CONTRACT_ADDRESS, OWNER_WALLET_ADDRESS } from "../utils/EnvConfig";
 import { ProfileData } from "../types";
-import { encryptData } from "../services/EncryptionDecryption/encryption";
 import { decryptData } from "../services/EncryptionDecryption/decryption";
 import { selectProfileType, selectSmartProfiles } from "../services/orbis/selectQueries";
-import { insertSmartProfile } from "../services/orbis/insertQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
 import { deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
-import { normalizeSmartProfile, PluralityAttestation } from "@plurality-network/smart-profile-utils";
+import { normalizeSmartProfile, PluralityAttestation, ProfilePrivateData } from "@plurality-network/smart-profile-utils";
 import { message } from "antd";
+import { createSmartProfileAction, resetSmartProfileAction } from "../utils/SmartProfile";
 
 type Platform = {
     platform: string,
@@ -44,47 +42,7 @@ const useRefreshOrbisData = (step: string) => {
             localStorage.removeItem('platforms');
         }
     }, [socialIcons, profileTypeStreamId]);
-
-    const createAndPublishSmartProfile = async (profileTypeStreamId: string) =>{
-        const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-        const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'x-profile-type-stream-id': profileTypeStreamId,
-            }
-        })
-        if (data.success) {
-            const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
-            if (!litSignature) {
-                console.log('Lit signatures not found')
-            }
-            const privateDataObj = data.smartProfile.privateData
-            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
-            data.smartProfile.privateData=encryptedPrivateData
-            await reGenerateUserDidAddress()
-            const insertionResult = await insertSmartProfile(data.smartProfile)
-            // save smart profile in local storage along with the returned stream id
-            if (insertionResult) {
-                await deserializeSmartProfile(data.smartProfile, privateDataObj);
-                const objData = {
-                    streamId: insertionResult?.id,
-                    data: { smartProfile: data.smartProfile }
-                }
-                const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                existingData = {
-                    ...existingData,
-                    smartProfileData: objData,
-                }
-                localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-                dispatch(updateHeader())
-                setLoading(false)
-                goToStep(step);
-            }
-        }
-    }    
-
+  
     const getSmartProfileFromOrbis = async (profileTypeStreamId: string, userDid: string) => {
         setLoading(true)
         const selectResult = await selectProfileType(profileTypeStreamId);
@@ -111,7 +69,10 @@ const useRefreshOrbisData = (step: string) => {
 
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
-                await createAndPublishSmartProfile(profileTypeStreamId)
+                await createSmartProfileAction(profileTypeStreamId)
+                dispatch(updateHeader())
+                setLoading(false)
+                goToStep(step);
                 
             }
             else {
@@ -140,6 +101,8 @@ const useRefreshOrbisData = (step: string) => {
                         attestation,
                         privateData 
                     }))(response.rows[0]);
+                
+                const streamId = response.rows[0].stream_id;
                     
                 const pluralityAttestation = new PluralityAttestation({
                     signerAddress: OWNER_WALLET_ADDRESS || '',
@@ -153,14 +116,21 @@ const useRefreshOrbisData = (step: string) => {
                         setLoading(false)
                         goToStep(step)
                     } else {
-                        // profile got updated as its attestation value doesnt match so we decrypt it
-                        const decryptedData = await decryptData(orbisSmartProfile.privateData)
-                        if (decryptedData.code === -32603) {
-                            goToStep('success')
-                            return
+                        // the profile in localstorage and orbis are different so we take the orbis profile
+                        let privataDataObj;
+                        if(!orbisSmartProfile.privateData) {
+                            // the privata data is empty it means we need to initialize the object
+                            privataDataObj = new ProfilePrivateData(); 
                         }
-
-                        await deserializeSmartProfile(orbisSmartProfile, decryptedData);
+                        else {
+                            // the privata data is not empty it means we need to decrypt the data
+                            const privataDataObj = await decryptData(orbisSmartProfile.privateData)
+                            if (privataDataObj.code === -32603) {
+                                goToStep('success')
+                                return
+                            }
+                        }
+                        await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
 
                         // verify attestation
                         const smartProfile = normalizeSmartProfile(orbisSmartProfile)
@@ -189,18 +159,28 @@ const useRefreshOrbisData = (step: string) => {
                         }
                         else{
                             message.info("Could not validate your profile, Let's reset your profile")
-                            await createAndPublishSmartProfile(profileTypeStreamId)
-                        
+                            await resetSmartProfileAction(profileTypeStreamId, streamId)
+                            dispatch(updateHeader())
+                            setLoading(false)
+                            goToStep(step);
                         }
                     }
                 } else {
-                    const decryptedData = await decryptData(orbisSmartProfile.privateData)
-                    if (decryptedData.code === -32603) {
-                        goToStep('success')
-                        return
+                    // the profile is not present in localstorage so we take the orbis profile
+                    let privataDataObj;
+                    if(!orbisSmartProfile.privateData) {
+                        // the privata data is empty it means we need to initialize the object
+                        privataDataObj = new ProfilePrivateData(); 
                     }
-                    orbisSmartProfile.privateData = decryptedData
-                    await deserializeSmartProfile(orbisSmartProfile, decryptedData);
+                    else {
+                        // the privata data is not empty it means we need to decrypt the data
+                        const privataDataObj = await decryptData(orbisSmartProfile.privateData)
+                        if (privataDataObj.code === -32603) {
+                            goToStep('success')
+                            return
+                        }
+                    }
+                    await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
 
                     // verify attestation
                     const smartProfile = normalizeSmartProfile(orbisSmartProfile)
@@ -228,7 +208,10 @@ const useRefreshOrbisData = (step: string) => {
                     }
                     else{
                         message.info("Could not validate your profile, Let's reset your profile")
-                        await createAndPublishSmartProfile(profileTypeStreamId)
+                        await resetSmartProfileAction(profileTypeStreamId, streamId)
+                        dispatch(updateHeader())
+                        setLoading(false)
+                        goToStep(step);
                     }
                 }
             }

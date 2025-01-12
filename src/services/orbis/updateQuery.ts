@@ -23,7 +23,7 @@ export async function updateSmartProfile(
 }
 
 
-export async function updatePublicDataSmartProfile(
+export async function updatePublicSmartProfile(
     smartProfile: any,
     streamId: string) {
 

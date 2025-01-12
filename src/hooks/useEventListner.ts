@@ -6,7 +6,7 @@ import { setLoadingState } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
-import { updateSmartProfileAction } from '../utils/orbis-service'
+import { updateSmartProfileAction } from '../utils/SmartProfile'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')

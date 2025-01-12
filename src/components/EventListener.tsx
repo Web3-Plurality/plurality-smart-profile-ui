@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { deserializeSmartProfile, getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform, reGenerateUserDidAddress } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform, reGenerateUserDidAddress } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
 import * as ethersV5 from 'ethers-v5'
-import { updatePublicDataSmartProfileAction, updateSmartProfileAction } from '../utils/orbis-service';
+import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -223,7 +223,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.extendedPublicData[data?.key] = data?.value;
-                    await updatePublicDataSmartProfileAction(profileTypeStreamId, smartProfile)
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                     window.parent.postMessage({ id: data.id, eventName: 'setPublicData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {

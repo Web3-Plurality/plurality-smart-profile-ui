@@ -11,7 +11,7 @@ import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import CustomButtom from "../customButton"
 import { getLocalStorageValueofClient } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
-import { updatePublicDataSmartProfileAction } from "../../utils/orbis-service"
+import { updatePublicSmartProfileAction } from "../../utils/SmartProfile"
 
 const ProfileSettings = () => {
     const { goBack } = useStepper()
@@ -87,7 +87,7 @@ const ProfileSettings = () => {
             const { success, smartProfile } = data
             if (success) {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                await updatePublicDataSmartProfileAction(profileTypeStreamId, smartProfile)
+                await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                 message.success("Profile updated successfully!")
                 setLoading(false)
                 goBack()
