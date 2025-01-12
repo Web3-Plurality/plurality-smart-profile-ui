@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform, reGenerateUserDidAddress } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
 import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';

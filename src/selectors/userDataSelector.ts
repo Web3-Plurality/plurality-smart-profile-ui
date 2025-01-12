@@ -10,11 +10,6 @@ export const selectLitSigs = createSelector(
     (state) => state.litSigs,
 );
 
-export const selectPublicKey = createSelector(
-    [selectDomain],
-    (state) => state.publicKey,
-);
-
 export const selectLoader = createSelector(
     [selectDomain],
     (state) => state.isLoading,
