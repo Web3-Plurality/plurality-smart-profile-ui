@@ -3,8 +3,6 @@ import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout,
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
-import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
-import * as ethersV5 from 'ethers-v5'
 import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 import { useDispatch } from 'react-redux';
 import { setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';

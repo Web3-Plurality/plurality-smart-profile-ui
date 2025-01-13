@@ -89,7 +89,7 @@ const ProfileSettings = () => {
 
             const { success, smartProfile } = data
             if (success) {
-                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                 message.success("Profile updated successfully!")
                 setLoading(false)

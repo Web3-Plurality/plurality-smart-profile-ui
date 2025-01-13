@@ -319,7 +319,7 @@ export {
     redirectUserOnLogout,
     reGenerateUserDidAddress,
     serializeSmartProfile,
-    deserializeSmartProfile
+    deserializeSmartProfile,
     truncateAddress,
     getRandomColor
 }

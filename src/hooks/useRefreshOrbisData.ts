@@ -70,23 +70,21 @@ const useRefreshOrbisData = (step: string) => {
 
             if (!response?.rows?.length) {
                 // no profile found in orbis for this user
+                const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 await createSmartProfileAction(profileTypeStreamId)
                 dispatch(updateHeader())
-                setLoading(false)
-                goToStep(step);
-                
-                        if (consent?.accepted || consent?.rejected) {
-                            sendUserConsentEvent()
-                            sendProfileConnectedEvent()
-                        } else {
-                            goToStep(step)
-                        }
-                        sendUserDataEvent()
+                setLoading(false)                
+                if (consent?.accepted || consent?.rejected) {
+                    sendUserConsentEvent()
+                    sendProfileConnectedEvent()
+                } else {
+                    goToStep(step)
+                }
+                sendUserDataEvent()
             }
             else {
                 // user has a smart profile in orbis
-                const { pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, consent, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const orbisSmartProfile = (({ 
                     username, 
@@ -123,6 +121,8 @@ const useRefreshOrbisData = (step: string) => {
                     if (JSON.stringify(data.smartProfile.attestation) === orbisSmartProfile.attestation) {
                         // same profile is already present in localstorage
                         setLoading(false)
+                        
+                        // TODO: check this logic check sendProfileConnectedEvent?
                         if (consent?.accepted || consent?.rejected) {
                             sendUserConsentEvent()
                         } else {
@@ -170,8 +170,15 @@ const useRefreshOrbisData = (step: string) => {
                             localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                             dispatch(updateHeader())
                             setLoading(false)
-                            goToStep(step)
-                        }
+                            // TODO: check this logic check sendProfileConnectedEvent?
+                            if (consent?.accepted || consent?.rejected) {
+                                sendUserConsentEvent()
+                            } else {
+                                goToStep(step)
+                            }
+                            sendUserDataEvent()
+                            sendProfileConnectedEvent()
+                            }
                         else{
                             message.info("Could not validate your profile, Let's reset your profile")
                             await resetSmartProfileAction(profileTypeStreamId, streamId)
