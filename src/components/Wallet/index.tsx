@@ -16,7 +16,7 @@ const Wallet = () => {
     const { walletData: SupportedNetwork } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const [activeTab, setActiveTab] = useState('balance')
-    const [selectedNetwork, setSelectedNetwork] = useState(SupportedNetwork[0]);
+    const [selectedNetwork, setSelectedNetwork] = useState(SupportedNetwork?.[0]);
 
     const handleSelectedNetworkChnage = (network: SelectedNetworkType) => {
         setSelectedNetwork(network)
