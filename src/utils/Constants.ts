@@ -70,6 +70,9 @@ import seventhImage from './../assets/images/wardrobe/seventh.png'
 import eightImage from './../assets/images/wardrobe/eight.png'
 import ninthImage from './../assets/images/wardrobe/ninth.png'
 
+import PolygonIcon from './../assets/svgIcons/polygon.svg';
+import EthereumIcon from './../assets/svgIcons/ethereum-logo.svg';
+
 export const digitalWardrobeImages = [
     firstImage, secondImage, thirdImage,
     fourthImage, fifthImage, sixthImage,
@@ -278,3 +281,74 @@ export const SocialProfileUrls = {
 export const domain = window.location.host;
 export const origin = window.location.origin;
 export const statement = "I am the owner of this address";
+
+export const WalletTabsKeys = [
+    {
+        key: 1,
+        name: 'balance',
+        label: 'Balance'
+
+    },
+    {
+        key: 2,
+        name: 'send',
+        label: 'Send'
+
+    },
+    {
+        key: 3,
+        name: 'receive',
+        label: 'Receive'
+
+    },
+]
+
+export const SupportedNetwork = [
+    {
+        chainId: '11155111',
+        token: 'ETH',
+        chainName: 'Sepolia',
+        rpc: 'https://eth-sepolia.public.blastapi.io',
+        icon: EthereumIcon,
+        priceUSD: 'endpoint'
+    },
+    // {
+    //     chainId: '1',
+    //     token: 'ETH',
+    //     chainName: 'Ethereum',
+    //     rpc: '',
+    //     icon: PolygonIcon
+    // },
+    // {
+    //     chainId: '137',
+    //     token: 'Matic',
+    //     chainName: 'Polygon',
+    //     rpc: '',
+    //     icon: PolygonIcon
+    // }
+]
+
+
+export const interestsPillsColors = [
+    // Original colors
+    '#f50',
+    '#2db7f5',
+    '#87d068',
+    '#108ee9',
+    '#722ed1',  // Purple
+    '#13c2c2',  // Cyan
+    '#eb2f96',  // Pink
+    '#faad14',  // Gold
+    '#52c41a',  // Green
+    '#1890ff',  // Blue
+    '#fa8c16',  // Orange
+    '#a0d911',  // Lime
+    '#eb2f96',  // Magenta
+    '#fadb14',  // Yellow
+    '#7cb305',  // Olive
+    '#096dd9',  // Ocean Blue
+    '#08979c',  // Teal
+    '#531dab',  // Deep Purple
+    '#cf1322',  // Red
+    '#237804',  // Forest Green
+];

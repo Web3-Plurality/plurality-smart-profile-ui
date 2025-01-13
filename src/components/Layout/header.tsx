@@ -9,7 +9,7 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
   justify-content: center;
   align-items: center;
   margin-top: ${({ isIframe, currentStep }) => (isIframe && (currentStep === 'litLogin' || currentStep === 'otp') ? '30%'
-    : isIframe && currentStep === 'dashboard' ? '12%' : '')};
+    : isIframe && (currentStep === 'dashboard' || currentStep === 'home' || currentStep === 'wallet') ? '12%' : '')};
 
   &.toggleShow {
     display: none;
@@ -36,7 +36,16 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     &.topSpacingIframeProfile{
-      margin-top: 5px;
+      margin-top: -95px;
+    }
+
+    &.topSpacingIframeConsent{
+      margin-top: 50px;
+      margin-bottom: -5px;
+    }
+
+    &.topSpacingIframeSigning{
+      margin-top: 70px;
     }
 
     @media (max-width: 834px) {
@@ -100,7 +109,9 @@ export default function WidgetHeader() {
           success: currentStep === "success",
           topSpacing: currentStep === 'socialConnect' && !isIframe,
           topSpacingIframe: currentStep === 'socialConnect' && isIframe,
-          topSpacingIframeProfile: currentStep === 'profileSettings' && isIframe
+          topSpacingIframeProfile: currentStep === 'profileSettings' && isIframe,
+          topSpacingIframeConsent: currentStep === 'consent' && isIframe,
+          topSpacingIframeSigning: currentStep === 'signing' && isIframe
         }
         )}
       >

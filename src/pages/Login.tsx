@@ -17,7 +17,7 @@ import EmailVerification from "../components/emailVerification"
 import Dashboard from "../components/dashboard"
 import AuthSuccess from "../components/authSuccess"
 import SocialConnect from "../components/socialConnect"
-import { socialConnectButtons } from "../utils/Constants"
+import { socialConnectButtons, SupportedNetwork } from "../utils/Constants"
 import { message } from "antd"
 import { useRegisterEvent } from "../hooks/useEventListner"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
@@ -33,6 +33,12 @@ import { setLoadingState } from "../Slice/userDataSlice"
 import axios from "axios"
 import { useLogoutUser } from "../hooks/useLogoutUser"
 import { useStepper } from "../hooks/useStepper"
+import Consent from "../components/Consent"
+import Profile from "../components/Profile"
+import { sendProfileConnectedEvent, sendUserDataEvent } from "../utils/sendEventToParent"
+import Transaction from "../components/Transaction"
+import Wallet from "../components/Wallet"
+import Signing from "../components/Signing"
 
 const Login = () => {
 
@@ -107,6 +113,7 @@ const Login = () => {
                         logo: data.data.logo,
                         links: data.data.links,
                         incentives: data.data.incentiveType,
+                        walletData: SupportedNetwork
                     }
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
@@ -153,10 +160,14 @@ const Login = () => {
     }, [isConnected])
 
     useEffect(() => {
-        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
         const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
         if (profileData) {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
+        }
+        if (consent && (consent.accepted || consent.rejected)) {
+            sendUserDataEvent()
+            sendProfileConnectedEvent()
         }
     }, [])
 
@@ -175,9 +186,9 @@ const Login = () => {
 
     }, [metamaskAddress, currentStep, storedLitAccount])
 
-    useEffect(() => {
-        window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!storedLitAccount } }, parentUrl);
-    }, [storedLitAccount])
+    // useEffect(() => {
+    //     window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!storedLitAccount } }, parentUrl);
+    // }, [storedLitAccount])
 
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
@@ -297,6 +308,16 @@ const Login = () => {
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'profileSettings':
                 return <ProfileSettings />
+            case 'consent':
+                return <Consent />
+            case 'profile':
+                return <Profile />
+            case 'transaction':
+                return <Transaction />
+            case 'wallet':
+                return <Wallet />
+            case 'signing':
+                return <Signing />
             default:
                 return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
         }

@@ -1,36 +1,43 @@
 import React, { useEffect } from 'react';
 import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
-import { useDisconnect } from 'wagmi';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { generatePkpWalletInstance } from '../services/orbis/generatePkpWallet';
 import * as ethersV5 from 'ethers-v5'
 import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
+import { useDispatch } from 'react-redux';
+import { setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
+import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature, writeToContract } from '../services/ethers/ethersService';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { disconnectAsync } = useDisconnect();
-    const { resetSteps } = useStepper()
+    const { goToStep, resetSteps } = useStepper()
     const navigate = useNavigate();
+    const dispatch = useDispatch()
 
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = getParentUrl()
         if (event.origin === parentUrl) {
             const data = event.data;
-            const pkpWallet = await generatePkpWalletInstance()
-            const rpc = localStorage.getItem(`rpc`)
-            const chainId = localStorage.getItem(`chainId`)
-            if (rpc && chainId) {
-                await pkpWallet!.setRpc(rpc)
-                await pkpWallet!.setChainId(Number(chainId));
+            if (data.method === 'getMessageSignature' && data.message) {
+                const signatureData = {
+                    message: data.message,
+                    id: data.id
+                }
+                dispatch(setSignatureMessage(signatureData))
+                goToStep('signing')
             }
-            if (data.method === 'getAllAccounts') {
+            else if (data.method === 'sendTransaction') {
+                console.log("Dtaaa: ", data)
+                dispatch(setTransactionData(data))
+                goToStep('transaction')
+            }
+            else if (data.method === 'getAllAccounts') {
                 try {
-                    // This doesnt make sense with Lit, so we return only 1 account as array
-                    const account = await pkpWallet!.getAddress()
+                    const account = await getAccount();
                     window.parent.postMessage({ id: data.id, eventName: 'getAllAccounts', data: [account] }, parentUrl);
                 }
                 catch (error) {
@@ -40,19 +47,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getConnectedAccount') {
                 try {
-                    const account = await pkpWallet!.getAddress()
+                    const account = await getAccount();
                     window.parent.postMessage({ id: data.id, eventName: 'getConnectedAccount', data: account }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-
-            else if (data.method === 'getMessageSignature' && data.message) {
-                try {
-                    const signature = await pkpWallet!.signMessage(data.message);
-                    window.parent.postMessage({ id: data.id, eventName: 'getMessageSignature', data: signature }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -61,8 +57,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'verifyMessageSignature' && data.signature && data.message) {
                 try {
-                    const signerAddress = ethersV5.utils.verifyMessage(data.message, data.signature);
-                    if (signerAddress == await pkpWallet!.getAddress()) {
+                    const result = await verifyMessageSignature(data)
+                    if (result) {
                         window.parent.postMessage({ id: data.id, eventName: 'verifyMessageSignature', data: "true" }, parentUrl);
                     }
                     else {
@@ -76,46 +72,8 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getBalance') {
                 try {
-                    const balance = await pkpWallet?.getBalance();
+                    const balance = await getBalance();
                     window.parent.postMessage({ id: data.id, eventName: 'getBalance', data: balance!.toString() + 'n' }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-
-            else if (data.method === 'sendTransaction' && data.raw_transaction) {
-                try {
-                    if (!data.rpc) {
-                        throw new Error("rpc is empty")
-                    }
-                    await pkpWallet!.setRpc(data.rpc)
-                    if (!data.chain_id) {
-                        throw new Error("chain id is empty")
-                    }
-                    const raw = JSON.parse(data.raw_transaction)
-                    if (!!raw.value) {
-                        const bigIntValue = BigInt(raw.value)
-                        raw.value = bigIntValue
-                    }
-                    if (!!raw.gasPrice) {
-                        const bigIntGasPrice = BigInt(raw.gasPrice)
-                        raw.gasPrice = bigIntGasPrice
-                    }
-                    if (!!raw.gasLimit) {
-                        const bigIntGasLimit = BigInt(raw.gasLimit)
-                        raw.gasLimit = bigIntGasLimit
-                    }
-                    const rawTransaction = {
-                        from: await pkpWallet!.getAddress(),
-                        ...raw,
-                        chainId: +data.chain_id
-                    }
-                    const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
-                    const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction)
-                    const receipt = await sentTransaction.wait();
-                    window.parent.postMessage({ id: data.id, eventName: 'sendTransaction', data: JSON.stringify(receipt) }, parentUrl);
                 }
                 catch (error) {
                     console.error(error);
@@ -134,15 +92,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getTransactionCount' && data.address) {
                 try {
-                    if (!data.rpc) {
-                        throw new Error("rpc is empty")
-                    }
-                    await pkpWallet!.setRpc(data.rpc)
-                    if (!data.chain_id) {
-                        throw new Error("chain id is empty")
-                    }
-                    await pkpWallet!.setChainId(+data.chain_id);
-                    const transactionCount = await pkpWallet?.getTransactionCount();
+                    const transactionCount = await getTransactionCount(data);
                     window.parent.postMessage({ id: data.id, eventName: 'getTransactionCount', data: transactionCount }, parentUrl);
                 }
                 catch (error) {
@@ -164,23 +114,7 @@ const EventListener: React.FC = () => {
             // }
             else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
                 try {
-                    if (!data.rpc) {
-                        throw new Error("rpc is empty")
-                    }
-                    await pkpWallet!.setRpc(data.rpc)
-                    if (!data.chain_id) {
-                        throw new Error("chain id is empty")
-                    }
-                    await pkpWallet!.setChainId(+data.chain_id);
-                    // contract initialization           
-                    let contract = new ethersV5.Contract(
-                        data.address,
-                        data.abi,
-                        pkpWallet
-                    );
-                    const response = await contract[data.method_name]({
-                        blockTag: "latest",
-                    });
+                    const response = await readFromContract(data);
                     console.log("contract read response: ", response)
                     window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: response!.toString() }, parentUrl);
                 } catch (error) {
@@ -190,24 +124,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
                 try {
-                    if (!data.rpc) {
-                        throw new Error("rpc is empty")
-                    }
-                    await pkpWallet!.setRpc(data.rpc)
-                    if (!data.chain_id) {
-                        throw new Error("chain id is empty")
-                    }
-                    await pkpWallet!.setChainId(+data.chain_id);
-                    let contract = new ethersV5.Contract(
-                        data.address,
-                        data.abi,
-                        pkpWallet
-                    );
-                    const methodParams = JSON.parse(data.method_params)
-                    const txOptions = JSON.parse(data.options)
-                    const response = await contract[data.method_name](...methodParams, {
-                        ...txOptions
-                    });
+                    const response = await writeToContract(data);
                     console.log("contract write response: ", response)
                     window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: response!.toString() }, parentUrl);
                 } catch (error) {
@@ -277,6 +194,21 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
+            else if (event.data.type === 'logoutRequest') {
+                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false } }, parentUrl);
+
+                handleLocalStorageOnLogout(clientId)
+
+                let path = '/'
+                if (isRsmPlatform()) {
+                    path = `/rsm?client_id=${clientId}`;
+                } else if (isProfileConnectPlatform()) {
+                    path = `/profile-connect?client_id=${clientId}`;
+                }
+                resetSteps()
+                navigate(path, { replace: true });
+                window.location.reload()
+            }
             // else if (data.method === 'fetchNetwork') {
             //     try {
             //         const rpc = localStorage.getItem(`rpc`) ?? "https://chain-rpc.litprotocol.com/http"
@@ -288,30 +220,13 @@ const EventListener: React.FC = () => {
             //         window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: (error as Error).toString() }, parentUrl);
             //     }
             // }
-        } else if (event.origin === parentUrl && event.data.type === 'logoutRequest') {
-            console.log("Logout received", event.data)
-            const { platform } = event.data
+            else if (event.data.type === 'goToStep') {
+                const { step } = event.data
 
-            if (platform !== 'lit') {
-                try {
-                    await disconnectAsync();
-                } catch (err) {
-                    console.error(err);
+                if (step) {
+                    goToStep(step)
                 }
-                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false } }, parentUrl);
             }
-
-            handleLocalStorageOnLogout(clientId)
-
-            let path = '/'
-            if (isRsmPlatform()) {
-                path = `/rsm?client_id=${clientId}`;
-            } else if (isProfileConnectPlatform()) {
-                path = `/profile-connect?client_id=${clientId}`;
-            }
-            resetSteps()
-            navigate(path, { replace: true });
-            window.location.reload()
         }
     };
     useEffect(() => {

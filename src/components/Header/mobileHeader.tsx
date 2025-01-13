@@ -70,7 +70,6 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
                             </>
                         )}
                         {incentiveType && incentiveType === 'STARS' && <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />}
-
                     </div>)}
                 </div>
             )}

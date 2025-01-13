@@ -50,7 +50,8 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const { goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
     const plaformImg = getPlatformImage()
-    const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' : (currentStep !== 'socialConnect' && currentStep !== 'profileSettings')
+    const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' && currentStep !== 'profile' :
+        (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile')
     const { isTabScreen, isMobileScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)

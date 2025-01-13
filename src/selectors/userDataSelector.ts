@@ -20,4 +20,24 @@ export const selecUserDID = createSelector(
     (state) => state.userDid,
 );
 
+export const selectProfileConnected = createSelector(
+    [selectDomain],
+    (state) => state.profileConnected,
+);
+
+export const selectCurrentWalletTab = createSelector(
+    [selectDomain],
+    (state) => state.currentWalletTab,
+);
+
+export const selectMessageToBeSigned = createSelector(
+    [selectDomain],
+    (state) => state.messageToBeSigned,
+);
+
+export const selectTransactionData = createSelector(
+    [selectDomain],
+    (state) => state.transactionData,
+);
+
 

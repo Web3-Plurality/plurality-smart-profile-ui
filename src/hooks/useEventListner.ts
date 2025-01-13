@@ -2,7 +2,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
 import { RouteMapper, getLocalStorageValueofClient, setLocalStorageValue } from '../utils/Helpers'
-import { setLoadingState } from '../Slice/userDataSlice'
+import { setLoadingState, setProfileConnected } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
@@ -127,6 +127,7 @@ export const useRegisterEvent = () => {
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+                        dispatch(setProfileConnected())
                 }
                 
             }

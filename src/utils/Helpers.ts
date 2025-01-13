@@ -8,6 +8,7 @@ import {
     FORTNITE_ROUTE,
     headerSteps,
     INSTAGRAM_ROUTE,
+    interestsPillsColors,
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
     SPATIAL_ROUTE,
@@ -86,6 +87,12 @@ const getTitleText = (currentStep: string) => {
             return 'Digital Wardrobe';
         case 'profileSettings':
             return `${isIframe ? 'Update Profile' : ''}`;
+        case 'consent':
+            return 'Confirm your choices';
+        case 'transaction':
+            return 'Confirm your action';
+        case 'signing':
+            return 'Your sign is requested';
         default:
             return '';
     }
@@ -157,7 +164,8 @@ const getBtntext = (currStep: string) => {
 }
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
-    if (currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || loader) return false
+    const isIframe = window.self !== window.top && currStep !== 'litLogin'
+    if (isIframe || currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || currStep === 'profile' || loader) return false
     return true
 }
 
@@ -189,13 +197,14 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
 
     const keysAndValues: Record<string, string> = {};
 
-    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    const { clientId, incentives, links, logo, profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
 
     const updatedData = {
         clientId,
         incentives,
         links,
         logo,
+        consent,
         profileTypeStreamId
     };
 
@@ -277,6 +286,16 @@ const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: a
     }
 }
 
+const truncateAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-3)}`;
+};
+
+const getRandomColor = (index: number): string => {
+    const colorIndex = index % interestsPillsColors.length;
+    return interestsPillsColors[colorIndex];
+};
+
 export {
     setLocalStorageValue,
     getLocalStorageValue,
@@ -301,4 +320,6 @@ export {
     reGenerateUserDidAddress,
     serializeSmartProfile,
     deserializeSmartProfile
+    truncateAddress,
+    getRandomColor
 }

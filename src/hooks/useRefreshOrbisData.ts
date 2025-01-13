@@ -10,6 +10,7 @@ import { useStepper } from "./useStepper";
 import { normalizeSmartProfile, PluralityAttestation, ProfilePrivateData } from "@plurality-network/smart-profile-utils";
 import { message } from "antd";
 import { createSmartProfileAction, resetSmartProfileAction } from "../utils/SmartProfile";
+import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } from "../utils/sendEventToParent";
 
 type Platform = {
     platform: string,
@@ -74,10 +75,18 @@ const useRefreshOrbisData = (step: string) => {
                 setLoading(false)
                 goToStep(step);
                 
+                        if (consent?.accepted || consent?.rejected) {
+                            sendUserConsentEvent()
+                            sendProfileConnectedEvent()
+                        } else {
+                            goToStep(step)
+                        }
+                        sendUserDataEvent()
             }
             else {
                 // user has a smart profile in orbis
                 const { pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const orbisSmartProfile = (({ 
                     username, 
@@ -114,7 +123,13 @@ const useRefreshOrbisData = (step: string) => {
                     if (JSON.stringify(data.smartProfile.attestation) === orbisSmartProfile.attestation) {
                         // same profile is already present in localstorage
                         setLoading(false)
-                        goToStep(step)
+                        if (consent?.accepted || consent?.rejected) {
+                            sendUserConsentEvent()
+                        } else {
+                            goToStep(step)
+                        }
+                        sendUserDataEvent()
+                        sendProfileConnectedEvent()
                     } else {
                         // the profile in localstorage and orbis are different so we take the orbis profile
                         let privataDataObj;
@@ -204,7 +219,14 @@ const useRefreshOrbisData = (step: string) => {
                         localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
                         dispatch(updateHeader())
                         setLoading(false)
-                        goToStep(step)
+
+                        if (consent?.accepted || consent?.rejected) {
+                            sendUserConsentEvent()
+                            sendProfileConnectedEvent()
+                        } else {
+                            goToStep(step)
+                        }
+                        sendUserDataEvent()
                     }
                     else{
                         message.info("Could not validate your profile, Let's reset your profile")
