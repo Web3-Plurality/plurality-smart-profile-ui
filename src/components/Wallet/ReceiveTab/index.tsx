@@ -48,7 +48,7 @@ const InfoWrapper = styled.div`
    
 `
 
-const ReceiveTab = ({ tab, selectedNetwork, handleSelectedNetworkChnage }: { tab: string, selectedNetwork: SelectedNetworkType, handleSelectedNetworkChnage: (val: SelectedNetworkType) => void }) => {
+const ReceiveTab = ({ tab, selectedNetwork, handleSelectedNetworkChange }: { tab: string, selectedNetwork: SelectedNetworkType, handleSelectedNetworkChange: (val: SelectedNetworkType) => void }) => {
     const [currentQRCode, setCurrentQRCode] = useState(defaultQRCode);
     useEffect(() => {
         // by default we generate sepolia QR code
@@ -77,7 +77,7 @@ const ReceiveTab = ({ tab, selectedNetwork, handleSelectedNetworkChnage }: { tab
                     <BalanceInfo
                         border={true}
                         selectedNetwork={selectedNetwork}
-                        handleSelectedNetworkChnage={handleSelectedNetworkChnage} />
+                        handleSelectedNetworkChange={handleSelectedNetworkChange} />
                 </ReceiveTabWrapper>
             </BalanceTabWrapper>
             <InfoWrapper>

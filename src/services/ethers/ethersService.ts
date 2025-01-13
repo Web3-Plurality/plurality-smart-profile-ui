@@ -25,9 +25,9 @@ interface VerifyMessageSignatureData {
 }
 
 interface SendTransactionData {
-    rpc: string;
-    chain_id: string;
-    raw_transaction: string;
+    rpc?: string;
+    chain_id?: string;
+    raw_transaction?: string;
     id?: string;
     isWallet?: boolean
 }
@@ -64,7 +64,7 @@ export const sendTransaction = async (data: SendTransactionData) => {
     }
 
     try {
-        const raw = JSON.parse(data.raw_transaction);
+        const raw = JSON.parse(data.raw_transaction || '');
         if (raw.value) {
             const bigIntValue = BigInt(raw.value);
             raw.value = bigIntValue;

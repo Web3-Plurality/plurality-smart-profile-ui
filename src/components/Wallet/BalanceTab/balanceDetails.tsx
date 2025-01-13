@@ -2,7 +2,7 @@ import { Spin } from "antd";
 // import PolygonIcon from './../../../assets/svgIcons/polygon.svg';
 import { SelectedNetworkType } from "../../../types";
 
-const BalanceDetails = ({ amount, loading, selectedNetwork }: { amount: number, loading: boolean, selectedNetwork: SelectedNetworkType }) => {
+const BalanceDetails = ({ amount, loading, selectedNetwork }: { amount: string, loading: boolean, selectedNetwork: SelectedNetworkType }) => {
     return (
         <div className="balance-info-2">
             <div className="address">

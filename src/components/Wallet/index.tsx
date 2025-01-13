@@ -38,14 +38,14 @@ const Wallet = () => {
                 <BalanceTab
                     tab={activeTab}
                     selectedNetwork={selectedNetwork}
-                    handleSelectedNetworkChnage={handleSelectedNetworkChnage} />
+                    handleSelectedNetworkChange={handleSelectedNetworkChnage} />
             ) : activeTab === 'send' ? (
                 <SendTab />
             ) : activeTab === 'receive' ? (
                 <ReceiveTab
                     tab={activeTab}
                     selectedNetwork={selectedNetwork}
-                    handleSelectedNetworkChnage={handleSelectedNetworkChnage} />
+                    handleSelectedNetworkChange={handleSelectedNetworkChnage} />
             ) : ''}
         </>
     )

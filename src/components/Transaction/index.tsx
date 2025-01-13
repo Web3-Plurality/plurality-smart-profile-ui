@@ -55,7 +55,7 @@ const Transaction = () => {
     const [showDetails, setShowDetails] = useState(false)
 
     const { raw_transaction, chain_id } = useSelector(selectTransactionData)
-    const tsxData = JSON.parse(raw_transaction)
+    const tsxData = JSON.parse(raw_transaction!)
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;

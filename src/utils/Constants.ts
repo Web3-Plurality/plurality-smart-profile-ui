@@ -70,7 +70,7 @@ import seventhImage from './../assets/images/wardrobe/seventh.png'
 import eightImage from './../assets/images/wardrobe/eight.png'
 import ninthImage from './../assets/images/wardrobe/ninth.png'
 
-import PolygonIcon from './../assets/svgIcons/polygon.svg';
+// import PolygonIcon from './../assets/svgIcons/polygon.svg';
 import EthereumIcon from './../assets/svgIcons/ethereum-logo.svg';
 
 export const digitalWardrobeImages = [

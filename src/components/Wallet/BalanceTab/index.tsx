@@ -11,14 +11,15 @@ import { ethers } from "ethers";
 
 const BalanceTab = ({ tab, selectedNetwork, handleSelectedNetworkChange: handleSelectedNetworkChange }: { tab: string, selectedNetwork: SelectedNetworkType, handleSelectedNetworkChange: (val: SelectedNetworkType) => void }) => {
     const [loading, setLoading] = useState<boolean>(false);
-    const [amount, setAmount] = useState(0)
+    const [amount, setAmount] = useState('')
 
     const fetchUpdatedBalance = async (rpc: string) => {
         setLoading(true); // Set loading to true before fetching balance
         try {
             const res = await getBalance(rpc);
-            console.log("res", ethers.formatEther(res?._hex || '0'));
-            setAmount(ethers.formatEther(res?._hex || '0'))
+            if (res) {
+                setAmount(ethers.formatEther(res._hex))
+            }
             // You can set the balance here if needed, depending on the structure of `res`
         } catch (error) {
             console.error("Error fetching balance:", error);
@@ -40,7 +41,7 @@ const BalanceTab = ({ tab, selectedNetwork, handleSelectedNetworkChange: handleS
                         selectedNetwork={selectedNetwork}
                         handleSelectedNetworkChange={handleSelectedNetworkChange} />
                     <Divider />
-                    <BalanceDetails loading={loading} amount={amount} selectedNetwork={selectedNetwork}/>
+                    <BalanceDetails loading={loading} amount={amount} selectedNetwork={selectedNetwork} />
                 </div>
             </BalanceTabWrapper>
         </>

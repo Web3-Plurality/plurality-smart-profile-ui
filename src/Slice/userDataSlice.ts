@@ -20,6 +20,8 @@ interface SendTransactionData {
     amount: number
     nativeCoin: string
     chainAmount: number
+    raw_transaction?: string
+    chain_id?: string
 }
 
 interface StepState {

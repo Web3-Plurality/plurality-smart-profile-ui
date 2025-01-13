@@ -70,7 +70,7 @@ const EventListener: React.FC = () => {
             }
             else if (data.method === 'getBalance') {
                 try {
-                    const balance = await getBalance();
+                    const balance = await getBalance('https://eth-sepolia.public.blastapi.io');
                     window.parent.postMessage({ id: data.id, eventName: 'getBalance', data: balance!.toString() + 'n' }, parentUrl);
                 }
                 catch (error) {
