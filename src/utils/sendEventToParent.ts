@@ -17,8 +17,13 @@ export const sendUserConsentEvent = () => {
 }
 
 export const sendProfileConnectedEvent = () => {
-    const { litWalletSig } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!litWalletSig } }, getParentUrl());
+    const { litWalletSig, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    window.parent.postMessage({
+        eventName: 'litConnection', data: {
+            isConnected: !!litWalletSig,
+            token
+        }
+    }, getParentUrl());
 }
 
 export const sendUserDataEvent = (id: string = '',

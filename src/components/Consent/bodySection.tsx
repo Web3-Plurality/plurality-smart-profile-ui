@@ -19,7 +19,7 @@ const ConsentBody = () => {
     return (
         <>
             <p className='consent-title'>
-                You are allowing <span>{platformName}</span> to access data from your <span>XSmartProfile</span>:
+                You are allowing <span>{window.location.hostname}</span> to access data from your <span>{platformName}</span> profile:
             </p>
             <ul>
                 {CONSENT_ITEMS_LIST.map((item) => (
