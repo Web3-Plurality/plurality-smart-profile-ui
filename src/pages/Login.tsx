@@ -39,6 +39,7 @@ import { sendProfileConnectedEvent, sendUserDataEvent } from "../utils/sendEvent
 import Transaction from "../components/Transaction"
 import Wallet from "../components/Wallet"
 import Signing from "../components/Signing"
+import Contract from "../components/Contract"
 
 const Login = () => {
 
@@ -318,6 +319,8 @@ const Login = () => {
                 return <Wallet />
             case 'signing':
                 return <Signing />
+            case 'contract':
+                return <Contract />
             default:
                 return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
         }

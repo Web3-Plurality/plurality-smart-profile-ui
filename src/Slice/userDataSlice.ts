@@ -1,38 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-
-
-interface LoaderData {
-    loadingState: boolean,
-    text: string
-}
-
-interface MesssageSignatureData {
-    message: string
-    id: number | null
-}
-
-interface SendTransactionData {
-    id: string
-    from: string
-    to: string
-    gasFee: number
-    amount: number
-    nativeCoin: string
-    chainAmount: number
-    raw_transaction?: string
-    chain_id?: string
-}
-
-interface StepState {
-    litSigs: string
-    isLoading: LoaderData
-    userDid: string
-    profileConnected: boolean
-    currentWalletTab: string
-    messageToBeSigned: MesssageSignatureData
-    transactionData: SendTransactionData
-}
+import { ContractData, LoaderData, MesssageSignatureData, SendTransactionData, StepState } from '../types';
 
 export const initialState: StepState = {
     litSigs: '',
@@ -55,7 +23,9 @@ export const initialState: StepState = {
         amount: 0,
         nativeCoin: '',
         chainAmount: 0
-    }
+    },
+    contractData: null,
+    profileDataID: '',
 };
 
 export const UserDataSlice = createSlice({
@@ -84,6 +54,12 @@ export const UserDataSlice = createSlice({
         },
         setTransactionData: (state, action: PayloadAction<SendTransactionData>) => {
             state.transactionData = action.payload
+        },
+        setContractData: (state, action: PayloadAction<ContractData>) => {
+            state.contractData = action.payload
+        },
+        setProfileDataID: (state, action: PayloadAction<string>) => {
+            state.profileDataID = action.payload
         }
     },
 })
@@ -95,7 +71,9 @@ export const {
     setProfileConnected,
     setWalletTab,
     setSignatureMessage,
-    setTransactionData
+    setTransactionData,
+    setContractData,
+    setProfileDataID
 } = UserDataSlice.actions
 
 export default UserDataSlice.reducer

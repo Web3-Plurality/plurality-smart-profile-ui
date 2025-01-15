@@ -2,18 +2,19 @@ import styled from "styled-components";
 import CustomButtom from "../customButton";
 import { sendUserConsentEvent } from "../../utils/sendEventToParent";
 import { useSelector } from "react-redux";
-import { selectTransactionData } from "../../selectors/userDataSelector";
-import { sendTransaction } from "../../services/ethers/ethersService";
+import { selectContratData } from "../../selectors/userDataSelector";
+import { writeToContract } from "../../services/ethers/ethersService";
 import { getParentUrl } from "../../utils/Helpers";
 import { useState } from "react";
 import { message } from "antd";
 
-const ConsentFooterWrapper = styled.div<{ showDetails: boolean }>`
+const ConsentFooterWrapper = styled.div`
     width: 340px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: ${({ showDetails }) => (showDetails ? '-10px' : '20px')};
+    margin-top: 40px;
+    margin-bottom: -60px;
 
     @media (max-width: 576px) {
         width: 340px;
@@ -26,26 +27,27 @@ const ConsentFooterWrapper = styled.div<{ showDetails: boolean }>`
 `;
 
 
-const TsxFooterSection = ({ showDetails }: { showDetails: boolean }) => {
+const ContractFooterSection = () => {
     const [loading, setLoading] = useState(false);
-    const txData = useSelector(selectTransactionData)
+    const contractData = useSelector(selectContratData)
 
     const parentUrl = getParentUrl()
 
-    const handleCancelTransaction = () => {
+    const handleCancelWriteContract = () => {
         sendUserConsentEvent()
     }
 
-    const handleAcceptTransaction = async () => {
+    const handleAcceptWriteContract = async () => {
         setLoading(true); // Set loading to true when the button is clicked
         try {
-            const receipt = await sendTransaction(txData);
-            if (receipt) {
+            const response = await writeToContract(contractData);
+            if (response) {
                 message.success("Transaction successfull")
-                window.parent.postMessage({ id: txData.id, eventName: 'sendTransaction', data: JSON.stringify(receipt) }, parentUrl);
+                window.parent.postMessage({ id: contractData?.id, eventName: 'writeToContract', data: JSON.stringify(response) }, parentUrl);
             }
         } catch (error) {
             console.error(error);
+            window.parent.postMessage({ id: contractData?.id, eventName: 'errorMessage', data: 'Something went Wrong' }, parentUrl);
         } finally {
             setLoading(false);
             sendUserConsentEvent()
@@ -53,13 +55,13 @@ const TsxFooterSection = ({ showDetails }: { showDetails: boolean }) => {
     };
 
     return (
-        <ConsentFooterWrapper showDetails={showDetails}>
+        <ConsentFooterWrapper>
             <CustomButtom
                 text='Cancel'
                 minWidth='130px'
                 theme={'light'}
                 consent={true}
-                handleClick={handleCancelTransaction}
+                handleClick={handleCancelWriteContract}
             />
             <CustomButtom
                 text='Accept'
@@ -67,10 +69,10 @@ const TsxFooterSection = ({ showDetails }: { showDetails: boolean }) => {
                 theme={'dark'}
                 consent={true}
                 loader={loading}
-                handleClick={handleAcceptTransaction}
+                handleClick={handleAcceptWriteContract}
             />
         </ConsentFooterWrapper>
     )
 }
 
-export default TsxFooterSection
+export default ContractFooterSection

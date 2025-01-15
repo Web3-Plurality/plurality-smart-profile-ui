@@ -3,6 +3,9 @@ import CustomButtom from '../customButton';
 import { getLocalStorageValueofClient, setLocalStorageValue } from '../../utils/Helpers';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } from '../../utils/sendEventToParent';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectSPDataId } from '../../selectors/userDataSelector';
+import { setProfileDataID } from '../../Slice/userDataSlice';
 
 const ConsentFooterWrapper = styled.div`
     display: flex;
@@ -14,6 +17,13 @@ const queryParams = new URLSearchParams(location.search);
 const clientId = queryParams.get('client_id') || CLIENT_ID;
 
 const ConsentFooter = () => {
+    const dispatch = useDispatch()
+    const id = useSelector(selectSPDataId)
+
+    const resetSPId = () => {
+        dispatch(setProfileDataID(''));
+    }
+
     const acceptUserConsent = () => {
         const existingClientData = getLocalStorageValueofClient(`clientID-${clientId}`)
         const updatedClientData = {
@@ -27,7 +37,7 @@ const ConsentFooter = () => {
         setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
         sendProfileConnectedEvent();
         sendUserConsentEvent();
-        sendUserDataEvent()
+        sendUserDataEvent(id, resetSPId)
     }
 
     const rejectUserConsent = () => {
@@ -43,7 +53,7 @@ const ConsentFooter = () => {
         setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
         sendProfileConnectedEvent();
         sendUserConsentEvent()
-        sendUserDataEvent()
+        sendUserDataEvent(id, resetSPId)
     }
 
     return (

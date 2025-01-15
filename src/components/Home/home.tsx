@@ -13,22 +13,22 @@ const Home = ({ handleLitConnect, handleMetamaskConnect, handleGoogleConnect }: 
     return (
         <>
             <SocialButton
-                text={'Login with Email'}
+                text={'Google'}
+                icon={google}
+                handleClick={handleGoogleConnect}
+            />
+
+            <SocialButton
+                text={'Email'}
                 icon={mailIcon}
                 handleClick={handleLitConnect}
                 style={"translateY(2px)"}
             />
 
             <SocialButton
-                text={'Login with Metamask'}
+                text={'Metamask'}
                 icon={metamaskIcon}
                 handleClick={handleMetamaskConnect}
-            />
-
-            <SocialButton
-                text={'Login with Google'}
-                icon={google}
-                handleClick={handleGoogleConnect}
             />
         </>
     )

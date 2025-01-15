@@ -1,6 +1,5 @@
-import { Spin } from "antd";
-// import PolygonIcon from './../../../assets/svgIcons/polygon.svg';
 import { SelectedNetworkType } from "../../../types";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const BalanceDetails = ({ amount, loading, selectedNetwork }: { amount: string, loading: boolean, selectedNetwork: SelectedNetworkType }) => {
     return (
@@ -8,9 +7,7 @@ const BalanceDetails = ({ amount, loading, selectedNetwork }: { amount: string, 
             <div className="address">
                 <p>Balance:
                     {loading ? (
-                        <span className="spin-container">
-                            <Spin size="small" />
-                        </span>
+                        <LoadingOutlined style={{ fontSize: '16px', marginLeft: "10px" }} />
                     ) : (
                         <span className="balance">
                             {/* $5.00 */}

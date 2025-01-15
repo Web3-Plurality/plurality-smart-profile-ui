@@ -40,3 +40,53 @@ export interface SelectedNetworkType {
     rpc: string,
     icon: string
 }
+
+export interface LoaderData {
+    loadingState: boolean,
+    text: string
+}
+
+export interface MesssageSignatureData {
+    message: string
+    id: number | null
+}
+
+export interface SendTransactionData {
+    id: string
+    from: string
+    to: string
+    gasFee: number
+    amount: number
+    nativeCoin: string
+    chainAmount: number
+    raw_transaction?: string
+    chain_id?: string
+}
+
+export interface StepState {
+    litSigs: string
+    isLoading: LoaderData
+    userDid: string
+    profileConnected: boolean
+    currentWalletTab: string
+    messageToBeSigned: MesssageSignatureData
+    transactionData: SendTransactionData,
+    contractData: ContractData | null
+    profileDataID: string
+}
+
+export interface ContractData {
+    id: string
+    type: string
+    method: string
+    isWidgetOpen: string
+    message: string
+    signature: string
+    address: string
+    abi: string
+    method_name: string
+    method_params: string
+    rpc: string
+    chain_id: string
+    options: string
+}

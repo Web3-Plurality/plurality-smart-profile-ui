@@ -1,23 +1,28 @@
 import { generatePkpWalletInstance } from "../services/orbis/generatePkpWallet";
 import { DAppData } from "../types";
 import { CLIENT_ID } from "./EnvConfig";
-import { getLocalStorageValueofClient, getParentUrl } from "./Helpers";
+import { getLocalStorageValueofClient } from "./Helpers";
 
 const queryParams = new URLSearchParams(location.search);
 const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-const parentUrl = getParentUrl()
+const getParentUrl = () => {
+    const { ancestorOrigins, origin } = window.location
+    const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
+    return parentUrl
+}
 
 export const sendUserConsentEvent = () => {
-    window.parent.postMessage({ eventName: 'consentData', data: { consent: true } }, parentUrl);
+    window.parent.postMessage({ eventName: 'consentData', data: { consent: true } }, getParentUrl());
 }
 
 export const sendProfileConnectedEvent = () => {
     const { litWalletSig } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!litWalletSig } }, parentUrl);
+    window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!litWalletSig } }, getParentUrl());
 }
 
-export const sendUserDataEvent = () => {
+export const sendUserDataEvent = (id: string = '',
+    resetSPId: () => void = () => { }) => {
     const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const {
@@ -57,7 +62,12 @@ export const sendUserDataEvent = () => {
         }
     }
 
-    window.parent.postMessage({ eventName: 'userData', data: userData }, parentUrl);
+    if (id) {
+        window.parent.postMessage({ id, eventName: 'getSmartProfile', data: userData }, getParentUrl());
+        resetSPId?.()
+    } else {
+        window.parent.postMessage({ id, eventName: 'userData', data: userData }, getParentUrl());
+    }
 }
 
 
@@ -69,11 +79,11 @@ export const sendMessageSignedEvent = async (
     try {
         const pkpWallet = await generatePkpWalletInstance()
         const signature = await pkpWallet!.signMessage(message);
-        window.parent.postMessage({ id, eventName: 'getMessageSignature', data: signature }, parentUrl);
+        window.parent.postMessage({ id, eventName: 'getMessageSignature', data: signature }, getParentUrl());
     }
     catch (error) {
         console.error(error);
-        window.parent.postMessage({ id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
+        window.parent.postMessage({ id, eventName: 'errorMessage', data: (error as Error).toString() }, getParentUrl());
     }
     finally {
         onComplete?.();

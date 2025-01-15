@@ -40,4 +40,14 @@ export const selectTransactionData = createSelector(
     (state) => state.transactionData,
 );
 
+export const selectContratData = createSelector(
+    [selectDomain],
+    (state) => state.contractData,
+);
+
+
+export const selectSPDataId = createSelector(
+    [selectDomain],
+    (state) => state.profileDataID,
+);
 

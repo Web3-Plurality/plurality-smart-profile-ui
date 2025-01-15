@@ -2,6 +2,8 @@ import { message } from "antd";
 import { getParentUrl } from "../../utils/Helpers";
 import { generatePkpWalletInstance } from "../orbis/generatePkpWallet"
 import * as ethersV5 from 'ethers-v5';
+import { sendUserConsentEvent } from "../../utils/sendEventToParent";
+import { ContractData } from "../../types";
 
 const parentUrl = getParentUrl()
 
@@ -92,16 +94,17 @@ export const sendTransaction = async (data: SendTransactionData) => {
 
     } catch (error) {
         const customError = error as CustomError;
-        if (customError.code === "INSUFFICIENT_FUNDS" || customError.code === "SERVER_ERROR") {
-            if (data.isWallet) {
-                message.error("Insufficient funds");
-                // hmmm are we expecting the dapp to have a event listener to show the error msg?
-                window.parent.postMessage({ eventName: 'walletSendTransaction', data: customError.code }, parentUrl);
-            }
+        if (customError.code === "INSUFFICIENT_FUNDS" || customError.code === "SERVER_ERROR" || customError.code === "REPLACEMENT_UNDERPRICED") {
+            // if (data.isWallet) {
+            // message.error("Insufficient funds");
+            // hmmm are we expecting the dapp to have a event listener to show the error msg?
+            window.parent.postMessage({ eventName: 'walletSendTransaction', data: customError.code }, parentUrl);
+            // }
         } else {
             message.error("Something went wrong, please try again");
             window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: customError.code }, parentUrl);
         }
+        sendUserConsentEvent()
     }
 };
 
@@ -152,25 +155,33 @@ export const readFromContract = async (data: WriteToContractData) => {
 }
 
 
-export const writeToContract = async (data: WriteToContractData) => {
+export const writeToContract = async (data: ContractData | null) => {
     const pkpWallet = await generatePkpWalletInstance()
-    if (!data.rpc) {
+    if (!data?.rpc) {
         throw new Error("rpc is empty")
     }
     await pkpWallet!.setRpc(data.rpc)
     if (!data.chain_id) {
         throw new Error("chain id is empty")
     }
-    await pkpWallet!.setChainId(+data.chain_id);
-    const contract = new ethersV5.Contract(
-        data.address,
-        data.abi,
-        pkpWallet
-    );
-    const methodParams = JSON.parse(data.method_params)
-    const txOptions = JSON.parse(data.options)
-    const response = await contract[data.method_name](...methodParams, {
-        ...txOptions
-    });
-    return response;
+
+    try {
+        await pkpWallet!.setChainId(+data.chain_id);
+        const contract = new ethersV5.Contract(
+            data.address,
+            data.abi,
+            pkpWallet
+        );
+        const methodParams = JSON.parse(data.method_params)
+        const txOptions = JSON.parse(data.options)
+        const response = await contract[data.method_name](...methodParams, {
+            ...txOptions
+        });
+        return response;
+    } catch (error) {
+        const customError = error as CustomError;
+        window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: customError.message }, parentUrl);
+        sendUserConsentEvent()
+    }
+
 }

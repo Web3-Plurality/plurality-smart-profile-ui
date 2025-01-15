@@ -60,7 +60,7 @@ const Terms = ({ acceptance, setAcceptance }: { acceptance: boolean, setAcceptan
                 >
                     terms of service
                 </a>{" "}
-                and subscribe to receive updates from the DFDC and Plurality Network
+                and subscribe to receive updates from the Plurality Network
             </span>
         </TermsWrapper>
     )

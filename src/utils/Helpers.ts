@@ -18,6 +18,7 @@ import {
 import { CLIENT_ID } from "./EnvConfig";
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
 import { message } from "antd";
+import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } from "./sendEventToParent";
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
@@ -68,7 +69,7 @@ const getTitleText = (currentStep: string) => {
     const isIframe = window.self !== window.top;
     switch (currentStep) {
         case 'home':
-            return 'Login To Your Account';
+            return 'Login or Signup';
         case 'litLogin':
             return 'Enter Your Email';
         case 'register':
@@ -93,6 +94,8 @@ const getTitleText = (currentStep: string) => {
             return 'Confirm your action';
         case 'signing':
             return 'Your sign is requested';
+        case 'contract':
+            return 'Contract Details';
         default:
             return '';
     }
@@ -269,7 +272,7 @@ const serializeSmartProfile = (smartProfile: any) => {
     smartProfile.connectedPlatforms = JSON.stringify(smartProfile.connectedPlatforms);
     smartProfile.extendedPublicData = JSON.stringify(smartProfile.extendedPublicData);
     smartProfile.attestation = JSON.stringify(smartProfile.attestation);
-    if (smartProfile.privateData!=='') {
+    if (smartProfile.privateData !== '') {
         smartProfile.privateData = JSON.stringify(smartProfile.privateData);
     }
 }
@@ -281,7 +284,7 @@ const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: a
     smartProfile.attestation = JSON.parse(smartProfile.attestation);
     if (unecryptedPrivateDataObj) {
         smartProfile.privateData = unecryptedPrivateDataObj;
-    }else{
+    } else {
         smartProfile.privateData = JSON.parse(smartProfile.privateData);
     }
 }
@@ -295,6 +298,24 @@ const getRandomColor = (index: number): string => {
     const colorIndex = index % interestsPillsColors.length;
     return interestsPillsColors[colorIndex];
 };
+
+const handleUserConsentFlow = (
+    consent: { accepted: boolean, rejected: boolean },
+    step: string,
+    prevStep: string,
+    cb: (step: string) => void
+) => {
+    const ignoreConsent = prevStep === 'profile' || prevStep === 'profileSettings' || prevStep === 'wallet' || prevStep === 'consent'
+
+    if ((consent?.accepted || consent?.rejected) && !ignoreConsent) {
+        sendUserConsentEvent()
+        sendProfileConnectedEvent()
+    } else {
+        cb(step)
+    }
+    sendUserDataEvent()
+};
+
 
 export {
     setLocalStorageValue,
@@ -321,5 +342,6 @@ export {
     serializeSmartProfile,
     deserializeSmartProfile,
     truncateAddress,
-    getRandomColor
+    getRandomColor,
+    handleUserConsentFlow
 }

@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 import { useDispatch } from 'react-redux';
-import { setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
-import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature, writeToContract } from '../services/ethers/ethersService';
+import { setContractData, setProfileDataID, setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
+import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -27,11 +27,15 @@ const EventListener: React.FC = () => {
                 }
                 dispatch(setSignatureMessage(signatureData))
                 goToStep('signing')
-            }
-            else if (data.method === 'sendTransaction') {
-                console.log("Dtaaa: ", data)
+            } else if (data.method === 'sendTransaction') {
                 dispatch(setTransactionData(data))
                 goToStep('transaction')
+            } else if (data.method === 'writeToContract') {
+                dispatch(setContractData(data))
+                goToStep('contract')
+            } else if (data.method === 'getSmartProfile') {
+                dispatch(setProfileDataID(data.id))
+                goToStep('consent')
             }
             else if (data.method === 'getAllAccounts') {
                 try {
@@ -120,16 +124,16 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: (error as Error).toString() }, parentUrl);
                 }
             }
-            else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
-                try {
-                    const response = await writeToContract(data);
-                    console.log("contract write response: ", response)
-                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: response!.toString() }, parentUrl);
-                } catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
-                }
-            }
+            // else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
+            //     try {
+            //         const response = await writeToContract(data);
+            //         console.log("contract write response: ", response)
+            //         window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: response!.toString() }, parentUrl);
+            //     } catch (error) {
+            //         console.error(error);
+            //         window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
+            //     }
+            // }
             // EAS Event
             else if (data.method === 'setPublicData') {
                 try {

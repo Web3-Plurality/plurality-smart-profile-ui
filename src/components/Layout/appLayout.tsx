@@ -69,7 +69,6 @@ const WidgetLayout = ({
                 {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
                 {isIframe &&
                     currentStep !== 'consent' &&
-                    currentStep !== 'home' &&
                     (currentStep === 'wallet' && activeWalletTab === 'balance') &&
                     <PoweredByFooter />
                 }
