@@ -56,6 +56,7 @@ const WidgetLayout = ({
     const showLoader = useSelector(selectLoader)
     const profileConnected = useSelector(selectProfileConnected)
     const activeWalletTab = useSelector(selectCurrentWalletTab)
+    console.log("activeWalletTab", activeWalletTab)
     const text = getBtntext(currentStep)
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
 
@@ -69,8 +70,12 @@ const WidgetLayout = ({
                 {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
                 {isIframe &&
                     currentStep !== 'consent' &&
-                    (currentStep === 'wallet' && activeWalletTab === 'balance') &&
-                    <PoweredByFooter />
+                    currentStep !== 'signing' &&
+                    currentStep !== 'contract' &&
+                    currentStep !== 'profile' &&
+                    (currentStep !== 'wallet' || (activeWalletTab !== 'receive' && activeWalletTab !== 'send')) && (
+                        <PoweredByFooter />
+                    )
                 }
             </div>
             {!isIframe && <PoweredByFooter />}
