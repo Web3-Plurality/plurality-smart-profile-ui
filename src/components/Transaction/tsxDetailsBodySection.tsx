@@ -2,6 +2,8 @@ import styled from "styled-components";
 import { Divider } from "antd";
 import { ethers } from 'ethers';
 import tsxDownArrow from './../../assets/svgIcons/tsx-down-icon.svg';
+import { useState } from "react";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 
 const TsxDetailsBodySectionWrapper = styled.div`
   padding: 10px 0;
@@ -36,10 +38,7 @@ const AdrressInfoWrapper = styled.div`
   .address {
     font-size: 12px;
     color: #000;
-    width: 120px;  /* Fixed width for the address */
-    white-space: nowrap;  /* Prevent line break */
-    overflow: hidden;  /* Hide overflowing text */
-    text-overflow: ellipsis;  /* Add ellipsis for overflowing text */
+    width: 120px;
   }
   img {
     width: 12px;
@@ -96,6 +95,19 @@ const NetworkInfoWrapper = styled.div`
   }
 `;
 
+const ToggleIconWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 15px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #3771c8;
+
+  &:hover {
+    color: #265a91;
+  }
+`;
+
 const OverflowTextWrapper = styled.div`
   position: absolute;
   background: lightgray;
@@ -127,9 +139,14 @@ const OverflowTextWrapper = styled.div`
 `;
 
 const TsxDetailsBodySection = ({ tsxData, from, chainToken, chainName, handleClick }: { tsxData: any, from: string, chainToken: string, chainName: string, handleClick: () => void }) => {
-  const gasFee = Number(tsxData?.gasPrice) * Number(tsxData?.gasLimit)
-  const tsxAmount = Number(tsxData?.value)
-  const totalAmount = gasFee + tsxAmount
+  const [showTruncated, setShowTruncated] = useState(false);
+
+  const gasFee = Number(tsxData?.gasPrice) * Number(tsxData?.gasLimit);
+  const tsxAmount = Number(tsxData?.value);
+  const totalAmount = gasFee + tsxAmount;
+
+  const getTruncatedAddress = (address: string) => `${address.slice(0, 10)}...`;
+
   return (
     <>
       <TsxDetailsBodySectionWrapper>
@@ -143,22 +160,30 @@ const TsxDetailsBodySection = ({ tsxData, from, chainToken, chainName, handleCli
           <div>
             <div className="tsx-info">
               <p className="label">From</p>
-              <p className="address">{from}</p>
+              <p className="address">
+                {!showTruncated ? getTruncatedAddress(from) : from}
+              </p>
             </div>
             <img src={tsxDownArrow} alt="Arrow" />
             <div className="tsx-info">
               <p className="label">To</p>
-              <p className="address">{tsxData?.to}</p>
+              <p className="address">
+                {!showTruncated ? getTruncatedAddress(tsxData?.to) : tsxData?.to}
+              </p>
             </div>
           </div>
           <div>
             <div className="total-amount">
-              <p className="amount">{chainToken} {ethers.formatEther(JSON.stringify(tsxAmount))}</p>
-              {/* <p className="amount">$200</p> */}
-              {/* <p className="amount-info">{chainToken} 0.01</p> */}
+              <p className="amount">
+                {!showTruncated ? `${chainToken} ${ethers.formatEther(JSON.stringify(tsxAmount))}` : ''}
+              </p>
             </div>
           </div>
         </AdrressInfoWrapper>
+
+        <ToggleIconWrapper onClick={() => setShowTruncated(!showTruncated)}>
+          {!showTruncated ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+        </ToggleIconWrapper>
 
         <Divider />
 
@@ -166,7 +191,6 @@ const TsxDetailsBodySection = ({ tsxData, from, chainToken, chainName, handleCli
           <p>Gas Fee</p>
 
           <p>{`~ ETH < ${ethers.formatEther(JSON.stringify(tsxAmount))}`}</p>
-          {/* <p>{`~ $ < ${ethers.formatEther(JSON.stringify(totalAmount))}`}</p> */}
         </GasFeeWrapper>
 
         <Divider />

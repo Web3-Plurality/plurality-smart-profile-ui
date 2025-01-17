@@ -16,18 +16,36 @@ export const sendUserConsentEvent = () => {
     window.parent.postMessage({ eventName: 'consentData', data: { consent: true } }, getParentUrl());
 }
 
-export const sendProfileConnectedEvent = () => {
+export const sendProfileConnectedEvent = (id?: string) => {
     const { litWalletSig, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    window.parent.postMessage({
-        eventName: 'litConnection', data: {
-            isConnected: !!litWalletSig,
-            token
+    let event;
+    if (id) {
+        event = {
+            id,
+            eventName: 'getLoginInfo',
+            data: {
+                status: !!litWalletSig,
+                pluralityToken: token
+            }
         }
-    }, getParentUrl());
+    } else {
+        event = {
+            eventName: 'litConnection',
+            data: {
+                isConnected: !!litWalletSig,
+                token
+            }
+        }
+    }
+
+    window.parent.postMessage(event, getParentUrl());
 }
 
-export const sendUserDataEvent = (id: string = '',
-    resetSPId: () => void = () => { }) => {
+export const sendUserDataEvent = (
+    id: string = '',
+    event: string = '',
+    resetSPId: () => void = () => { }
+) => {
     const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const {
@@ -67,9 +85,11 @@ export const sendUserDataEvent = (id: string = '',
         }
     }
 
-    if (id) {
-        window.parent.postMessage({ id, eventName: 'getSmartProfile', data: userData }, getParentUrl());
+    if (id && event === 'update') {
+        window.parent.postMessage({ id, eventName: 'updateConsentData', data: userData }, getParentUrl());
         resetSPId?.()
+    } else if (id && event === 'get') {
+        window.parent.postMessage({ id, eventName: 'getSmartProfile', data: userData }, getParentUrl());
     } else {
         window.parent.postMessage({ id, eventName: 'userData', data: userData }, getParentUrl());
     }

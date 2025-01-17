@@ -35,6 +35,7 @@ const ContractFooterSection = () => {
 
     const handleCancelWriteContract = () => {
         sendUserConsentEvent()
+        window.parent.postMessage({ id: contractData?.id, eventName: 'writeToContract', data: JSON.stringify('User Rejected the request') }, parentUrl);
     }
 
     const handleAcceptWriteContract = async () => {

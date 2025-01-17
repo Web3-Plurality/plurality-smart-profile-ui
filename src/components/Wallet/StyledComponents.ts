@@ -4,6 +4,7 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
   width: 370px;
   background-color: ${({ tab }) => (tab === 'receive' ? 'transparent' : '#FFF')};
   border-radius: 15px;
+  box-shadow: ${({ tab }) => (tab === 'receive' ? 'none' : '0 4px 6px rgba(0, 0, 0, 0.1)')};
   display: flex;
   flex-direction: column;
 
@@ -63,6 +64,7 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
       text-align: right;
       border-radius: 12px;
       cursor: pointer;
+      margin: 8px 0;
     }
   }
 

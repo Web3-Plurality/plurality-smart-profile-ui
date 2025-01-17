@@ -5,6 +5,7 @@ import { useState } from 'react';
 import CustomButtom from './../customButton';
 import { selectMessageToBeSigned } from "../../selectors/userDataSelector"
 import { sendMessageSignedEvent, sendUserConsentEvent } from '../../utils/sendEventToParent';
+import { getParentUrl } from '../../utils/Helpers';
 
 const ConsentFooterWrapper = styled.div`
     width: 80%;
@@ -18,6 +19,8 @@ const SigningFooter = () => {
     const [isLoading, setIsLoading] = useState(false)
     const { message, id } = useSelector(selectMessageToBeSigned)
 
+    const parentUrl = getParentUrl()
+
     const handleMessageSign = async () => {
         setIsLoading(true);
         try {
@@ -28,6 +31,11 @@ const SigningFooter = () => {
         }
     };
 
+    const handleRejectMessageSign = async () => {
+        sendUserConsentEvent()
+        window.parent.postMessage({ id, eventName: 'getMessageSignature', data: 'User Cancelled Message Signature' }, parentUrl);
+    }
+
     return (
         <ConsentFooterWrapper>
             <CustomButtom
@@ -35,7 +43,7 @@ const SigningFooter = () => {
                 minWidth='120px'
                 theme={'light'}
                 consent={true}
-                handleClick={sendUserConsentEvent}
+                handleClick={handleRejectMessageSign}
             />
             <CustomButtom
                 text='Accept'

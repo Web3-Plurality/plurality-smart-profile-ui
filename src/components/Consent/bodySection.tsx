@@ -1,5 +1,5 @@
 import { CLIENT_ID } from "../../utils/EnvConfig";
-import { getLocalStorageValueofClient } from "../../utils/Helpers";
+import { getLocalStorageValueofClient, getParentHost } from "../../utils/Helpers";
 
 const CONSENT_ITEMS_LIST = [
     'Interests',
@@ -16,10 +16,12 @@ const ConsentBody = () => {
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { platformName } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
+    const dApp = getParentHost()
+
     return (
         <>
             <p className='consent-title'>
-                You are allowing <span>{window.location.hostname}</span> to access data from your <span>{platformName}</span> profile:
+                You are allowing <span>{dApp}</span> to access data from your <span>{platformName}</span> profile:
             </p>
             <ul>
                 {CONSENT_ITEMS_LIST.map((item) => (

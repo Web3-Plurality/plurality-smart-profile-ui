@@ -7,15 +7,18 @@ const Interests: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId }: { profileTypeStreamId: string } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-
-    const interestAvailable = smartProfileData?.interests?.length > 0
+    const interests = smartProfileData?.data?.smartProfile?.privateData?.attestedCred?.interests
+    const interestAvailable = smartProfileData?.data?.smartProfile?.privateData?.attestedCred?.interests?.length > 0
 
     return (
-        <Flex gap="4px 0" wrap style={{ padding: '15px 10px' }}>
+        <Flex gap="4px 0" wrap style={{
+            padding: '15px 10px', maxHeight: '60px',
+            overflowY: 'auto'
+        }}>
             {!interestAvailable && <span>No Interests</span>}
-            {interestAvailable && smartProfileData?.interests.map((interest: string, index: number) => (
+            {interestAvailable && interests.map((interest: string, index: number) => (
                 <Tag
                     key={`${interest}-${index}`}
                     color={getRandomColor(index)}

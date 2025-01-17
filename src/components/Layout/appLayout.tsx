@@ -56,7 +56,7 @@ const WidgetLayout = ({
     const showLoader = useSelector(selectLoader)
     const profileConnected = useSelector(selectProfileConnected)
     const activeWalletTab = useSelector(selectCurrentWalletTab)
-    console.log("activeWalletTab", activeWalletTab)
+
     const text = getBtntext(currentStep)
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
 

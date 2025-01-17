@@ -7,6 +7,7 @@ import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../uti
 import { useDispatch } from 'react-redux';
 import { setContractData, setProfileDataID, setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
+import { sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -33,9 +34,13 @@ const EventListener: React.FC = () => {
             } else if (data.method === 'writeToContract') {
                 dispatch(setContractData(data))
                 goToStep('contract')
-            } else if (data.method === 'getSmartProfile') {
+            } else if (data.method === 'updateConsentData') {
                 dispatch(setProfileDataID(data.id))
                 goToStep('consent')
+            } else if (data.method === 'getSmartProfile') {
+                sendUserDataEvent(data.id, 'get')
+            } else if (data.method === 'getLoginInfo') {
+                sendProfileConnectedEvent(data.id)
             }
             else if (data.method === 'getAllAccounts') {
                 try {

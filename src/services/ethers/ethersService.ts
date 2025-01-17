@@ -98,7 +98,7 @@ export const sendTransaction = async (data: SendTransactionData) => {
             // if (data.isWallet) {
             // message.error("Insufficient funds");
             // hmmm are we expecting the dapp to have a event listener to show the error msg?
-            window.parent.postMessage({ eventName: 'walletSendTransaction', data: customError.code }, parentUrl);
+            window.parent.postMessage({ id: data.id, eventName: !data.id ? 'walletSendTransaction' : 'errorMessage', data: customError.code }, parentUrl);
             // }
         } else {
             message.error("Something went wrong, please try again");

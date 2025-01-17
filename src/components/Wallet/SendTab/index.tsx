@@ -9,14 +9,15 @@ import { SelectedNetworkType } from "../../../types";
 
 // Styled component with custom styling
 const SendTabWrapper = styled.div`
-    width: 100%;
+    width: 370px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: #fff;
     border-radius: 15px;
     margin-top: 40px;
     
     p{
         margin: 0;
-        font-size: 12px;
+        font-size: 14px;
         color: #000;
     }
 
@@ -55,36 +56,39 @@ const SendTabWrapper = styled.div`
 
     label{
         color: #ACACAC;
-        font-size: 10px;
+        font-size: 12px;
     }
 
     input{
         outline: none;
         border: none;
         cursor: pointer;
+
+        &::placeholder {
+        font-size: 10px;
+        color: #acacac;
+  }
     }
 
     /* Removing border from Select */
     .ant-select-selector {
         padding: 0 10px;
-        height: 30px;
+        height: 30px !important;
         display: flex;
         align-items: center;
         background-color: #D9D9D9;
-        border-radius: 5px;
         font-size: 12px;
-        border: none !important;  /* Remove border */
-        background-color: #9D9D9D !important;
+        border: 1px solid #acacac !important;
+        border-radius: 12px !important;
     }
 
     .ant-select-dropdown {
         border: none !important;
+        background-color: transparent !important;
         box-shadow: none !important;
     }
 
-    /* Custom caret icon */
     .ant-select-arrow {
-        color: black !important;
         font-size: 12px;
     }
 

@@ -20,9 +20,12 @@ const Profile = () => {
             <ProfileWrapper>
                 <ProfileHeader />
                 <CollapsableList />
-                {/* <p>Connect more Platfroms</p> */}
             </ProfileWrapper>
-            <CustomButtom text='Connect more Platfroms' minWidth='250px' handleClick={() => goToStep('socialConnect')} />
+            <CustomButtom
+                text='Connect more Platfroms'
+                minWidth='250px'
+                handleClick={() => goToStep('socialConnect')}
+            />
         </>
     )
 }

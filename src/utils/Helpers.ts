@@ -131,6 +131,14 @@ const getParentUrl = () => {
     return parentUrl
 }
 
+
+const getParentHost = () => {
+    const { ancestorOrigins, origin } = window.location
+    const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
+    const parentHost = new URL(parentUrl).hostname;
+    return parentHost
+}
+
 const isLitLogin = (val: string) => {
     if (val.length) return true
     return false
@@ -306,7 +314,7 @@ const handleUserConsentFlow = (
     prevStep: string,
     cb: (step: string) => void
 ) => {
-    const ignoreConsent = prevStep === 'profile' || prevStep === 'profileSettings' || prevStep === 'wallet' || prevStep === 'consent'
+    const ignoreConsent = prevStep === 'profile' || prevStep === 'profileSettings' || prevStep === 'wallet' || prevStep === 'consent' || prevStep === 'contract'
 
     if ((consent?.accepted || consent?.rejected) && !ignoreConsent) {
         sendUserConsentEvent()
@@ -327,6 +335,7 @@ export {
     getTitleText,
     getDescription,
     getParentUrl,
+    getParentHost,
     isLitLogin,
     checkPreviousLoginMode,
     getBtntext,

@@ -34,6 +34,7 @@ const TsxFooterSection = ({ showDetails }: { showDetails: boolean }) => {
 
     const handleCancelTransaction = () => {
         sendUserConsentEvent()
+        window.parent.postMessage({ id: txData.id, eventName: 'sendTransaction', data: JSON.stringify('User rejected the transaction') }, parentUrl);
     }
 
     const handleAcceptTransaction = async () => {

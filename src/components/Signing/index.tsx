@@ -2,6 +2,7 @@ import styled from "styled-components"
 import SigningFooter from "./signingFooter"
 import { selectMessageToBeSigned } from "../../selectors/userDataSelector"
 import { useSelector } from "react-redux"
+import { getParentHost } from "../../utils/Helpers"
 
 const SigningWrapper = styled.div`
     width: 100%;
@@ -32,9 +33,10 @@ const SigningWrapper = styled.div`
 
 const Signing = () => {
     const { message } = useSelector(selectMessageToBeSigned)
+    const dApp = getParentHost()
     return (
         <SigningWrapper>
-            <p><span>TheApp</span> is requesting your sign on the folowing message</p>
+            <p><span>{dApp}</span> is requesting your sign on the folowing message</p>
             <span className="signing-message">{message}</span>
 
             <SigningFooter />

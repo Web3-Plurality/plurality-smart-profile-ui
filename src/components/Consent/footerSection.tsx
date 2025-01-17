@@ -20,6 +20,11 @@ const ConsentFooter = () => {
     const dispatch = useDispatch()
     const id = useSelector(selectSPDataId)
 
+    let event = ''
+    if (id) {
+        event = 'update'
+    }
+
     const resetSPId = () => {
         dispatch(setProfileDataID(''));
     }
@@ -37,7 +42,7 @@ const ConsentFooter = () => {
         setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
         sendProfileConnectedEvent();
         sendUserConsentEvent();
-        sendUserDataEvent(id, resetSPId)
+        sendUserDataEvent(id, event, resetSPId)
     }
 
     const rejectUserConsent = () => {
@@ -53,13 +58,13 @@ const ConsentFooter = () => {
         setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
         sendProfileConnectedEvent();
         sendUserConsentEvent()
-        sendUserDataEvent(id, resetSPId)
+        sendUserDataEvent(id, event, resetSPId)
     }
 
     return (
         <ConsentFooterWrapper>
             <CustomButtom
-                text='Cancel'
+                text='Reject'
                 minWidth='150px'
                 theme={'light'}
                 consent={true}

@@ -13,6 +13,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
+  max-height: 60px;
+  overflow-y: auto;
 `;
 
 const ScoreItem = styled.div`
