@@ -69,15 +69,15 @@ const getTitleText = (currentStep: string) => {
     const isIframe = window.self !== window.top;
     switch (currentStep) {
         case 'home':
-            return 'Login or Signup';
+            return '';
         case 'litLogin':
             return 'Enter Your Email';
         case 'register':
-            return 'Register Your Account';
+            return 'Login into Your Account';
         case 'otp':
-            return 'Register Your Account';
+            return 'Login into Your Account';
         case 'success':
-            return `Welcome to ${platformName || ''}`;
+            return `Welcome to ${platformName || ''} Profile`;
         case 'socialConnect':
             return 'Connect Your Platforms';
         case 'digitalWardrobeConnect':
@@ -108,13 +108,14 @@ const getDescription = (currentStep: string) => {
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { platformDescription } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
     switch (currentStep) {
         case 'litLogin':
             return 'A verification code will be sent to your email'
         case 'otp':
             return 'Enter the 6 digit code sent to your email';
         case 'success':
-            return platformDescription || ''
+            return platformDescription || '';
         case 'digitalWardrobe':
             return 'Collection';
         case 'digitalWardrobeConnect':
@@ -167,7 +168,7 @@ const getBtntext = (currStep: string) => {
 }
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
-    const isIframe = window.self !== window.top && currStep !== 'litLogin'
+    const isIframe = window.self !== window.top && currStep !== 'litLogin' && currStep !== 'otp'
     if (isIframe || currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || currStep === 'profile' || loader) return false
     return true
 }

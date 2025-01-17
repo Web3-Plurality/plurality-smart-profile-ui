@@ -15,7 +15,7 @@ const TabsContainer = styled.div<{ defaultMargin: string }>`
 const Tab = styled.div`
   cursor: pointer;
   padding: 10px 20px;
-  font-size: 12px;
+  font-size: 15px;
   color: #9B9B9B;
   text-align: center;
   position: relative;
@@ -50,28 +50,28 @@ const StyledDivider = styled(Divider)`
 `
 
 interface Tabs {
-    key: number,
-    name: string,
-    label: string
+  key: number,
+  name: string,
+  label: string
 }
 
 const WalletTabs = ({ activeTab, tabMargin, handleTabClick }: { activeTab: string, tabMargin: string, handleTabClick: (val: string) => void }) => {
-    return (
-        <div>
-            <TabsContainer defaultMargin={tabMargin}>
-                {WalletTabsKeys.map((tab: Tabs) => (
-                    <Tab
-                        key={tab.key}
-                        className={activeTab === tab.name ? 'active' : ''}
-                        onClick={() => handleTabClick(tab.name)}
-                    >
-                        {tab.label}
-                    </Tab>
-                ))}
-            </TabsContainer>
-            <StyledDivider />
-        </div>
-    )
+  return (
+    <div>
+      <TabsContainer defaultMargin={tabMargin}>
+        {WalletTabsKeys.map((tab: Tabs) => (
+          <Tab
+            key={tab.key}
+            className={activeTab === tab.name ? 'active' : ''}
+            onClick={() => handleTabClick(tab.name)}
+          >
+            {tab.label}
+          </Tab>
+        ))}
+      </TabsContainer>
+      <StyledDivider />
+    </div>
+  )
 }
 
 export default WalletTabs

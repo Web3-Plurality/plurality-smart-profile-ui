@@ -9,8 +9,8 @@ interface FooterButtonWrapperProps {
 const FooterButtonWrapper = styled.div<FooterButtonWrapperProps>`
     cursor: pointer;
     color: gray;
-    margin-bottom: ${({ isIframe, currentStep }) => (isIframe && currentStep === 'socialConnect' ? '55px' : '16px')};
-    margin-top: ${({ isIframe, currentStep }) => (isIframe && currentStep !== 'socialConnect' ? '55px' : isIframe && currentStep === 'socialConnect' ? '-55px' : '')};
+    margin-bottom: ${({ isIframe, currentStep }) => (isIframe && currentStep === 'socialConnect' ? '50px' : '16px')};
+    margin-top: ${({ isIframe, currentStep }) => (isIframe && currentStep !== 'socialConnect' ? '25px' : isIframe && currentStep === 'socialConnect' ? '-55px' : '')};
 `;
 
 const BackButton = ({ text, handleClick }: { text: string, handleClick: () => void }) => {
