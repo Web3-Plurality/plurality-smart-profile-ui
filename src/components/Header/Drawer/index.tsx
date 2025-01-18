@@ -5,11 +5,8 @@ import settingsIcon from './../../../assets/svgIcons/settings.svg'
 import './styles.css'
 import { UserAvatar } from '../../Avatar';
 import { CLIENT_ID } from '../../../utils/EnvConfig';
-import { getLocalStorageValueofClient, getParentUrl } from '../../../utils/Helpers';
-import { useEffect } from 'react';
+import { getLocalStorageValueofClient } from '../../../utils/Helpers';
 import { useStepper } from '../../../hooks/useStepper';
-
-
 interface DrawerProps {
     handleLogout: () => void;
     address: `0x${string}` | string
@@ -19,7 +16,6 @@ interface DrawerProps {
 const isIframe = window.location !== window.parent.location
 const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
     const { goToStep } = useStepper()
-    const parentUrl = getParentUrl()
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
@@ -27,12 +23,6 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
     const { smartProfileData: parssedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     const userAvatar = parssedUserOrbisData?.data?.smartProfile.avatar
-    const username = parssedUserOrbisData?.data?.smartProfile.username
-    const ratingValue = parssedUserOrbisData?.data?.smartProfile?.connectedPlatforms?.length
-
-    useEffect(() => {
-        window.parent.postMessage({ eventName: 'userData', data: { name: username, avatar: userAvatar, rating: ratingValue } }, parentUrl);
-    }, [userAvatar, username, ratingValue, parentUrl])
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(address);

@@ -12,9 +12,10 @@ import CustomButtom from "../customButton"
 import { getLocalStorageValueofClient } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
 import { updatePublicSmartProfileAction } from "../../utils/SmartProfile"
+import { sendUserDataEvent } from "../../utils/sendEventToParent"
 
 const ProfileSettings = () => {
-    const { goBack } = useStepper()
+    const { goBack, goToStep } = useStepper()
     const [loading, setLoading] = useState(false)
 
     const queryParams = new URLSearchParams(location.search);
@@ -33,6 +34,8 @@ const ProfileSettings = () => {
 
     const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
+
+    const isIframe = window.self !== window.top;
 
     const handleInputChnage = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | any>) => {
         const maxSize = 45 * 1024 * 1024
@@ -86,11 +89,16 @@ const ProfileSettings = () => {
 
             const { success, smartProfile } = data
             if (success) {
-                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                 message.success("Profile updated successfully!")
                 setLoading(false)
-                goBack()
+                    if (isIframe && (consent && consent.accepted)) {
+                        goToStep('profile')
+                        sendUserDataEvent()
+                    } else {
+                        goBack()
+                    }
             }
 
         } catch (err) {

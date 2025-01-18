@@ -1,58 +1,85 @@
-import { Button } from "antd"
+import { Button, Spin } from "antd";
 import styled from "styled-components";
 
 interface CustomButtomProps {
-    text: string,
-    isDisable?: boolean,
-    handleClick?: () => void
+    text: string;
+    theme?: string;
+    minWidth?: string;
+    isDisable?: boolean;
+    consent?: boolean;
+    loader?: boolean;
+    handleClick?: () => void;
 }
 
-const defaultProps = {
-    isDisable: false,
-    handleClick: () => { }
-};
+interface ButtonWrapperProps {
+    minWidth?: string;
+    theme?: string;
+    consent?: boolean;
+}
 
-const ButtonWrapper = styled(Button)`
-        min-width: 392px;
-        height: 20px;
-        padding: 23px 0;
-        border-radius: 10px;
+const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
+    min-width: ${({ minWidth }) => (minWidth ? minWidth : '392px')};
+    height: 20px;
+    padding: 23px 0;
+    border-radius: 10px;
+    border: none;
+    background-color: ${({ theme }) => (theme === 'light' ? 'transparent' : '#565656 !important')};
+    color: ${({ theme }) => (theme === 'light' ? '#565656' : '#ffffff !important')};
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    margin-bottom: ${({ consent }) => (consent ? '-4rem' : '')};
+
+    &:not(:disabled):hover {
         border: none;
-        background-color: #565656 !important;
-        color: #ffffff !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 1rem;
-        
-        &:not(:disabled):hover {
-            border: none;
-            color: #ffffff !important;
-            background-color: #000000 !important;
-        }
-    
-        @media (max-width: 441px) {
-            min-width: 320px;
-        }
+        color: ${({ theme }) => (theme === 'light' ? '#565656 !important' : '#ffffff !important')};
+        background-color: ${({ theme }) => (theme === 'light' ? 'transparent' : '#000000 !important')};
+    }
 
-        @media (max-width: 376px) {
-            min-width: 250px;
-        }
-`
+    @media (max-width: 441px) {
+        min-width: ${({ consent }) => (consent ? '' : '320px')};
+    }
 
-const CustomButtom = ({ text, isDisable, handleClick }: CustomButtomProps) => {
+    @media (max-width: 376px) {
+        min-width: ${({ consent }) => (consent ? '' : '250px')};
+    }
+
+    .ant-spin {
+        .ant-spin-dot-item {
+            background-color: #808080;
+        }
+    }
+`;
+
+const StyledSpin = styled(Spin)`
+    .ant-spin-dot-item {
+        background-color: #808080 !important;
+    }
+`;
+
+const CustomButtom = ({
+    text,
+    minWidth,
+    theme,
+    isDisable,
+    consent,
+    loader = false,
+    handleClick,
+}: CustomButtomProps) => {
     return (
         <ButtonWrapper
             type="default"
             iconPosition="end"
-            disabled={isDisable}
+            disabled={isDisable || false}
             onClick={handleClick}
-
+            minWidth={minWidth}
+            theme={theme}
+            consent={consent}
         >
-            {text}
-        </ButtonWrapper >
-    )
-}
+            {loader ? <StyledSpin size="small" /> : text}
+        </ButtonWrapper>
+    );
+};
 
-CustomButtom.defaultProps = defaultProps;
-export default CustomButtom
+export default CustomButtom;

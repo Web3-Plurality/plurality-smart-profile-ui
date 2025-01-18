@@ -6,7 +6,7 @@ import WidgetContent from './widgetContent';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getBtntext, isBackBtnVisible } from '../../utils/Helpers';
-import { selectLoader } from '../../selectors/userDataSelector';
+import { selectCurrentWalletTab, selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
 import { useStepper } from '../../hooks/useStepper';
 
 interface WidgetLayoutWrapperProps {
@@ -52,8 +52,10 @@ const WidgetLayout = ({
     children,
 }: { children: ReactNode }) => {
 
-    const { goBack, currentStep } = useStepper()
+    const { goToStep, goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
+    const profileConnected = useSelector(selectProfileConnected)
+    const activeWalletTab = useSelector(selectCurrentWalletTab)
 
     const text = getBtntext(currentStep)
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
@@ -65,7 +67,16 @@ const WidgetLayout = ({
             <div className='widget'>
                 <WidgetContent children={children} />
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
-                {isIframe && <PoweredByFooter />}
+                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
+                {isIframe &&
+                    currentStep !== 'consent' &&
+                    currentStep !== 'signing' &&
+                    currentStep !== 'contract' &&
+                    currentStep !== 'profile' &&
+                    (currentStep !== 'wallet' || (activeWalletTab !== 'receive' && activeWalletTab !== 'send')) && (
+                        <PoweredByFooter />
+                    )
+                }
             </div>
             {!isIframe && <PoweredByFooter />}
         </WidgetLayoutWrapper >

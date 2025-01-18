@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from 'react';
 import CustomButtom from "./customButton";
 import { connectOrbisDidPkh } from '../services/orbis/getOrbisDidPkh';
@@ -6,9 +7,10 @@ import { useDispatch } from "react-redux"
 import { setLoadingState } from "../Slice/userDataSlice";
 import { LoaderMessages } from '../utils/Constants';
 import { CLIENT_ID } from '../utils/EnvConfig';
-import { getLocalStorageValueofClient, getParentUrl } from '../utils/Helpers';
+import { getLocalStorageValueofClient } from '../utils/Helpers';
 import { useStepper } from '../hooks/useStepper';
 import { useAccount, useDisconnect } from 'wagmi';
+// import { sendProfileConnectedEvent } from '../utils/sendEventToParent';
 
 interface DashboardProps {
     currentAccount: string;
@@ -23,9 +25,7 @@ export default function Dashboard({
     const { goToStep } = useStepper()
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { userDid, litWalletSig } = getLocalStorageValueofClient(`clientID-${clientId}`)
-
-    const parentUrl = getParentUrl()
+    const { userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     useEffect(() => {
         const connectToOris = async () => {
@@ -50,7 +50,9 @@ export default function Dashboard({
 
         if (!userDid) {
             connectToOris()
-            window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!litWalletSig } }, parentUrl);
+            // if (!consent && !consent?.accepted && !consent?.rejected) {
+            //     sendProfileConnectedEvent()
+            // }
         }
 
         const disconnectMetamask = async () => {
@@ -67,7 +69,7 @@ export default function Dashboard({
     }, [])
 
     useEffect(() => {
-        const isInIframe = window.self !== window.top; // Check if inside an iframe
+        const isInIframe = window.self !== window.top;
 
         const detailsCard = document.querySelector('.details-card');
 

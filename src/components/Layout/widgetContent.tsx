@@ -13,6 +13,7 @@ import { useStepper } from "../../hooks/useStepper";
 
 interface WidgetContentWrapperProps {
     isIframe: boolean;
+    currentStep: string;
 }
 
 const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
@@ -25,7 +26,7 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
 
     .app-logo {
         position: absolute;
-        bottom: ${({ isIframe }) => (isIframe ? '87%' : '100%')};
+        bottom: ${({ isIframe, currentStep }) => ((isIframe && currentStep === 'home') ? '80%' : (isIframe && currentStep !== 'home') ? '87%' : '100%')};
         left: 50%;
         transform: translate(-50%, 50%);
         height: 120px;
@@ -50,7 +51,8 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const { goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
     const plaformImg = getPlatformImage()
-    const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' : (currentStep !== 'socialConnect' && currentStep !== 'profileSettings')
+    const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' && currentStep !== 'profile' :
+        (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile')
     const { isTabScreen, isMobileScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)
@@ -59,7 +61,7 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const isSmallScreen = isTabScreen || isMobileScreen
 
     return (
-        <WidgetContentWrapper isIframe={isIframe}>
+        <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep}>
             {showWidgetLogo && plaformImg && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />

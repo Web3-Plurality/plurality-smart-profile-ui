@@ -8,6 +8,7 @@ import {
     FORTNITE_ROUTE,
     headerSteps,
     INSTAGRAM_ROUTE,
+    interestsPillsColors,
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
     SPATIAL_ROUTE,
@@ -17,6 +18,7 @@ import {
 import { CLIENT_ID } from "./EnvConfig";
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
 import { message } from "antd";
+import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } from "./sendEventToParent";
 
 const setLocalStorageValue = (key: string, value: string) => localStorage.setItem(key, value)
 const getLocalStorageValue = (key: string) => localStorage.getItem(key)
@@ -67,15 +69,15 @@ const getTitleText = (currentStep: string) => {
     const isIframe = window.self !== window.top;
     switch (currentStep) {
         case 'home':
-            return 'Login To Your Account';
+            return '';
         case 'litLogin':
             return 'Enter Your Email';
         case 'register':
-            return 'Register Your Account';
+            return 'Login into Your Account';
         case 'otp':
-            return 'Register Your Account';
+            return 'Login into Your Account';
         case 'success':
-            return `Welcome to ${platformName || ''}`;
+            return `Welcome to ${platformName || ''} Profile`;
         case 'socialConnect':
             return 'Connect Your Platforms';
         case 'digitalWardrobeConnect':
@@ -86,6 +88,14 @@ const getTitleText = (currentStep: string) => {
             return 'Digital Wardrobe';
         case 'profileSettings':
             return `${isIframe ? 'Update Profile' : ''}`;
+        case 'consent':
+            return 'Confirm your choices';
+        case 'transaction':
+            return 'Confirm your action';
+        case 'signing':
+            return 'Your sign is requested';
+        case 'contract':
+            return 'Contract Details';
         default:
             return '';
     }
@@ -98,13 +108,14 @@ const getDescription = (currentStep: string) => {
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { platformDescription } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
     switch (currentStep) {
         case 'litLogin':
             return 'A verification code will be sent to your email'
         case 'otp':
             return 'Enter the 6 digit code sent to your email';
         case 'success':
-            return platformDescription || ''
+            return platformDescription || '';
         case 'digitalWardrobe':
             return 'Collection';
         case 'digitalWardrobeConnect':
@@ -118,6 +129,14 @@ const getParentUrl = () => {
     const { ancestorOrigins, origin } = window.location
     const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
     return parentUrl
+}
+
+
+const getParentHost = () => {
+    const { ancestorOrigins, origin } = window.location
+    const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
+    const parentHost = new URL(parentUrl).hostname;
+    return parentHost
 }
 
 const isLitLogin = (val: string) => {
@@ -157,7 +176,8 @@ const getBtntext = (currStep: string) => {
 }
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
-    if (currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || loader) return false
+    const isIframe = window.self !== window.top && currStep !== 'litLogin' && currStep !== 'otp'
+    if (isIframe || currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || currStep === 'profile' || loader) return false
     return true
 }
 
@@ -189,13 +209,14 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
 
     const keysAndValues: Record<string, string> = {};
 
-    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    const { clientId, incentives, links, logo, profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
 
     const updatedData = {
         clientId,
         incentives,
         links,
         logo,
+        consent,
         profileTypeStreamId
     };
 
@@ -260,7 +281,7 @@ const serializeSmartProfile = (smartProfile: any) => {
     smartProfile.connectedPlatforms = JSON.stringify(smartProfile.connectedPlatforms);
     smartProfile.extendedPublicData = JSON.stringify(smartProfile.extendedPublicData);
     smartProfile.attestation = JSON.stringify(smartProfile.attestation);
-    if (smartProfile.privateData!=='') {
+    if (smartProfile.privateData !== '') {
         smartProfile.privateData = JSON.stringify(smartProfile.privateData);
     }
 }
@@ -272,10 +293,38 @@ const deserializeSmartProfile = (smartProfile: any, unecryptedPrivateDataObj?: a
     smartProfile.attestation = JSON.parse(smartProfile.attestation);
     if (unecryptedPrivateDataObj) {
         smartProfile.privateData = unecryptedPrivateDataObj;
-    }else{
+    } else {
         smartProfile.privateData = JSON.parse(smartProfile.privateData);
     }
 }
+
+const truncateAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-3)}`;
+};
+
+const getRandomColor = (index: number): string => {
+    const colorIndex = index % interestsPillsColors.length;
+    return interestsPillsColors[colorIndex];
+};
+
+const handleUserConsentFlow = (
+    consent: { accepted: boolean, rejected: boolean },
+    step: string,
+    prevStep: string,
+    cb: (step: string) => void
+) => {
+    const ignoreConsent = prevStep === 'profile' || prevStep === 'profileSettings' || prevStep === 'wallet' || prevStep === 'consent' || prevStep === 'contract'
+
+    if ((consent?.accepted || consent?.rejected) && !ignoreConsent) {
+        sendUserConsentEvent()
+        sendProfileConnectedEvent()
+    } else {
+        cb(step)
+    }
+    sendUserDataEvent()
+};
+
 
 export {
     setLocalStorageValue,
@@ -286,6 +335,7 @@ export {
     getTitleText,
     getDescription,
     getParentUrl,
+    getParentHost,
     isLitLogin,
     checkPreviousLoginMode,
     getBtntext,
@@ -300,5 +350,8 @@ export {
     redirectUserOnLogout,
     reGenerateUserDidAddress,
     serializeSmartProfile,
-    deserializeSmartProfile
+    deserializeSmartProfile,
+    truncateAddress,
+    getRandomColor,
+    handleUserConsentFlow
 }
