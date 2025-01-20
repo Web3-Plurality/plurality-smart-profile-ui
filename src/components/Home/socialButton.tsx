@@ -32,6 +32,10 @@ const SocialButtonWrapper = styled(Button) <{ styleProp?: string }>`
     justify-content: space-between;
     margin-top: 1rem;
 
+    &:hover{
+        background-color: #e9e9e9 !important;
+    }
+
     .button-content-left {
         display: flex;
         align-items: center;

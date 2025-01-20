@@ -50,9 +50,6 @@ export default function Dashboard({
 
         if (!userDid) {
             connectToOris()
-            // if (!consent && !consent?.accepted && !consent?.rejected) {
-            //     sendProfileConnectedEvent()
-            // }
         }
 
         const disconnectMetamask = async () => {
