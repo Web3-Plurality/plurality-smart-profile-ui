@@ -147,7 +147,7 @@ const CollapsableList = ({
   const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
 
   const extendedPublicData = smartProfileData?.data?.smartProfile?.extendedPublicData;
-  const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData;
+  const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData?.extendedPrivateData;
 
   const isPublicData = Object.keys(extendedPublicData || {}).length > 0;
   const isPrivateData = Object.keys(extendedPrivateData || {}).length > 0;
