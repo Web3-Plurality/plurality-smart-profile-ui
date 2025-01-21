@@ -9,6 +9,7 @@ import {
     headerSteps,
     INSTAGRAM_ROUTE,
     interestsPillsColors,
+    overRideConsentComponents,
     ROBLOX_ROUTE,
     SNAPCHAT_ROUTE,
     SPATIAL_ROUTE,
@@ -314,7 +315,7 @@ const handleUserConsentFlow = (
     prevStep: string,
     cb: (step: string) => void
 ) => {
-    const ignoreConsent = prevStep === 'profile' || prevStep === 'profileSettings' || prevStep === 'wallet' || prevStep === 'consent' || prevStep === 'contract'
+    const ignoreConsent = overRideConsentComponents.includes(prevStep)
 
     if ((consent?.accepted || consent?.rejected) && !ignoreConsent) {
         sendUserConsentEvent()

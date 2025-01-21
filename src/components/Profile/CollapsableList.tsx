@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Collapse } from 'antd';
+import { Collapse, Radio, RadioChangeEvent } from 'antd'; // Import Ant Design's Radio component
 import styled from 'styled-components';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { ProfileItems } from './ProfileItems';
+import { CLIENT_ID } from '../../utils/EnvConfig';
+import { getLocalStorageValueofClient } from '../../utils/Helpers';
 
 const StyledDivider = styled.div<{ $visible: boolean }>`
   height: 1px;
@@ -61,44 +63,139 @@ const StyledCollapse = styled(Collapse)`
   }
 
   @media (max-width:430px) {
-        max-width: 360px; 
-    }
+    max-width: 360px;
+  }
 
-    @media (max-width:390px) {
-        max-width: 300px; 
-    }
+  @media (max-width:390px) {
+    max-width: 300px;
+  }
 `;
 
-const CollapsableList: React.FC = () => {
+const OtherDataWrapper = styled.div`
+  height: 300px;
+  width: 370px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  overflow-y: auto;
+  padding: 10px;
+  white-space: pre-wrap;
+
+  ::-webkit-scrollbar {
+    width: 8px !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #888 !important;
+    border-radius: 10px !important;
+    border: 2px solid #ffffff !important;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #555 !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 10px !important;
+  }
+`;
+
+const StyledRadioGroup = styled(Radio.Group)`
+  .ant-radio-button-wrapper-checked {
+    background-color: #6d6d6d !important;
+    color: white !important;
+  }
+
+  .ant-radio-button-wrapper {
+    border: 1px solid #6d6d6d !important;
+    color: #6d6d6d;
+  }
+
+  .ant-radio-button-wrapper:hover {
+    border-color: #6d6d6d !important;
+  }
+`;
+
+const CollapsableList = ({
+  isOtherDataVisible,
+  handleOtherDataVisibility,
+}: {
+  isOtherDataVisible: boolean;
+  handleOtherDataVisibility: () => void;
+}) => {
   const defaultActiveKey = ['1'];
   const [activeKey, setActiveKey] = useState<string[]>(defaultActiveKey);
 
   const items = ProfileItems(activeKey);
 
   const handleChange = (key: string | string[]) => {
-    setActiveKey(Array.isArray(key) ? key : [key]);
+    if (key == '4') {
+      handleOtherDataVisibility();
+    } else {
+      setActiveKey(Array.isArray(key) ? key : [key]);
+    }
+  };
+
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+  const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`);
+  const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
+
+  const extendedPublicData = smartProfileData?.data?.smartProfile?.extendedPublicData;
+  const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData;
+
+  const isPublicData = Object.keys(extendedPublicData || {}).length > 0;
+  const isPrivateData = Object.keys(extendedPrivateData || {}).length > 0;
+
+  const [showPublicData, setShowPublicData] = useState(true);
+
+  const handleRadioChange = (e: RadioChangeEvent) => {
+    setShowPublicData(e.target.value);
   };
 
   return (
-    <StyledCollapse
-      bordered={false}
-      defaultActiveKey={defaultActiveKey}
-      expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
-      expandIconPosition="end"
-      accordion
-      onChange={handleChange}
-    >
-      {items.map((item) => (
-        <React.Fragment key={item.key}>
-          <Collapse.Panel header={item.label} key={item.key}>
-            {item.children}
-          </Collapse.Panel>
-          <BottomDivider
-            $visible={item.bottomDivider}
-          />
-        </React.Fragment>
-      ))}
-    </StyledCollapse>
+    <>
+      {isOtherDataVisible ? (
+        <OtherDataWrapper>
+          <StyledRadioGroup value={showPublicData} onChange={handleRadioChange} style={{ marginBottom: '10px' }}>
+            <Radio.Button value={true}>Public Data</Radio.Button>
+            <Radio.Button value={false}>Private Data</Radio.Button>
+          </StyledRadioGroup>
+          <pre>
+            {showPublicData
+              ? isPublicData
+                ? JSON.stringify(extendedPublicData, null, 2)
+                : 'No Public data is available'
+              : isPrivateData
+                ? JSON.stringify(extendedPrivateData, null, 2)
+                : 'No Private data is available'}
+          </pre>
+        </OtherDataWrapper>
+      ) : (
+        <StyledCollapse
+          bordered={false}
+          defaultActiveKey={defaultActiveKey}
+          expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+          expandIconPosition="end"
+          accordion
+          onChange={handleChange}
+        >
+          {items.map((item) => (
+            <React.Fragment key={item.key}>
+              <Collapse.Panel header={item.label} key={item.key}>
+                {item.children}
+              </Collapse.Panel>
+              <BottomDivider $visible={item.bottomDivider} />
+            </React.Fragment>
+          ))}
+        </StyledCollapse>
+      )}
+    </>
   );
 };
 
