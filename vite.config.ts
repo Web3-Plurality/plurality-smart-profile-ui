@@ -1,22 +1,22 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import { resolve } from 'path'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react()
+    react(),
+    nodePolyfills()
   ],
-  resolve: {
-    alias: {
-      global: resolve(__dirname, 'global-shim.js')
-    }
+  preview: {
+    port: 3000,
   },
   server: {
     port: 3000,
     // host: "app.plurality.local",
     hmr: {
-      overlay: false, // Disable the error overlay
+      overlay: false
     },
   },
   optimizeDeps: {
