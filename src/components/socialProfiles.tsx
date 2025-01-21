@@ -7,6 +7,8 @@ import styled from 'styled-components';
 import useResponsive from '../hooks/useResponsive';
 import { CLIENT_ID } from '../utils/EnvConfig';
 
+import CircleImg from './../assets/images/circle.png';
+
 type Platform = {
     active: boolean,
     activeIcon: string,
@@ -17,7 +19,7 @@ type Platform = {
 }
 
 
-const ProfileIconsWrapper = styled.div`
+const ProfileIconsWrapper = styled.div<{ imageUrl: string }>`
     position: relative;
     display: flex;
     justify-content: center;
@@ -28,7 +30,7 @@ const ProfileIconsWrapper = styled.div`
     max-height: 375px;
     border-radius: 50%;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-    background: url("/src/assets/images/circle.png");
+    background: ${({ imageUrl }) => `url(${imageUrl})`};
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -153,7 +155,7 @@ const SocialProfiles = ({
     const plaformImg = getPlatformImage()
 
     return (
-        <ProfileIconsWrapper ref={circleRef} className="circle">
+        <ProfileIconsWrapper ref={circleRef} imageUrl={CircleImg} className="circle">
             <div className='mid-icon'>
                 <img className="app-logo-center" src={plaformImg} alt='' />
             </div>
