@@ -352,3 +352,12 @@ export const interestsPillsColors = [
     '#cf1322',  // Red
     '#237804',  // Forest Green
 ];
+
+export const overRideConsentComponents = [
+    'profile',
+    'profileSettings',
+    'wallet',
+    'consent',
+    'contract',
+    'signing',
+]

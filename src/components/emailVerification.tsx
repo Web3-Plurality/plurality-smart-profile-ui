@@ -134,7 +134,7 @@ const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMet
         return <Loader message={'Securing your session...'} />;
     }
     if (accounts.length && sessionSigs) {
-        goToStep("dashboard")
+        goToStep("success")
     }
 
     if (error) {

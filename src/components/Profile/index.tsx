@@ -3,6 +3,7 @@ import CollapsableList from './CollapsableList'
 import ProfileHeader from './ProfileHeader'
 import CustomButtom from '../customButton';
 import { useStepper } from '../../hooks/useStepper';
+import { useState } from 'react';
 
 const ProfileWrapper = styled.div`
     width: 100%;
@@ -14,18 +15,36 @@ const ProfileWrapper = styled.div`
 `;
 
 const Profile = () => {
+    const [isOtherDataVisible, setIsOtherDataVisible] = useState(false)
+
+    const handleOtherDataVisibility = () => {
+        setIsOtherDataVisible(true)
+    }
+
     const { goToStep } = useStepper()
     return (
         <>
             <ProfileWrapper>
                 <ProfileHeader />
-                <CollapsableList />
+                <CollapsableList
+                    isOtherDataVisible={isOtherDataVisible}
+                    handleOtherDataVisibility={handleOtherDataVisibility}
+                />
             </ProfileWrapper>
-            <CustomButtom
-                text='Connect more Platfroms'
-                minWidth='250px'
-                handleClick={() => goToStep('socialConnect')}
-            />
+            {isOtherDataVisible ? (
+                <CustomButtom
+                    text='View Profile'
+                    minWidth='100px'
+                    theme={'light'}
+                    handleClick={() => setIsOtherDataVisible(false)}
+                />
+            ) : (
+                <CustomButtom
+                    text='Connect more Platfroms'
+                    minWidth='250px'
+                    handleClick={() => goToStep('socialConnect')}
+                />
+            )}
         </>
     )
 }

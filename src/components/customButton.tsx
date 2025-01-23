@@ -1,5 +1,6 @@
 import { Button, Spin } from "antd";
 import styled from "styled-components";
+import { useStepper } from "../hooks/useStepper";
 
 interface CustomButtomProps {
     text: string;
@@ -15,6 +16,7 @@ interface ButtonWrapperProps {
     minWidth?: string;
     theme?: string;
     consent?: boolean;
+    currentStep: string
 }
 
 const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
@@ -28,7 +30,7 @@ const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: ${({ consent, currentStep }) => ((consent && currentStep === 'consent') ? '' : '1rem')};
     margin-bottom: ${({ consent }) => (consent ? '-4rem' : '')};
 
     &:not(:disabled):hover {
@@ -67,6 +69,7 @@ const CustomButtom = ({
     loader = false,
     handleClick,
 }: CustomButtomProps) => {
+    const { currentStep } = useStepper()
     return (
         <ButtonWrapper
             type="default"
@@ -76,6 +79,7 @@ const CustomButtom = ({
             minWidth={minWidth}
             theme={theme}
             consent={consent}
+            currentStep={currentStep}
         >
             {loader ? <StyledSpin size="small" /> : text}
         </ButtonWrapper>
