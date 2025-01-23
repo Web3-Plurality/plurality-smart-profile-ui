@@ -326,6 +326,13 @@ const handleUserConsentFlow = (
     sendUserDataEvent()
 };
 
+const isInIframe = (): boolean => {
+    try {
+        return window !== window.parent
+    } catch {
+        return true
+    }
+}
 
 export {
     setLocalStorageValue,
@@ -354,5 +361,6 @@ export {
     deserializeSmartProfile,
     truncateAddress,
     getRandomColor,
-    handleUserConsentFlow
+    handleUserConsentFlow,
+    isInIframe
 }
