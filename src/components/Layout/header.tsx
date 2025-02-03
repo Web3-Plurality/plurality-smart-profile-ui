@@ -50,7 +50,7 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     &.topSpacingMedium{
-      margin-top: -320px;
+      margin-top: -313px;
     }
 
     @media (max-width: 834px) {
