@@ -7,7 +7,7 @@ import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../uti
 import { useDispatch } from 'react-redux';
 import { setContractData, setProfileDataID, setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
-import { sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
+import { sendExtentedPrivateData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -41,6 +41,33 @@ const EventListener: React.FC = () => {
                 sendUserDataEvent(data.id, 'get')
             } else if (data.method === 'getLoginInfo') {
                 sendProfileConnectedEvent(data.id)
+            } else if (data.method === 'getAppData') {
+                sendExtentedPrivateData(data.id)
+            } else if (data.method === 'setAppData') {
+                try {
+
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                    const smartProfile = smartProfileData.data.smartProfile
+                    const extendedPrivateData = smartProfile.privateData.extendedPrivateData;
+
+                    const parsedData = JSON.parse(data?.message)
+
+                    if (extendedPrivateData[clientId]) {
+                        extendedPrivateData[clientId] = {
+                            ...extendedPrivateData[clientId],
+                            ...parsedData
+                        };
+                    } else {
+                        extendedPrivateData[clientId] = parsedData;
+                    }
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+                    window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "recieved" }, parentUrl);
+                }
+                catch (error) {
+                    console.error(error);
+                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
+                }
             }
             else if (data.method === 'getAllAccounts') {
                 try {
@@ -142,7 +169,6 @@ const EventListener: React.FC = () => {
             // EAS Event
             else if (data.method === 'setPublicData') {
                 try {
-
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile

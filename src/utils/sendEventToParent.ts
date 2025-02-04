@@ -6,6 +6,8 @@ import { getLocalStorageValueofClient } from "./Helpers";
 const queryParams = new URLSearchParams(location.search);
 const clientId = queryParams.get('client_id') || CLIENT_ID;
 
+
+
 const getParentUrl = () => {
     const { ancestorOrigins, origin } = window.location
     const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
@@ -95,7 +97,6 @@ export const sendUserDataEvent = (
     }
 }
 
-
 export const sendMessageSignedEvent = async (
     message: string,
     id: number | null,
@@ -114,3 +115,15 @@ export const sendMessageSignedEvent = async (
         onComplete?.();
     }
 }
+
+export const sendExtentedPrivateData = async (
+    id: number,
+) => {
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
+    const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData?.extendedPrivateData
+
+    window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPrivateData || 'No Private Data Found' }, getParentUrl());
+}
+
