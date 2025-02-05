@@ -3,7 +3,6 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { SiweMessage } from 'siwe';
-import { useAccount } from 'wagmi';
 import { domain, origin, statement } from '../utils/Constants';
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig';
 import { useLogoutUser } from './useLogoutUser';
@@ -13,7 +12,7 @@ function isEthereumError(err: unknown): err is { code: number; info?: { error?: 
     return typeof err === 'object' && err !== null && 'code' in err;
 }
 
-export const useMetamaskToken = () => {
+export const useMetamaskToken = (walletAddress: string) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [ceramicError, setCeramicError] = useState(false);
@@ -21,7 +20,7 @@ export const useMetamaskToken = () => {
     const handleLogoutUser = useLogoutUser()
     const { goToStep } = useStepper()
 
-    const { address } = useAccount();
+    // const { address } = useAccount();
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -68,13 +67,13 @@ export const useMetamaskToken = () => {
                 }
             }
         }
-    }, []);
+    }, [walletAddress]);
 
     // Handle MetaMask sign-in using nonce
     const generateMetamaskToken = useCallback(async () => {
         setIsLoading(true);
         try {
-            const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/login`, { address });
+            const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/login`, { address: walletAddress });
             if (data.nonce) {
                 const signInResponse = await signInWithEthereum(data.nonce);
                 if (signInResponse) {
@@ -87,7 +86,7 @@ export const useMetamaskToken = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [address]);
+    }, [walletAddress]);
 
     // Post signature response to API
     const signatureResponseApi = useCallback(async (msg: string, sig: string) => {
@@ -97,7 +96,7 @@ export const useMetamaskToken = () => {
 
             const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/authenticate`,
                 { 
-                    address, 
+                    address: walletAddress, 
                     clientAppId: clientId 
                 },
                 { headers }
@@ -122,7 +121,7 @@ export const useMetamaskToken = () => {
             handleLogoutUser("Something went wrong. Please try again.");
             console.error("Error posting signature response:", err);
         }
-    }, [address]);
+    }, [walletAddress]);
 
     return {
         generateMetamaskToken,

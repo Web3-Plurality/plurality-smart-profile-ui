@@ -2,7 +2,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { message } from "antd"
-import { useAccount } from "wagmi"
 import { AuthMethodType } from "@lit-protocol/constants"
 
 import useAuthenticate from "../hooks/useAuthenticate"
@@ -23,13 +22,14 @@ import { CLIENT_ID } from "../utils/EnvConfig"
 interface EmailLoginProps {
     finalPayload: PayloadDataType
     pkpWithMetamakError: boolean
+    walletAddress: string
     handlePkpWithMetamaskError: (val: boolean) => void
 }
 
-const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMetamaskError }: EmailLoginProps) => {
+const EmailVerification = ({ finalPayload, pkpWithMetamakError, walletAddress, handlePkpWithMetamaskError }: EmailLoginProps) => {
     const navigate = useNavigate();
     const { goToStep } = useStepper()
-    const { address: metamaskAddress } = useAccount();
+    // const { address: metamaskAddress } = useAccount();
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -84,7 +84,7 @@ const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMet
                     authMethodType: AuthMethodType.GoogleJwt,
                     accessToken: googleToken,
                 });
-            } else if (metamaskAddress) {
+            } else if (walletAddress) {
                 if (pkpWithMetamakError) return
                 await authWithEthWallet(handlePkpWithMetamaskError);
             } else {
@@ -93,7 +93,7 @@ const EmailVerification = ({ finalPayload, pkpWithMetamakError, handlePkpWithMet
         };
 
         authenticate();
-    }, [googleToken, pkpWithMetamakError])
+    }, [googleToken, pkpWithMetamakError, walletAddress])
 
     useEffect(() => {
         // If user is authenticated, fetch accounts

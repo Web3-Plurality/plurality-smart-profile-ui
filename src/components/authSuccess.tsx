@@ -54,7 +54,6 @@ const AuthSuccess = () => {
                 console.error(err)
             }
         }
-
         goToStep('socialConnect')
     }
 
