@@ -46,20 +46,27 @@ const EventListener: React.FC = () => {
             } else if (data.method === 'setAppData') {
                 try {
 
-                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                    
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     const extendedPrivateData = smartProfile.privateData.extendedPrivateData;
 
                     const parsedData = JSON.parse(data?.message)
-
+                    let userConsent;
+                    if (consent && consent.accepted) {
+                        userConsent = true;
+                    } else {
+                        userConsent = false;
+                    }
                     if (extendedPrivateData[clientId]) {
                         extendedPrivateData[clientId] = {
                             ...extendedPrivateData[clientId],
-                            ...parsedData
+                            ...parsedData,
+                            consent: userConsent
                         };
                     } else {
-                        extendedPrivateData[clientId] = parsedData;
+                        extendedPrivateData[clientId] = {...parsedData, consent: userConsent};
                     }
                     await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                     window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "recieved" }, parentUrl);

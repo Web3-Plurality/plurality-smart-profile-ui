@@ -6,8 +6,6 @@ import { getLocalStorageValueofClient } from "./Helpers";
 const queryParams = new URLSearchParams(location.search);
 const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-
-
 const getParentUrl = () => {
     const { ancestorOrigins, origin } = window.location
     const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin
