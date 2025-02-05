@@ -221,7 +221,6 @@ const Login = () => {
 
             if (connection && connection.accounts.length > 0) {
                 setWalletAddress(connection.accounts[0]);
-                message.success(`Connected: ${connection.accounts[0]}`);
             }
         }
     };
