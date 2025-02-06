@@ -120,7 +120,7 @@ export const sendExtentedPrivateData = async (
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-    const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData?.extendedPrivateData
+    const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData?.extendedPrivateData?.[`${clientId}`]
 
     window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPrivateData || 'No Private Data Found' }, getParentUrl());
 }
