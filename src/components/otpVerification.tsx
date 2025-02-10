@@ -118,7 +118,7 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
                 email_id: emailId,
                 email: user,
                 subscribe: true,
-                clientId
+                clientAppId: clientId
             };
             const response = await axios.post(url, payload)
 

@@ -96,7 +96,10 @@ export const useMetamaskToken = () => {
             const headers = { 'x-siwe': headersData }
 
             const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/authenticate`,
-                { address, clientId },
+                { 
+                    address, 
+                    clientAppId: clientId 
+                },
                 { headers }
             );
 
