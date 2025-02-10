@@ -27,7 +27,7 @@ function CallBackUrl() {
             console.log("redirect", redirect)
             const apiUrl = appName ? `oauth-${appName}` : 'auth/google'
             //if redirect is true, means user already  been loggedIn with stytch so we have to redirect hinm to otp page
-            await axiosInstance.post(`${apiUrl}/event`, { clientId, redirect: redirect === 'true' ? true : false }, {
+            await axiosInstance.post(`${apiUrl}/event`, { clientAppId: clientId, redirect: redirect === 'true' ? true : false }, {
                 headers: {
                     'x-sse-id': getLocalStorageValue('sseId'),
                     'x-token-id': accessTokenID,
