@@ -114,14 +114,14 @@ export const sendMessageSignedEvent = async (
     }
 }
 
-export const sendExtentedPrivateData = async (
+export const sendExtentedPublicData = async (
     id: number,
 ) => {
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-    const extendedPrivateData = smartProfileData?.data?.smartProfile?.privateData?.extendedPrivateData?.[`${clientId}`]
+    const extendedPublicData = smartProfileData?.data?.smartProfile?.extendedPublicData?.[`${clientId}`]
 
-    window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPrivateData || 'No Private Data Found' }, getParentUrl());
+    window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPublicData || 'No Data Found' }, getParentUrl());
 }
 

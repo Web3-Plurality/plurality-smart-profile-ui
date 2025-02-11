@@ -7,7 +7,7 @@ import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../uti
 import { useDispatch } from 'react-redux';
 import { setContractData, setProfileDataID, setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
-import { sendExtentedPrivateData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
+import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -42,7 +42,7 @@ const EventListener: React.FC = () => {
             } else if (data.method === 'getLoginInfo') {
                 sendProfileConnectedEvent(data.id)
             } else if (data.method === 'getAppData') {
-                sendExtentedPrivateData(data.id)
+                sendExtentedPublicData(data.id)
             } else if (data.method === 'setAppData') {
                 try {
 
@@ -50,20 +50,20 @@ const EventListener: React.FC = () => {
 
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
-                    const extendedPrivateData = smartProfile.privateData.extendedPrivateData;
+                    const extendedPublicData = smartProfile.extendedPublicData;
 
                     const parsedData = JSON.parse(data?.message)
 
                     const userConsent = consent && consent.accepted ? true : false;
 
-                    if (extendedPrivateData[clientId]) {
-                        extendedPrivateData[clientId] = {
-                            ...extendedPrivateData[clientId],
+                    if (extendedPublicData[clientId]) {
+                        extendedPublicData[clientId] = {
+                            ...extendedPublicData[clientId],
                             ...parsedData,
                             consent: consent && consent.accepted ? true : false
                         };
                     } else {
-                        extendedPrivateData[clientId] = { ...parsedData, consent: userConsent };
+                        extendedPublicData[clientId] = { ...parsedData, consent: userConsent };
                     }
                     await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                     window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "recieved" }, parentUrl);
