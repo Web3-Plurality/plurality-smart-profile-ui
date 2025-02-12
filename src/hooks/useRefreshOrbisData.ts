@@ -70,8 +70,10 @@ const useRefreshOrbisData = (step: string) => {
             const response = await selectSmartProfiles(profileTypeStreamId, userDid);
 
             if (!response?.rows?.length) {
+                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const consent = smartProfileData.data.smartProfile.extendedPublicData?.[clientId]?.consent;
                 // no profile found in orbis for this user
-                const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 await createSmartProfileAction(profileTypeStreamId)
                 dispatch(updateHeader())
                 setLoading(false)
@@ -79,8 +81,10 @@ const useRefreshOrbisData = (step: string) => {
             }
             else {
                 // user has a smart profile in orbis
-                const { profileTypeStreamId, consent, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                
+                const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
                 const orbisSmartProfile = (({
                     username,
                     avatar,
@@ -131,6 +135,7 @@ const useRefreshOrbisData = (step: string) => {
                                 goToStep('success')
                                 return
                             }
+                            // handleUserConsentFlow(consent, step, prevStep, goToStep)
                         }
                         await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
 

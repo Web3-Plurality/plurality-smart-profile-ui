@@ -46,12 +46,12 @@ export const sendUserDataEvent = (
     event: string = '',
     resetSPId: () => void = () => { }
 ) => {
-    const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const {
         smartProfileData: parssedUserOrbisData,
     } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
+    const consent = parssedUserOrbisData.data.smartProfile.extendedPublicData?.[clientId]?.consent;
 
     const { username,
         avatar,
@@ -69,20 +69,17 @@ export const sendUserDataEvent = (
         avatar,
         rating: connectedPlatforms?.length,
         bio,
-        consent: false,
+        consent: 'rejected',
     }
 
-    if (consent) {
-        const { accepted } = consent
-
-        if (accepted) {
+    if (consent && consent === 'accepted') {
             userData.interests = interests
             userData.reputationTags = reputationTags
             userData.badges = badges
             userData.collections = collections
             userData.scores = scores
-            userData.consent = true
-        }
+            userData.consent = 'accepted'
+        
     }
 
     if (id && event === 'update') {

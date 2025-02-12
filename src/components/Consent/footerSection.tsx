@@ -1,11 +1,12 @@
 import styled from 'styled-components'
 import CustomButtom from '../customButton';
-import { getLocalStorageValueofClient, setLocalStorageValue } from '../../utils/Helpers';
+import { getLocalStorageValueofClient } from '../../utils/Helpers';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } from '../../utils/sendEventToParent';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSPDataId } from '../../selectors/userDataSelector';
 import { setProfileDataID } from '../../Slice/userDataSlice';
+import { updatePublicSmartProfileAction } from '../../utils/SmartProfile';
 
 const ConsentFooterWrapper = styled.div`
     display: flex;
@@ -29,35 +30,39 @@ const ConsentFooter = () => {
         dispatch(setProfileDataID(''));
     }
 
-    const acceptUserConsent = () => {
+    const acceptUserConsent = async() => {
         const existingClientData = getLocalStorageValueofClient(`clientID-${clientId}`)
-        const updatedClientData = {
-            ...existingClientData,
-            consent: {
-                accepted: true,
-                rejected: false
-            }
-        }
+        const { profileTypeStreamId } = existingClientData
+        const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const smartProfile = smartProfileData.data.smartProfile
+        const extendedPublicData = smartProfile.extendedPublicData;
 
-        setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
+        extendedPublicData[clientId] = {
+            ...extendedPublicData[clientId],
+            consent: 'accepted'
+        };
+
+        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
         sendProfileConnectedEvent();
         sendUserConsentEvent();
         sendUserDataEvent(id, event, resetSPId)
     }
 
-    const rejectUserConsent = () => {
+    const rejectUserConsent = async () => {
         const existingClientData = getLocalStorageValueofClient(`clientID-${clientId}`)
-        const updatedClientData = {
-            ...existingClientData,
-            consent: {
-                accepted: false,
-                rejected: true
-            }
-        }
+        const { profileTypeStreamId } = existingClientData
+        const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const smartProfile = smartProfileData.data.smartProfile
+        const extendedPublicData = smartProfile.extendedPublicData;
 
-        setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedClientData))
+        extendedPublicData[clientId] = {
+            ...extendedPublicData[clientId],
+            consent: 'rejected'
+        };
+
+        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
         sendProfileConnectedEvent();
-        sendUserConsentEvent()
+        sendUserConsentEvent();
         sendUserDataEvent(id, event, resetSPId)
     }
 

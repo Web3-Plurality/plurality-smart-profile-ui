@@ -161,12 +161,13 @@ const Login = () => {
     }, [walletAddress])
 
     useEffect(() => {
-        const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
         const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
         if (profileData) {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
-        if (consent && (consent.accepted || consent.rejected)) {
+        if (consent && (consent == 'accepted' || consent == 'rejected')) {
             sendUserDataEvent()
             sendProfileConnectedEvent()
         }

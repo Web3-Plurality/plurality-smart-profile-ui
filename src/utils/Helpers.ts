@@ -210,14 +210,13 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
 
     const keysAndValues: Record<string, string> = {};
 
-    const { clientId, incentives, links, logo, profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
 
     const updatedData = {
         clientId,
         incentives,
         links,
         logo,
-        consent,
         profileTypeStreamId
     };
 
@@ -310,14 +309,14 @@ const getRandomColor = (index: number): string => {
 };
 
 const handleUserConsentFlow = (
-    consent: { accepted: boolean, rejected: boolean },
+    consent: string,
     step: string,
     prevStep: string,
     cb: (step: string) => void
 ) => {
     const ignoreConsent = overRideConsentComponents.includes(prevStep)
 
-    if ((consent?.accepted || consent?.rejected) && !ignoreConsent) {
+    if ((consent == 'accepted' || consent == 'rejected') && !ignoreConsent) {
         sendUserConsentEvent()
         sendProfileConnectedEvent()
     } else {
