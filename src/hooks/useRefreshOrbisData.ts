@@ -72,7 +72,7 @@ const useRefreshOrbisData = (step: string) => {
             if (!response?.rows?.length) {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                const consent = smartProfileData.data.smartProfile.extendedPublicData?.[clientId]?.consent;
+                const consent = smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
                 // no profile found in orbis for this user
                 await createSmartProfileAction(profileTypeStreamId)
                 dispatch(updateHeader())
