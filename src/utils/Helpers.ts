@@ -326,11 +326,7 @@ const handleUserConsentFlow = (
 };
 
 const isInIframe = (): boolean => {
-    try {
-        return window !== window.parent
-    } catch {
-        return true
-    }
+    return window !== window.parent
 }
 
 export {

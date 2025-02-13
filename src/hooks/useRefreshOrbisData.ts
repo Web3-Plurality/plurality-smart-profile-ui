@@ -84,7 +84,6 @@ const useRefreshOrbisData = (step: string) => {
                 
                 const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
                 const orbisSmartProfile = (({
                     username,
                     avatar,
@@ -115,6 +114,8 @@ const useRefreshOrbisData = (step: string) => {
                     easContractAddress: EAS_CONTRACT_ADDRESS || '',
                     rpcProvider: EAS_BLOCKCHAIN_RPC || '',
                 });
+                const parsedExtendedPublicData = JSON.parse(orbisSmartProfile.extendedPublicData);
+                const consent = parsedExtendedPublicData?.[clientId]?.consent;
                 if (smartprofileData) {
                     const { data } = smartprofileData
                     if (JSON.stringify(data.smartProfile.attestation) === orbisSmartProfile.attestation) {
@@ -135,7 +136,6 @@ const useRefreshOrbisData = (step: string) => {
                                 goToStep('success')
                                 return
                             }
-                            // handleUserConsentFlow(consent, step, prevStep, goToStep)
                         }
                         await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
 

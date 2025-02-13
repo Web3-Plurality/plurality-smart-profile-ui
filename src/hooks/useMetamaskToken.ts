@@ -20,8 +20,6 @@ export const useMetamaskToken = (walletAddress: string) => {
     const handleLogoutUser = useLogoutUser()
     const { goToStep } = useStepper()
 
-    // const { address } = useAccount();
-
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 

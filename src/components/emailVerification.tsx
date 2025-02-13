@@ -29,7 +29,6 @@ interface EmailLoginProps {
 const EmailVerification = ({ finalPayload, pkpWithMetamakError, walletAddress, handlePkpWithMetamaskError }: EmailLoginProps) => {
     const navigate = useNavigate();
     const { goToStep } = useStepper()
-    // const { address: metamaskAddress } = useAccount();
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
