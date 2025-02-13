@@ -175,9 +175,7 @@ const Login = () => {
 
     useEffect(() => {
         if (clientId === id) {
-            if (walletAddress && currentStep === "home" && !!previousStep) {
-                goToStep("success")
-            } else if (storedLitAccount || walletAddress) {
+            if (storedLitAccount || metamaskAddress) {
                 goToStep(currentStep!)
             } else {
                 if (showHeader(currentStep)) {
