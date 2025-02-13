@@ -11,6 +11,7 @@ interface CircularLayoutProps {
     handleIconClick: (id: number) => void
     connectedPlatforms: string[]
     platformImage: string
+    platformCount: number
 }
 
 export function CircularLayout({
@@ -19,6 +20,7 @@ export function CircularLayout({
     handleIconClick,
     connectedPlatforms,
     platformImage,
+    platformCount,
 }: CircularLayoutProps) {
     const circleRef = useRef<HTMLDivElement>(null)
     const [circleRadius, setCircleRadius] = useState(153)
@@ -34,12 +36,13 @@ export function CircularLayout({
                     ? isIframe
                         ? width / 2.06
                         : width / 2.1
-                    : width / 2.1
+                    : width / 2.07
             setCircleRadius(baseRadius - 30)
         }
     }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen, isIframe, isExtraSmallScreen])
 
     const angle = (360 / platforms.length) * (Math.PI / 180)
+    const rotationAdjustment = -20 * (Math.PI / 180)
 
     return (
         <ProfileIconsWrapper ref={circleRef} imageUrl={CircleImg} className="circle">
@@ -47,8 +50,11 @@ export function CircularLayout({
                 <img className="app-logo-center" src={platformImage || "/placeholder.svg"} alt="" />
             </div>
             {platforms.map(({ iconName, id, icon, activeIcon }, index) => {
-                const x = circleRadius * Math.cos(angle * index)
-                const y = circleRadius * Math.sin(angle * index)
+                const currentAngle = platformCount === 5
+                         ? angle * index + rotationAdjustment
+                         : angle * index
+                const x = circleRadius * Math.cos(currentAngle)
+                const y = circleRadius * Math.sin(currentAngle)
                 const iconSize = isExtraSmallScreen
                     ? "22px"
                     : isMobileScreen

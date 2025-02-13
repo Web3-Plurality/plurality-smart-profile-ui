@@ -26,6 +26,7 @@ const SocialProfiles = ({ activeStates, handleIconClick }: SocialProfilesProps) 
                 handleIconClick={handleIconClick}
                 connectedPlatforms={connectedPlatforms}
                 platformImage={platformImage}
+                platformCount={platformCount}
             />
         )
     }
