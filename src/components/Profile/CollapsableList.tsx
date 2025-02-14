@@ -72,7 +72,7 @@ const StyledCollapse = styled(Collapse)`
 `;
 
 const OtherDataWrapper = styled.div`
-  height: 300px;
+  height: 272px;
   width: 370px;
   display: flex;
   flex-direction: column;
@@ -83,6 +83,7 @@ const OtherDataWrapper = styled.div`
   overflow-y: auto;
   padding: 10px;
   white-space: pre-wrap;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   ::-webkit-scrollbar {
     width: 8px !important;

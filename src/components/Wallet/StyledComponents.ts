@@ -16,7 +16,6 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
 
     .address {
       display: flex;
-      gap: 15px;
       align-items: center;
       color: #545454;
 
@@ -28,12 +27,13 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
       .balance {
         font-size: 20px;
         color: #545454;
-        margin-left: 10px;
+        margin-left: 7px;
+        display: flex;
+        align-items: center;
 
-        .balance-info {
+        span{
           color: #177EF8;
           font-size: 14px;
-          margin-left: 6px;
           img {
             width: 12px;
             margin: 0 5px -4px;
@@ -44,7 +44,7 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
 
     .chain {
       border: 1.5px solid #ACACAC;
-      padding: 0.4rem;
+      padding: 0.5rem 0.6rem;
       min-width: 80px;
       text-align: right;
       border-radius: 12px;
@@ -88,8 +88,8 @@ export const BalanceTabWrapper = styled.div<{ tab: string }>`
     gap: 6px;
 
     img {
-      width: 12px;
-      height: 12px;
+      width: 21px;
+      height: 21px;
     }
   }
 

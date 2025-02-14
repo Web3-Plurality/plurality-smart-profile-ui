@@ -29,7 +29,7 @@ const Wallet = () => {
         setActiveTab(tab)
     }
 
-    const defaultMargin = activeTab === 'balance' ? '-106px' : activeTab === 'send' ? '-11px' : '60px';
+    const defaultMargin = activeTab === 'balance' ? '-106px' : activeTab === 'send' ? '-12px' : '66px';
 
     return (
         <>
