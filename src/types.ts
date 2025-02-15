@@ -30,7 +30,7 @@ export interface DAppData {
     reputationTags?: Scores[]
     collections?: string[]
     badges?: string[]
-    consent?: boolean
+    consent?: string
 }
 
 export interface SelectedNetworkType {

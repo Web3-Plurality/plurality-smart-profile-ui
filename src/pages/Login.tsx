@@ -20,7 +20,7 @@ import SocialConnect from "../components/socialConnect"
 import { socialConnectButtons, SupportedNetwork } from "../utils/Constants"
 import { message } from "antd"
 import { useRegisterEvent } from "../hooks/useEventListner"
-import { useAccount, useConnect, useDisconnect } from "wagmi"
+import { useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
 import LogoutModal from "../components/LogoutModal"
@@ -54,6 +54,7 @@ const Login = () => {
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
     const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
+    const [walletAddress, setWalletAddress] = useState('')
 
     const { currentStep, goToStep } = useStepper()
 
@@ -63,8 +64,7 @@ const Login = () => {
     const handleLogoutUser = useLogoutUser()
 
     const { disconnectAsync } = useDisconnect();
-    const { connect, connectors } = useConnect();
-    const { address: metamaskAddress, isConnected } = useAccount();
+    const { connectAsync, connectors } = useConnect();
 
     const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
@@ -84,7 +84,7 @@ const Login = () => {
         setError,
         ceramicError,
         setCeramicError
-    } = useMetamaskToken()
+    } = useMetamaskToken(walletAddress)
 
     useEffect(() => {
         // We need tp use this clientId to load the logo
@@ -148,25 +148,26 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (isConnected && !token && clientId === id) {
+        if (walletAddress && !token && clientId === id) {
             generateMetamaskToken()
             const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
             const updatedData = {
                 ...existingData,
-                metamaskAddress
+                metamaskAddress: walletAddress
             }
             setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData))
 
         }
-    }, [isConnected])
+    }, [walletAddress])
 
     useEffect(() => {
-        const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
         const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
         if (profileData) {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
-        if (consent && (consent.accepted || consent.rejected)) {
+        if (consent && (consent == 'accepted' || consent == 'rejected')) {
             sendUserDataEvent()
             sendProfileConnectedEvent()
         }
@@ -174,9 +175,9 @@ const Login = () => {
 
     useEffect(() => {
         if (clientId === id) {
-            if (metamaskAddress && currentStep === "home") {
+            if (walletAddress && currentStep === "home") {
                 goToStep("success")
-            } else if (storedLitAccount || metamaskAddress) {
+            } else if (storedLitAccount || walletAddress) {
                 goToStep(currentStep!)
             } else {
                 if (showHeader(currentStep)) {
@@ -185,11 +186,7 @@ const Login = () => {
             }
         }
 
-    }, [metamaskAddress, currentStep, storedLitAccount])
-
-    // useEffect(() => {
-    //     window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: !!storedLitAccount } }, parentUrl);
-    // }, [storedLitAccount])
+    }, [walletAddress, currentStep, storedLitAccount])
 
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
@@ -216,12 +213,16 @@ const Login = () => {
             handleMetaMaskNotInstalled();
             return;
         }
-        const needsConnection = !metamaskAddress || !isConnected;
+        const needsConnection = !walletAddress;
 
         if (needsConnection) {
             await disconnectAsync();
-            const metamaskConnector = connectors[0]; // MetaMask connector
-            connect({ connector: metamaskConnector });
+            const metamaskConnector = connectors[0];
+            const connection = await connectAsync({ connector: metamaskConnector });
+
+            if (connection && connection.accounts.length > 0) {
+                setWalletAddress(connection.accounts[0]);
+            }
         }
     };
 
@@ -300,6 +301,7 @@ const Login = () => {
                 return <EmailVerification
                     finalPayload={finalPayload}
                     pkpWithMetamakError={pkpWithMetamakError}
+                    walletAddress={walletAddress}
                     handlePkpWithMetamaskError={handlePkpWithMetamaskError} />
             case 'dashboard':
                 return <Dashboard currentAccount={litAddress} />

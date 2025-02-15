@@ -44,19 +44,18 @@ const AuthSuccess = () => {
         if (!userDid) {
             connectToOris()
         }
+    }, [])
 
-        const disconnectMetamask = async () => {
-            if (metamaskAddress) {
-                try {
-                    await disconnectAsync()
-                } catch (err) {
-                    console.error(err)
-                }
+    const handleNext = async () => {
+        if (metamaskAddress) {
+            try {
+                await disconnectAsync()
+            } catch (err) {
+                console.error(err)
             }
         }
-
-        disconnectMetamask()
-    }, [])
+        goToStep('socialConnect')
+    }
 
     useEffect(() => {
         const isInIframe = window.self !== window.top
@@ -77,7 +76,7 @@ const AuthSuccess = () => {
     }
 
     return (
-        <CustomButtom text={`Let's Go`} handleClick={() => goToStep('socialConnect')} isDisable={!isDisabled} />
+        <CustomButtom text={`Let's Go`} handleClick={handleNext} isDisable={!isDisabled} />
     )
 }
 

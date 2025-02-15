@@ -89,11 +89,13 @@ const ProfileSettings = () => {
 
             const { success, smartProfile } = data
             if (success) {
-                const { profileTypeStreamId, consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
                 await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
                 message.success("Profile updated successfully!")
                 setLoading(false)
-                    if (isIframe && (consent && consent.accepted)) {
+                    if (isIframe && (consent && consent === 'accepted')) {
                         goToStep('profile')
                         sendUserDataEvent()
                     } else {

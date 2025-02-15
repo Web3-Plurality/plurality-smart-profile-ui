@@ -70,8 +70,10 @@ const useRefreshOrbisData = (step: string) => {
             const response = await selectSmartProfiles(profileTypeStreamId, userDid);
 
             if (!response?.rows?.length) {
+                const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+                const consent = smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
                 // no profile found in orbis for this user
-                const { consent } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 await createSmartProfileAction(profileTypeStreamId)
                 dispatch(updateHeader())
                 setLoading(false)
@@ -79,7 +81,8 @@ const useRefreshOrbisData = (step: string) => {
             }
             else {
                 // user has a smart profile in orbis
-                const { profileTypeStreamId, consent, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
+                
+                const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const orbisSmartProfile = (({
                     username,
@@ -111,6 +114,8 @@ const useRefreshOrbisData = (step: string) => {
                     easContractAddress: EAS_CONTRACT_ADDRESS || '',
                     rpcProvider: EAS_BLOCKCHAIN_RPC || '',
                 });
+                const parsedExtendedPublicData = JSON.parse(orbisSmartProfile.extendedPublicData);
+                const consent = parsedExtendedPublicData?.[clientId]?.consent;
                 if (smartprofileData) {
                     const { data } = smartprofileData
                     if (JSON.stringify(data.smartProfile.attestation) === orbisSmartProfile.attestation) {
