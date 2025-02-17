@@ -56,7 +56,7 @@ const Login = () => {
     const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
 
-    const { currentStep, previousStep, goToStep } = useStepper()
+    const { currentStep, goToStep } = useStepper()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -175,7 +175,7 @@ const Login = () => {
 
     useEffect(() => {
         if (clientId === id) {
-            if (storedLitAccount || metamaskAddress) {
+            if (storedLitAccount || walletAddress) {
                 goToStep(currentStep!)
             } else {
                 if (showHeader(currentStep)) {
