@@ -51,8 +51,6 @@ export const useRegisterEvent = () => {
                 } else if (message === "received") {
                     fetchUserInfo(app, auth)
                 } else if (appName === '') {
-                    console.log("Gooogle o oauth")
-                    setLocalStorageValue('sseId', id)
                     handleGoogleConnect(id)
                 } else {
                     socialConnect(id, appName)
@@ -74,16 +72,10 @@ export const useRegisterEvent = () => {
     };
 
     const handleGoogleConnect = (sseID: number) => {
-        const width = 500
-        const height = 600
-        const left = window.screenX + (window.outerWidth - width) / 2
-        const top = window.screenY + (window.outerHeight - height) / 2.5
-
-        window.open(
-            `${API_BASE_URL}/auth/google/login?sse_id=${sseID}`,
-            "Google Authentication",
-            `width=${width},height=${height},left=${left},top=${top}`
-        )
+        const newWindow = window.open(`/auth-start?sse_id=${sseID}`, "Google Authentication", 'width=500,height=600');
+        if (!newWindow) {
+            alert('Failed to open window. It might be blocked by a popup blocker.');
+        }
     }
 
     const socialConnect = (id: string, appName: string) => {
