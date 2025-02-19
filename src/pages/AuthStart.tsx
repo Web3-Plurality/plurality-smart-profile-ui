@@ -13,14 +13,20 @@ const AuthStart = () => {
         const id = searchParams.get('sse_id');
         const appRoute = searchParams.get('route');
 
+        
         if (!id) {
             message.error(ErrorMessages.SSID_MISSING_ERROR)
             window.close();
             return;
         }
+        
+        let redirectUrl = `${API_BASE_URL}${appRoute}?sse_id=${id}`;
+
+        if(!appRoute){
+            redirectUrl = `${API_BASE_URL}/auth/google/login?sse_id=${id}`;
+        }
 
         setLocalStorageValue('sseId', id);
-        const redirectUrl = `${API_BASE_URL}${appRoute}?sse_id=${id}`;
         window.location.href = redirectUrl;
 
     }, [searchParams]);
