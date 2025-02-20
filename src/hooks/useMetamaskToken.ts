@@ -7,15 +7,18 @@ import { domain, origin, statement } from '../utils/Constants';
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig';
 import { useLogoutUser } from './useLogoutUser';
 import { useStepper } from './useStepper';
+import { useDispatch } from 'react-redux';
+import { setLoadingState } from '../Slice/userDataSlice';
 
 function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
     return typeof err === 'object' && err !== null && 'code' in err;
 }
 
 export const useMetamaskToken = (walletAddress: string) => {
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
     const [ceramicError, setCeramicError] = useState(false);
+
+    const dispatch = useDispatch()
 
     const handleLogoutUser = useLogoutUser()
     const { goToStep } = useStepper()
@@ -69,7 +72,7 @@ export const useMetamaskToken = (walletAddress: string) => {
 
     // Handle MetaMask sign-in using nonce
     const generateMetamaskToken = useCallback(async () => {
-        setIsLoading(true);
+        dispatch(setLoadingState({ loadingState: true, text: 'Connecting your Metamask account...' }))
         try {
             const { data } = await axios.post(`${API_BASE_URL}/auth/siwe/login`, { address: walletAddress });
             if (data.nonce) {
@@ -81,8 +84,6 @@ export const useMetamaskToken = (walletAddress: string) => {
             }
         } catch (err) {
             console.error("Error during MetaMask sign-in:", err);
-        } finally {
-            setIsLoading(false);
         }
     }, [walletAddress]);
 
@@ -111,6 +112,7 @@ export const useMetamaskToken = (walletAddress: string) => {
                     token: data.token,
                 }
                 localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
+                 dispatch(setLoadingState({ loadingState: false, text: '' }))
                 goToStep("verification")
             } else {
                 handleLogoutUser("Authentication failed. Please try signing in again.");
@@ -123,7 +125,6 @@ export const useMetamaskToken = (walletAddress: string) => {
 
     return {
         generateMetamaskToken,
-        isLoading,
         error,
         ceramicError,
         setError,
