@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, isProfileConnectPlatform, isRsmPlatform } from '../utils/Helpers';
+import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout, redirectUserOnLogout} from '../utils/Helpers';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
@@ -11,7 +11,8 @@ import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } 
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const isClientId = queryParams.get('client_id')
+    const clientId = isClientId || CLIENT_ID;
 
     const { goToStep, resetSteps } = useStepper()
     const navigate = useNavigate();
@@ -234,14 +235,10 @@ const EventListener: React.FC = () => {
 
                 handleLocalStorageOnLogout(clientId)
 
-                let path = '/'
-                if (isRsmPlatform()) {
-                    path = `/rsm?client_id=${clientId}`;
-                } else if (isProfileConnectPlatform()) {
-                    path = `/profile-connect?client_id=${clientId}`;
-                }
+                const redirectPath = redirectUserOnLogout(clientId, isClientId)
+
                 resetSteps()
-                navigate(path, { replace: true });
+                navigate(redirectPath, { replace: true });
                 window.location.reload()
             }
             // else if (data.method === 'fetchNetwork') {
