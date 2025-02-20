@@ -329,6 +329,15 @@ const isInIframe = (): boolean => {
     return window !== window.parent
 }
 
+const platformCount = () => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+    const { platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    return platforms?.length
+}
+
 export {
     setLocalStorageValue,
     getLocalStorageValue,
@@ -357,5 +366,6 @@ export {
     truncateAddress,
     getRandomColor,
     handleUserConsentFlow,
-    isInIframe
+    isInIframe,
+    platformCount
 }

@@ -61,6 +61,7 @@ const sharedWrapperStyles = `
   background: #e7e5e5;
   gap: 1rem;
   margin-top: 2.5rem;
+  min-width: 300px;
 `
 
 export const ProfileWrapperMedium = styled.div`
@@ -68,7 +69,6 @@ export const ProfileWrapperMedium = styled.div`
   position: relative;
   background:rgb(238, 236, 236);
   overflow: hidden;
-
   box-shadow: 
     4px 4px 8px rgba(0, 0, 0, 0.2),
     -4px -4px 8px rgba(255, 255, 255, 0.7),
@@ -101,7 +101,7 @@ export const ProfileWrapperMedium = styled.div`
 
 export const ProfileWrapperSmall = styled.div`
   ${sharedWrapperStyles}
-  padding: 15px 30px 15px 10px;
+  padding: 15px 30px 15px 10px !important;
   box-shadow: 
     4px 4px 8px rgba(0, 0, 0, 0.2),
     -4px -4px 8px rgba(255, 255, 255, 0.7),
@@ -140,7 +140,7 @@ export const ProfileWrapperSmall = styled.div`
     p {
       font-family: 'Lexend', Courier, monospace;
       color: #545454 !important;
-      font-size: 22px;
+      font-size: 20px;
     }
   }
 `

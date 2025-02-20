@@ -49,8 +49,9 @@ const WidgetLayoutWrapper = styled.div<WidgetLayoutWrapperProps>`
 
 
 const WidgetLayout = ({
+    connectedPlatforms,
     children,
-}: { children: ReactNode }) => {
+}: { connectedPlatforms:number,children: ReactNode }) => {
 
     const { goToStep, goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
@@ -67,7 +68,7 @@ const WidgetLayout = ({
             <div className='widget'>
                 <WidgetContent children={children} />
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
-                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
+                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
                 {isIframe &&
                     currentStep !== 'consent' &&
                     currentStep !== 'signing' &&

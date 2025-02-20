@@ -12,20 +12,22 @@ interface SinglePlatformProps {
 export function SinglePlatform({ platforms, activeStates, handleIconClick, connectedPlatforms }: SinglePlatformProps) {
     return (
         <ProfileWrapperSmall>
-            {platforms.map(({ iconName, displayName, id, icon, activeIcon }) => (
+            {platforms.map(({ iconName, displayName, id, icon, activeIcon }) => {
+                      const isActive = activeStates[id] || platforms.find((x) => x.id === id)?.active || connectedPlatforms?.includes(iconName)
+                return (
                 <div key={id} className="icon" style={{ cursor: "pointer" }} onClick={() => handleIconClick(id)}>
                     <div className="small-icon">
                         <CustomIcon
                             path={
-                                activeStates[id] || platforms.find((x) => x.id === id)?.active || connectedPlatforms?.includes(iconName)
+                                isActive
                                     ? activeIcon
                                     : icon
                             }
                         />
                     </div>
-                    <p>Connect {displayName}</p>
+                    <p>{isActive ? 'Connected' : 'Connect'} {displayName}</p>
                 </div>
-            ))}
+            )})}
         </ProfileWrapperSmall>
     )
 }

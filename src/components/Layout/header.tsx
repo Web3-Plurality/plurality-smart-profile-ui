@@ -41,8 +41,8 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     &.topSpacingIframeConsent{
-      margin-top: 50px;
-      margin-bottom: -5px;
+      margin-top: -100px;
+      margin-bottom: -25px;
     }
 
     &.topSpacingIframeSigning{
@@ -50,7 +50,11 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     &.topSpacingMedium{
-      margin-top: -313px;
+      margin-top: -180px;
+    }
+
+    &.topSpacingMediumIframe{
+      margin-top: 0px;
     }
 
     @media (max-width: 834px) {
@@ -111,7 +115,6 @@ export default function WidgetHeader() {
 
   const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { platforms: socailIcons } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-
   const socilasLength = socailIcons?.length
 
   return (
@@ -120,7 +123,8 @@ export default function WidgetHeader() {
         classNames({
           isdescription: description,
           success: currentStep === "success",
-          topSpacingMedium: (currentStep === 'socialConnect' && socilasLength < 5),
+          topSpacingMedium: (!isIframe && currentStep === 'socialConnect' && socilasLength < 5),
+          topSpacingMediumIframe: (isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacing: currentStep === 'socialConnect' && !isIframe,
           topSpacingIframe: currentStep === 'socialConnect' && isIframe,
           topSpacingIframeProfile: currentStep === 'profileSettings' && isIframe,
