@@ -69,6 +69,10 @@ const Login = () => {
     const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const numberOfConnectedPlatforms = profileData?.data?.smartProfile?.connectedPlatforms?.length;
+
     const parentUrl = getParentUrl()
 
     const {
@@ -264,7 +268,9 @@ const Login = () => {
                 const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);
                 const clickedIconDisplayName = clickedIcon?.displayName?.toLowerCase().replace(/\s+/g, '')
                 const selectedItem = parsedUrls.find((item: ProfileData) => item?.platformName?.toLowerCase() === clickedIconDisplayName)
-                window.open(selectedItem?.url, '_blank');
+                if(selectedItem.url){
+                    window.open(selectedItem.url, '_blank');
+                }
             }
         };
 
@@ -368,7 +374,7 @@ const Login = () => {
                 handleCancel={handleCancel}
             />
 
-            <WidgetLayout> {conditionalRendrer()}</WidgetLayout>
+            <WidgetLayout connectedPlatforms={numberOfConnectedPlatforms}> {conditionalRendrer()}</WidgetLayout>
         </>
     )
 }

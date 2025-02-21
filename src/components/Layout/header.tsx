@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import styled from 'styled-components'
-import { getDescription, getTitleText } from '../../utils/Helpers'
+import { getDescription, getLocalStorageValueofClient, getTitleText } from '../../utils/Helpers'
 import { useStepper } from '../../hooks/useStepper'
+import { CLIENT_ID } from '../../utils/EnvConfig'
 
 const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string }>`
   display: flex;
@@ -40,12 +41,20 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     &.topSpacingIframeConsent{
-      margin-top: 50px;
-      margin-bottom: -5px;
+      margin-top: -100px;
+      margin-bottom: -25px;
     }
 
     &.topSpacingIframeSigning{
       margin-top: 70px;
+    }
+
+    &.topSpacingMedium{
+      margin-top: -180px;
+    }
+
+    &.topSpacingMediumIframe{
+      margin-top: 0px;
     }
 
     @media (max-width: 834px) {
@@ -101,12 +110,21 @@ export default function WidgetHeader() {
   const description = getDescription(currentStep)
   const isIframe = window.self !== window.top;
 
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
+
+  const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { platforms: socailIcons } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+  const socilasLength = socailIcons?.length
+
   return (
     <WidgetHeaderWrapper id="w-header" isIframe={isIframe} currentStep={currentStep}>
       <h1 className={
         classNames({
           isdescription: description,
           success: currentStep === "success",
+          topSpacingMedium: (!isIframe && currentStep === 'socialConnect' && socilasLength < 5),
+          topSpacingMediumIframe: (isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacing: currentStep === 'socialConnect' && !isIframe,
           topSpacingIframe: currentStep === 'socialConnect' && isIframe,
           topSpacingIframeProfile: currentStep === 'profileSettings' && isIframe,

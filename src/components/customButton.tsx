@@ -31,7 +31,7 @@ const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
     justify-content: center;
     align-items: center;
     margin-top: ${({ consent, currentStep }) => ((consent && currentStep === 'consent') ? '' : '1rem')};
-    margin-bottom: ${({ consent }) => (consent ? '-4rem' : '')};
+    margin-bottom: ${({ consent }) => (consent ? '-6rem' : '')};
 
     &:not(:disabled):hover {
         border: none;

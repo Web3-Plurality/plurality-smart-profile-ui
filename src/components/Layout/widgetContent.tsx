@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import styled from "styled-components";
 import WidgetHeader from "./header";
-import { getBtntext, getPlatformImage, isBackBtnVisible } from "../../utils/Helpers";
+import { getBtntext, getPlatformImage, isBackBtnVisible, platformCount } from "../../utils/Helpers";
 import MobileHeader from "../Header/mobileHeader";
 import useResponsive from "../../hooks/useResponsive";
 import Loader from "../Loader";
@@ -48,11 +48,17 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
 
 const WidgetContent = ({ children }: { children: ReactNode }) => {
     const isIframe = window.self !== window.top;
+
+    const platformsNum = platformCount()
+
     const { goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
     const plaformImg = getPlatformImage()
-    const showWidgetLogo = !isIframe ? currentStep !== 'socialConnect' && currentStep !== 'profile' :
-        (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile')
+
+    const showWidgetLogo = 
+    !isIframe ? (currentStep === 'socialConnect' && platformsNum < 5) || currentStep !== 'socialConnect' && currentStep !== 'profile' 
+    : (currentStep === 'socialConnect' && platformsNum < 5) || (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile' && currentStep !== 'consent')
+
     const { isTabScreen, isMobileScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)

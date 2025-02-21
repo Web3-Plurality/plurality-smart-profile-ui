@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import useRefreshOrbisData from '../hooks/useRefreshOrbisData';
 import Loader from './Loader';
-import SocialProfiles from './socialProfiles';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { getLocalStorageValueofClient } from '../utils/Helpers';
+import SocialProfiles from './SocialProfiles';
 interface SocialConnectProps {
     activeStates: boolean[],
     handleIconClick: (idx: number) => void
