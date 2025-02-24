@@ -113,12 +113,20 @@ export const sendMessageSignedEvent = async (
 
 export const sendExtentedPublicData = async (
     id: number,
+    key: string,
 ) => {
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const smartProfile = smartProfileData.data.smartProfile
 
-    const extendedPublicData = smartProfileData?.data?.smartProfile?.extendedPublicData?.[`${clientId}`]
+    const extendedPublicData = smartProfile.extendedPublicData[clientId][key]
 
-    window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPublicData || 'No Data Found' }, getParentUrl());
+    if(extendedPublicData){
+        window.parent.postMessage({ id, eventName: 'getAppData', data: extendedPublicData }, getParentUrl());
+    }else{
+        window.parent.postMessage({ id, eventName: 'getAppData', data: 'No Data Found' }, getParentUrl());
+    }
+
+    
 }
 

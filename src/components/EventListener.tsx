@@ -43,29 +43,22 @@ const EventListener: React.FC = () => {
             } else if (data.method === 'getLoginInfo') {
                 sendProfileConnectedEvent(data.id)
             } else if (data.method === 'getAppData') {
-                sendExtentedPublicData(data.id)
+                sendExtentedPublicData(data.id, data.key)
             } else if (data.method === 'setAppData') {
                 try {
-
-                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-
-                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-                    const smartProfile = smartProfileData.data.smartProfile
+                    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`);
+                    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
+                    const smartProfile = smartProfileData.data.smartProfile;
                     const extendedPublicData = smartProfile.extendedPublicData;
 
-                    const parsedData = JSON.parse(data?.message)
-
-
-                    if (extendedPublicData[clientId]) {
-                        extendedPublicData[clientId] = {
-                            ...extendedPublicData[clientId],
-                            ...parsedData,
-                        };
-                    } else {
-                        extendedPublicData[clientId] = { ...parsedData, consent: 'not given' };
+                    if (!extendedPublicData[clientId]) {
+                        extendedPublicData[clientId] = { consent: 'not given' };
                     }
-                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
-                    window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "recieved" }, parentUrl);
+                    
+                    smartProfile.extendedPublicData[clientId][data?.key] = data?.value;
+        
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile);
+                    window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "received" }, parentUrl);                  
                 }
                 catch (error) {
                     console.error(error);
