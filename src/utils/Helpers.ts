@@ -239,9 +239,9 @@ const removeGlobalLitData = () => {
     localStorage.removeItem('lit-session-key')
 }
 
-const redirectUserOnLogout = (currentClientId: string, isClientId: string | null) => {
+const redirectUserOnLogout = (currentClientId: string, appClientId: string | null) => {
     let path = '/'
-    if (isClientId) {
+    if (appClientId) {
         path = `${location.pathname}?client_id=${currentClientId}`
     }
 

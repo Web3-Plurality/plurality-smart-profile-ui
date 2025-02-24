@@ -14,8 +14,8 @@ export const useLogoutUser = () => {
     const { disconnectAsync } = useDisconnect();
 
     const queryParams = new URLSearchParams(location.search);
-    const isClientId = queryParams.get('client_id')
-    const clientId = isClientId || CLIENT_ID;
+    const appClientId = queryParams.get('client_id')
+    const clientId = appClientId || CLIENT_ID;
 
     const disconnectMetamask = async () => {
         try {
@@ -35,7 +35,7 @@ export const useLogoutUser = () => {
         handleLocalStorageOnLogout(clientId)
 
         // Get Redirect path to specific ClientID
-        const redirectPath = redirectUserOnLogout(clientId, isClientId)
+        const redirectPath = redirectUserOnLogout(clientId, appClientId)
 
         // Error Message in case any API fails
         if (errorMessage) {

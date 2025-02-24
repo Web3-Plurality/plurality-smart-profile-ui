@@ -30,13 +30,13 @@ const EmailVerification = ({ finalPayload, pkpWithMetamakError, walletAddress, h
     const { goToStep } = useStepper()
 
     const queryParams = new URLSearchParams(location.search);
-    const isClientId = queryParams.get('client_id')
-    const clientId = isClientId || CLIENT_ID;
+    const appClientId = queryParams.get('client_id')
+    const clientId = appClientId || CLIENT_ID;
 
     const { googleJwtToken: googleToken } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const handleNavigation = () => {
-        const redirectPath = redirectUserOnLogout(clientId, isClientId)
+        const redirectPath = redirectUserOnLogout(clientId, appClientId)
         navigate(redirectPath, { replace: true });
     }
 

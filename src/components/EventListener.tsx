@@ -11,8 +11,8 @@ import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } 
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
-    const isClientId = queryParams.get('client_id')
-    const clientId = isClientId || CLIENT_ID;
+    const appClientId = queryParams.get('client_id')
+    const clientId = appClientId || CLIENT_ID;
 
     const { goToStep, resetSteps } = useStepper()
     const navigate = useNavigate();
@@ -235,7 +235,7 @@ const EventListener: React.FC = () => {
 
                 handleLocalStorageOnLogout(clientId)
 
-                const redirectPath = redirectUserOnLogout(clientId, isClientId)
+                const redirectPath = redirectUserOnLogout(clientId, appClientId)
 
                 resetSteps()
                 navigate(redirectPath, { replace: true });
