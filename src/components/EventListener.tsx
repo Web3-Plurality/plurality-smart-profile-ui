@@ -54,8 +54,13 @@ const EventListener: React.FC = () => {
                     if (!extendedPublicData[clientId]) {
                         extendedPublicData[clientId] = { consent: 'not given' };
                     }
+
+                    if(!data?.key || !data?.value) {
+                        window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "Invalid data!" }, parentUrl);
+                        return
+                    }
                     
-                    smartProfile.extendedPublicData[clientId][data?.key] = data?.value;
+                    smartProfile.extendedPublicData[clientId][data.key] = data.value;
         
                     await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile);
                     window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "received" }, parentUrl);                  
