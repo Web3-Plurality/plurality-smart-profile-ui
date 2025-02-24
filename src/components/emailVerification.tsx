@@ -14,8 +14,7 @@ import { PayloadDataType } from "../types"
 import { ErrorMessages } from "../utils/Constants"
 import {
     getLocalStorageValueofClient,
-    isProfileConnectPlatform,
-    isRsmPlatform
+    redirectUserOnLogout,
 } from "../utils/Helpers"
 import { CLIENT_ID } from "../utils/EnvConfig"
 
@@ -31,16 +30,14 @@ const EmailVerification = ({ finalPayload, pkpWithMetamakError, walletAddress, h
     const { goToStep } = useStepper()
 
     const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const appClientId = queryParams.get('client_id')
+    const clientId = appClientId || CLIENT_ID;
 
     const { googleJwtToken: googleToken } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const handleNavigation = () => {
-        let path = window.location.pathname
-        if (isRsmPlatform() || isProfileConnectPlatform()) {
-            path = `${window.location.pathname}?client_id=${clientId}`
-        }
-        navigate(path, { replace: true });
+        const redirectPath = redirectUserOnLogout(clientId, appClientId)
+        navigate(redirectPath, { replace: true });
     }
 
 

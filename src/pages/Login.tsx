@@ -97,8 +97,8 @@ const Login = () => {
             const domain = window.location.ancestorOrigins.length > 0 ? window.location.ancestorOrigins[0] : window.location.origin
             const fetchData = async () => {
                 try {
-                    const rsmUrl = `${API_BASE_URL}/crm/client-app/${clientId}`
-                    const { data } = await axios.get(rsmUrl, {
+                    const apiUrl = `${API_BASE_URL}/crm/client-app/${clientId}`
+                    const { data } = await axios.get(apiUrl, {
                         headers: {
                             'x-domain': domain
                         }
@@ -262,7 +262,7 @@ const Login = () => {
                 if (clickedIconDisplayName) {
                     registerEvent(clickedIconDisplayName);
                 }
-            } else if (window.location.pathname === '/rsm' || window.location.pathname === '/') {
+            } else {
                 const { links: storedUrls } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const parsedUrls = storedUrls ? JSON.parse(storedUrls) : []
                 const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);

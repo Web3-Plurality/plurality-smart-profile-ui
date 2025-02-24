@@ -182,14 +182,6 @@ const isBackBtnVisible = (currStep: string, loader: boolean) => {
     return true
 }
 
-const isRsmPlatform = () => {
-    return window.location.pathname === '/rsm'
-}
-
-const isProfileConnectPlatform = () => {
-    return window.location.pathname === '/profile-connect'
-}
-
 const getLocalStorageValueofClient = (storageID: string) => {
     const storageData = getLocalStorageValue(storageID)
 
@@ -247,13 +239,12 @@ const removeGlobalLitData = () => {
     localStorage.removeItem('lit-session-key')
 }
 
-const redirectUserOnLogout = (currentClientId: string) => {
+const redirectUserOnLogout = (currentClientId: string, appClientId: string | null) => {
     let path = '/'
-    if (isRsmPlatform()) {
-        path = `/rsm?client_id=${currentClientId}`;
-    } else if (isProfileConnectPlatform()) {
-        path = `/profile-connect?client_id=${currentClientId}`;
+    if (appClientId) {
+        path = `${location.pathname}?client_id=${currentClientId}`
     }
+
     return path
 }
 
@@ -352,8 +343,6 @@ export {
     checkPreviousLoginMode,
     getBtntext,
     isBackBtnVisible,
-    isRsmPlatform,
-    isProfileConnectPlatform,
     getPlatformImage,
     getLocalStorageValueofClient,
     handleLocalStorageOnLogout,
