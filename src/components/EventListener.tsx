@@ -229,7 +229,7 @@ const EventListener: React.FC = () => {
                 }
             }
             else if (event.data.type === 'logoutRequest') {
-                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false } }, parentUrl);
+                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false, logout: true } }, parentUrl);
 
                 handleLocalStorageOnLogout(clientId)
 
