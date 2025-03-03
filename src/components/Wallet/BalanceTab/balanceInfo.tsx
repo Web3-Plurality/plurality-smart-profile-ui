@@ -39,7 +39,6 @@ font-size: 13px !important;
   min-width: 0;
   max-width: 80%;
   flex: 1;
-  text-align: center;
 `;
 
 const BalanceInfo = ({
