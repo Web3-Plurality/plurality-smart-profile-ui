@@ -33,7 +33,8 @@ export const sendProfileConnectedEvent = (id?: string) => {
             eventName: 'litConnection',
             data: {
                 isConnected: !!litWalletSig,
-                token
+                token,
+                logout: false
             }
         }
     }
