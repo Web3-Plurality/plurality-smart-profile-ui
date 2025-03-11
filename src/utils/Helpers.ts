@@ -97,6 +97,8 @@ const getTitleText = (currentStep: string) => {
             return 'Your sign is requested';
         case 'contract':
             return 'Contract Details';
+        case 'profileSetup':
+                return "Let's Setup Your Profile!";
         default:
             return '';
     }

@@ -55,9 +55,17 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const showLoader = useSelector(selectLoader)
     const plaformImg = getPlatformImage()
 
-    const showWidgetLogo = 
-    !isIframe ? (currentStep === 'socialConnect' && platformsNum < 5) || currentStep !== 'socialConnect' && currentStep !== 'profile' 
-    : (currentStep === 'socialConnect' && platformsNum < 5) || (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile' && currentStep !== 'consent')
+    // const showWidgetLogo = 
+    // !isIframe ? (currentStep === 'socialConnect' && platformsNum < 5) || currentStep !== 'socialConnect' && currentStep !== 'profile' 
+    // : (currentStep === 'socialConnect' && platformsNum < 5) || (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile' && currentStep !== 'consent')
+
+    const isSocialConnectWithFewPlatforms = currentStep === 'socialConnect' && platformsNum < 5;
+    const isNotProfileOrSocialConnect = !['socialConnect', 'profile', 'home'].includes(currentStep);
+    const isNotProfileSettingsOrConsent = !['socialConnect', 'profileSettings', 'profile', 'consent', 'home'].includes(currentStep);
+
+    const showWidgetLogo = !isIframe
+        ? isSocialConnectWithFewPlatforms || isNotProfileOrSocialConnect
+        : isSocialConnectWithFewPlatforms || isNotProfileSettingsOrConsent;
 
     const { isTabScreen, isMobileScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)

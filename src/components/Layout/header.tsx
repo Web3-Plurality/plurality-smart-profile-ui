@@ -57,6 +57,11 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
       margin-top: 0px;
     }
 
+    &.profileSetup {
+      margin-bottom: -30px;
+       margin-top: -40px;
+    }
+
     @media (max-width: 834px) {
       font-size: 23px !important;
       display: flex;
@@ -123,6 +128,7 @@ export default function WidgetHeader() {
         classNames({
           isdescription: description,
           success: currentStep === "success",
+          profileSetup: currentStep === "home",
           topSpacingMedium: (!isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacingMediumIframe: (isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacing: currentStep === 'socialConnect' && !isIframe,
