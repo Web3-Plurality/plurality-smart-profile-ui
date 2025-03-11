@@ -80,6 +80,7 @@ const SendTabWrapper = styled.div`
         font-size: 12px;
         border: 1px solid #acacac !important;
         border-radius: 12px !important;
+        font-family: 'Lexend', 'Poppins', sans-serif;   
     }
 
     .ant-select-dropdown {

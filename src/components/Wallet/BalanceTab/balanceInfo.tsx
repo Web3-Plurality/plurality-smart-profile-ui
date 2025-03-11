@@ -28,6 +28,7 @@ const AddressContainer = styled.div`
   gap: 8px;
   flex-wrap: wrap;
   word-break: break-all;
+  justify-content: center;
 `;
 
 const AddressText = styled.p`
@@ -36,6 +37,7 @@ font-size: 13px !important;
   word-break: break-all;
   overflow-wrap: break-word;
   min-width: 0;
+  max-width: 80%;
   flex: 1;
 `;
 

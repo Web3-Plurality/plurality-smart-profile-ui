@@ -34,14 +34,13 @@ const Profile = () => {
             {isOtherDataVisible ? (
                 <CustomButtom
                     text='View Profile'
-                    minWidth='100px'
-                    theme={'light'}
+                    minWidth='350px'
                     handleClick={() => setIsOtherDataVisible(false)}
                 />
             ) : (
                 <CustomButtom
                     text='Connect more Platfroms'
-                    minWidth='250px'
+                    minWidth='350px'
                     handleClick={() => goToStep('socialConnect')}
                 />
             )}

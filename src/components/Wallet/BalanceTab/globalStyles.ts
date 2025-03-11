@@ -28,8 +28,8 @@ const GlobalStyles = createGlobalStyle`
     font-size: 12px;
     
     img {
-      width: 12px !important;
-      height: 12px !important;
+      width: 20px !important;
+      height: 20px !important;
     }
 
 

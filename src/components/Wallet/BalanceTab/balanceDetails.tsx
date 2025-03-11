@@ -5,21 +5,15 @@ const BalanceDetails = ({ amount, loading, selectedNetwork }: { amount: string, 
     return (
         <div className="balance-info-2">
             <div className="address">
-                <p>Balance:
+                <p>Balance:</p>
                     {loading ? (
                         <LoadingOutlined style={{ fontSize: '16px', marginLeft: "10px" }} />
                     ) : (
-                        <span className="balance">
-                            {/* $5.00 */}
+                        <div className="balance">
                             <img src={selectedNetwork.icon} alt="polygon" />
-                            <span className="balance-info">
-                                {/* ( */}
-                                <span>{amount} {selectedNetwork.token}</span>
-                                {/* ) */}
-                            </span>
-                        </span>
+                            <span>{amount} {selectedNetwork.token}</span>
+                        </div>
                     )}
-                </p>
             </div>
             <div className="chain">
                 <p>+ Buy (Soon)</p>

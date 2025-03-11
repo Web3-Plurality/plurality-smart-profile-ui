@@ -26,6 +26,7 @@ const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
     border-radius: 10px;
     border: none;
     background-color: ${({ theme }) => (theme === 'light' ? 'transparent' : '#565656 !important')};
+    font-family: 'Lexend', Courier, monospace;
     color: ${({ theme }) => (theme === 'light' ? '#565656' : '#ffffff !important')};
     display: flex;
     justify-content: center;
