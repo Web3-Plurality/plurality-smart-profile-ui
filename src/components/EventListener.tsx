@@ -44,6 +44,9 @@ const EventListener: React.FC = () => {
                 sendProfileConnectedEvent(data.id)
             } else if (data.method === 'getAppData') {
                 sendExtentedPublicData(data.id, data.key)
+            }else if (data.method === 'navigateTo') {
+                const {step} = data
+                goToStep(step)
             } else if (data.method === 'setAppData') {
                 try {
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`);
