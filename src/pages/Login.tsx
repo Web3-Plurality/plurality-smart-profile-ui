@@ -41,6 +41,7 @@ import Wallet from "../components/Wallet"
 import Signing from "../components/Signing"
 import Contract from "../components/Contract"
 import ProfileSetup from "../components/OnboardingScreen/profileSetup"
+import OnboardingForm from "../components/OnboardingScreen/questionaire"
 
 const Login = () => {
 
@@ -330,6 +331,8 @@ const Login = () => {
                 return <Contract />
             case 'profileSetup':
                     return <ProfileSetup/>
+            case 'onboardingForm':
+                return <OnboardingForm />
             default:
                 return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
         }

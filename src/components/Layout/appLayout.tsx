@@ -66,7 +66,7 @@ const WidgetLayout = ({
     return (
         <WidgetLayoutWrapper isIframe={isIframe}>
             <div className='widget'>
-                <WidgetContent children={children} />
+                {currentStep !== 'home' ?  <WidgetContent children={children} /> : children}
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
                 {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
                 {isIframe &&
