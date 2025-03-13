@@ -77,7 +77,7 @@ const useRefreshOrbisData = (step: string) => {
                 await createSmartProfileAction(profileTypeStreamId)
                 dispatch(updateHeader())
                 setLoading(false)
-                handleUserConsentFlow(consent, step, prevStep, goToStep)
+                handleUserConsentFlow(consent, 'profileSetup', prevStep, goToStep)
             }
             else {
                 // user has a smart profile in orbis

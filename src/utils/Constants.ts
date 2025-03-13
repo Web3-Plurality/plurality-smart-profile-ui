@@ -360,32 +360,6 @@ export const overRideConsentComponents = [
     'consent',
     'contract',
     'signing',
+    'profileSetup',
+    'onboardingForm'
 ]
-
-export const ONBOARDING_QUESTIONS = [
-    {
-        id: 1,
-        questionType: "dropdown",
-        question: "What artists do you like?",
-        questionDescription: "Select your favorite artist",
-        options: ["Taylor Swift", "Drake", "BTS", "The Weeknd", "Adele"],
-        placeholder: "Select an artist",
-      },
-    {
-      id: 0,
-      questionType: "text",
-      question: "What music do you like?",
-      questionDescription: "We can give you recommendations based on this information",
-      placeholder: "Your answer here",
-    },
-
-    {
-      id: 2,
-      questionType: "tags",
-      question: "Pick topics that interest you",
-      questionDescription: "Select as many as you like",
-      technologies: ["React js", "Node js", "Data Science", "Javascript", "Python", "DevOps"],
-      health: ["Zumba", "Nutrition", "Running", "Yoga", "Diet"],
-      culture: ["Art", "Music", "Dance", "Theatre", "Books", "Movies"],
-    },
-  ]

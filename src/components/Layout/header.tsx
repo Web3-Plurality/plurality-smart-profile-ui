@@ -128,7 +128,7 @@ export default function WidgetHeader() {
         classNames({
           isdescription: description,
           success: currentStep === "success",
-          profileSetup: currentStep === "home",
+          profileSetup: currentStep === "profileSetup",
           topSpacingMedium: (!isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacingMediumIframe: (isIframe && currentStep === 'socialConnect' && socilasLength < 5),
           topSpacing: currentStep === 'socialConnect' && !isIframe,

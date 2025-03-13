@@ -90,3 +90,9 @@ export interface ContractData {
     chain_id: string
     options: string
 }
+export type TagsRoot = Tags[]
+
+export interface Tags {
+  tags: string[]
+  category: string
+}

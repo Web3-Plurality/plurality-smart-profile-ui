@@ -3,27 +3,29 @@ import { Input, Select, Tag } from "antd"
 import styled from "styled-components"
 import CustomButton from "../../customButton"
 import { useStepper } from "../../../hooks/useStepper"
-import { ONBOARDING_QUESTIONS } from "../../../utils/Constants"
+import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig"
+import { getLocalStorageValueofClient } from "../../../utils/Helpers"
+import { Tags } from "../../../types"
+import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile"
+import axios from "axios"
 
-interface Answers {
-  0: string;
-  1: string;
-  2: {
-    technologies: string[];
-    health: string[];
-    culture: string[];
-  };
+// Updated interfaces to match the new data structure
+interface TagGroup {
+  category: string
+  tags: string[]
 }
 
 interface Question {
-  questionType: string;
-  placeholder?: string;
-  options?: string[];
-  technologies?: string[];
-  health?: string[];
-  culture?: string[];
-  question: string;
-  questionDescription: string;
+  type: "SIMPLE_QUESTION" | "MULTICHOICE_QUESTION" | "CATEGORY_QUESTION"
+  question: string
+  supportingText?: string
+  options?: string[]
+  tagGroups?: TagGroup[]
+}
+
+// Updated answers structure to match the new question types
+interface Answers {
+  [key: number]: string | string[] | Record<string, string[]>
 }
 
 const Container = styled.div`
@@ -34,7 +36,7 @@ const Container = styled.div`
 `
 
 const Card = styled.div`
-  width: 100%;
+  width: 430px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -45,7 +47,6 @@ const Card = styled.div`
 
 const Header = styled.div<{ questionType: string }>`
   flex-shrink: 0;
-
   padding: 0;
 `
 
@@ -62,9 +63,9 @@ const ProgressBar = styled.div`
   width: 100%;
 `
 
-const Progress = styled.div<{progress: number}>`
+const Progress = styled.div<{ progress: number }>`
   height: 100%;
-  width: ${({progress}) => progress}%;
+  width: ${({ progress }) => progress}%;
   background-color: #333;
   border-radius: 4px;
   transition: width 0.3s ease;
@@ -78,11 +79,10 @@ const Title = styled.h1`
   margin-left: 30px;
 `
 
-// Remove overflow-y: auto from Content
 const Content = styled.div<{ questionType: string }>`
   padding: 16px;
   gap: 8px;
-  margin-top: ${({ questionType }) => (questionType === "tags" ? "0" : "70px")};
+  margin-top: ${({ questionType }) => (questionType === "CATEGORY_QUESTION" ? "0" : "70px")};
 `
 
 const Question = styled.h2`
@@ -146,16 +146,13 @@ const BackButton = styled.button`
   }
 `
 
-// Add a scrollable container specifically for the categories
 const TagsContainer = styled.div`
   margin-top: 16px;
-    max-height: 250px;
+  max-height: 250px;
   overflow-y: auto;
 `
 
-// Make the categories section scrollable
 const ScrollableTagsSection = styled.div`
-
   padding-right: 8px;
   
   /* Custom scrollbar styling */
@@ -193,37 +190,39 @@ const TagsWrapper = styled.div`
   margin-bottom: 12px;
 `
 
-const StyledTag = styled(Tag)<{selected: boolean}>`
+const StyledTag = styled(Tag) <{ selected: boolean }>`
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 14px;
   cursor: pointer;
   margin-right: 0;
   background-color: ${({ selected }) => (selected ? "#333" : "#f0f0f0")};
-  color: ${({ selected }) => (selected  ? "white" : "#333")};
+  color: ${({ selected }) => (selected ? "white" : "#333")};
   border: none;
   
   &:hover {
     opacity: 0.9;
   }
 `
-const ButtonContainer = styled.div`
+
+const ButtonContainer = styled.div<{ type: string }>`
+  margin-top:${({ type }) => (type === "SIMPLE_QUESTION" ? "20px" : type === "MULTICHOICE_QUESTION" ? "11px" : "auto")};
   display: flex;
   flex-direction: column;
   align-items: center;
 `
+
 const OnboardingForm = () => {
+  const queryParams = new URLSearchParams(location.search)
+  const clientId = queryParams.get("client_id") || CLIENT_ID
+
+  const { onboardingQuestions: ONBOARDING_QUESTIONS, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
   const [currentStep, setCurrentStep] = useState(0)
-  const {goToStep} = useStepper()
-  const [answers, setAnswers] = useState<Answers>({
-    0: "",
-    1: "",
-    2: {
-      technologies: [],
-      health: [],
-      culture: [],
-    },
-  })
+  const { goToStep } = useStepper()
+  const [answers, setAnswers] = useState<Answers>({})
+  const [loading, setLoading] = useState(false)
 
   const totalSteps = ONBOARDING_QUESTIONS.length
   const currentQuestion = ONBOARDING_QUESTIONS[currentStep]
@@ -233,34 +232,36 @@ const OnboardingForm = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      goToStep('socialConnect')
+      submitData()
     }
   }
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
+    } else {
+      goToStep('profileSetup')
     }
   }
-
- 
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers({
       ...answers,
       [currentStep]: e.target.value,
-    });
-  };
+    })
+  }
 
-  const handleDropdownChange = (value: unknown) => {
+  const handleMultiChoiceChange = (value: unknown) => {
     setAnswers({
       ...answers,
       [currentStep]: value as string,
     })
   }
 
-  const handleTagToggle = (category: 'technologies' | 'health' | 'culture', tag: string) => {
-    const currentTags = [...answers[2][category]]
+
+  const handleTagToggle = (category: string, tag: string) => {
+    const currentAnswers = (answers[2] as Record<string, string[]>) || {}
+    const currentTags = [...(currentAnswers[category] || [])]
     const tagIndex = currentTags.indexOf(tag)
 
     if (tagIndex === -1) {
@@ -272,31 +273,76 @@ const OnboardingForm = () => {
     setAnswers({
       ...answers,
       2: {
-        ...answers[2],
+        ...currentAnswers,
         [category]: currentTags,
       },
     })
   }
 
+  const isTagSelected = (category: string, tag: string): boolean => {
+    const categoryAnswers = (answers[2] as Record<string, string[]>) || {}
+    return categoryAnswers[category]?.includes(tag) || false
+  }
+
+  const prepareData = () => {
+    const parsedSmartProfileData = { ...parsedUserOrbisData.data.smartProfile };
+
+    // Add new data to the `extendedPublicData` object
+    parsedSmartProfileData.extendedPublicData[clientId] = {
+      ...parsedSmartProfileData.extendedPublicData[clientId],
+      onboardingData: answers
+    };
+
+    return parsedSmartProfileData;
+  }
+
+  const submitData = async () => {
+    try {
+      setLoading(true)
+      const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+      const finalData = prepareData()
+      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {}, smartProfile: finalData }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-profile-type-stream-id': profileTypeStreamId,
+        }
+      })
+
+      const { success, smartProfile } = data
+      if (success) {
+        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+        setLoading(false)
+        if (showRoulette) {
+          goToStep("socialConnect")
+        } else {
+          goToStep("consent")
+        }
+      }
+
+    } catch (err) {
+      console.log("Some Error:", err)
+    }
+  }
+
   const renderQuestionContent = () => {
-    switch (currentQuestion.questionType) {
-      case "text":
+    switch (currentQuestion.type) {
+      case "SIMPLE_QUESTION":
         return (
           <StyledInput
-            placeholder={currentQuestion.placeholder}
-            value={answers[currentStep]}
+            placeholder="Type your answer here"
+            value={answers[currentStep] as string}
             onChange={handleTextChange}
           />
         )
 
-      case "dropdown":
+      case "MULTICHOICE_QUESTION":
         return (
           <StyledSelect
-            placeholder={currentQuestion.placeholder}
-            value={answers[currentStep] || undefined}
-            onChange={handleDropdownChange}
+            placeholder="Select an option"
+            value={answers[currentStep] as string}
+            onChange={handleMultiChoiceChange}
           >
-            {currentQuestion && currentQuestion?.options?.map((option) => (
+            {currentQuestion.options?.map((option: string) => (
               <Select.Option key={option} value={option}>
                 {option}
               </Select.Option>
@@ -304,49 +350,27 @@ const OnboardingForm = () => {
           </StyledSelect>
         )
 
-      case "tags":
+
+      case "CATEGORY_QUESTION":
         return (
           <TagsContainer>
-            {/* Only the categories section is scrollable */}
             <ScrollableTagsSection>
-              <CategoryTitle>Technologies</CategoryTitle>
-              <TagsWrapper>
-                {currentQuestion && currentQuestion?.technologies?.map((tag) => (
-                  <StyledTag
-                    key={tag}
-                    selected={answers[2].technologies.includes(tag)}
-                    onClick={() => handleTagToggle("technologies", tag)}
-                  >
-                    {tag}
-                  </StyledTag>
-                ))}
-              </TagsWrapper>
-
-              <CategoryTitle>Health</CategoryTitle>
-              <TagsWrapper>
-                {currentQuestion && currentQuestion?.health?.map((tag) => (
-                  <StyledTag
-                    key={tag}
-                    selected={answers[2].health.includes(tag)}
-                    onClick={() => handleTagToggle("health", tag)}
-                  >
-                    {tag}
-                  </StyledTag>
-                ))}
-              </TagsWrapper>
-
-              <CategoryTitle>Culture</CategoryTitle>
-              <TagsWrapper>
-                {currentQuestion && currentQuestion?.culture?.map((tag) => (
-                  <StyledTag
-                    key={tag}
-                    selected={answers[2].culture.includes(tag)}
-                    onClick={() => handleTagToggle("culture", tag)}
-                  >
-                    {tag}
-                  </StyledTag>
-                ))}
-              </TagsWrapper>
+              {currentQuestion.tagGroups?.map((group: Tags) => (
+                <div key={group.category}>
+                  <CategoryTitle>{group.category}</CategoryTitle>
+                  <TagsWrapper>
+                    {group.tags.map((tag) => (
+                      <StyledTag
+                        key={tag}
+                        selected={isTagSelected(group.category, tag)}
+                        onClick={() => handleTagToggle(group.category, tag)}
+                      >
+                        {tag}
+                      </StyledTag>
+                    ))}
+                  </TagsWrapper>
+                </div>
+              ))}
             </ScrollableTagsSection>
           </TagsContainer>
         )
@@ -359,7 +383,7 @@ const OnboardingForm = () => {
   return (
     <Container>
       <Card>
-        <Header questionType={currentQuestion.questionType}>
+        <Header questionType={currentQuestion.type}>
           <Title>Profile Setup</Title>
           <ProgressBarContainer>
             <ProgressBar>
@@ -368,17 +392,23 @@ const OnboardingForm = () => {
           </ProgressBarContainer>
         </Header>
 
-        <Content questionType={currentQuestion.questionType}>
+        <Content questionType={currentQuestion.type}>
           <Question>{currentQuestion.question}</Question>
-          <Subtitle>{currentQuestion.questionDescription}</Subtitle>
+          <Subtitle>{currentQuestion.supportingText || ""}</Subtitle>
           {renderQuestionContent()}
         </Content>
 
-        <ButtonContainer>
+        <ButtonContainer type={currentQuestion.type}>
           <CustomButton
             text={currentStep === totalSteps - 1 ? "Finish" : "Next"}
             minWidth="390px"
+            isDisable={
+              (currentQuestion.type === "MULTICHOICE_QUESTION" && (!answers[currentStep] || answers[currentStep] === "Select option")) ||
+              (currentQuestion.type === "SIMPLE_QUESTION" && !(answers[currentStep] as string)?.trim()) ||
+              (currentQuestion.type === "CATEGORY_QUESTION" && !(answers?.[currentStep] && Object.keys(answers[currentStep])?.length))
+            }
             handleClick={handleNext}
+            loader={loading}
           />
           {<BackButton onClick={handleBack}>Back</BackButton>}
         </ButtonContainer>

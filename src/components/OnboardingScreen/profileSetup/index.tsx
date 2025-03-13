@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Tag } from "antd";
+import { message, Tag } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
 import BackIcon from './../../../assets/svgIcons/back-icon.svg'
+import { getLocalStorageValueofClient } from "../../../utils/Helpers";
+import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
+import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile";
+import axios from "axios";
+import { useStepper } from "../../../hooks/useStepper";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -115,6 +120,14 @@ const BackButton = styled.button`
 
 const ProfileSetup = () => {
   const [image, setImage] = useState<string | null>(null);
+  const [name, setName] = useState('')
+  const [userBio, setUserBio] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const { goToStep, goBack } = useStepper()
+
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -124,36 +137,82 @@ const ProfileSetup = () => {
     }
   };
 
+  const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
+  const { avatar, username, bio } = smartProfileData.data.smartProfile
+
+  const getUserData = () => {
+    setImage(avatar)
+    setName(username)
+    setUserBio(bio)
+  }
+
+  const submitData = async () => {
+    if ((!name && !username && !userBio) || (avatar === image && username === name && bio === userBio)) {
+      goToStep('onboardingForm')
+      return
+    }
+    try {
+      setLoading(true)
+      const payLoaddata = {
+        username: name,
+        profileImg: avatar,
+        bio: userBio
+      }
+      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: payLoaddata, smartProfile: smartProfileData.data.smartProfile }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-profile-type-stream-id': profileTypeStreamId,
+        }
+      })
+
+
+
+      const { success, smartProfile } = data
+      if (success) {
+        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+        message.success("Profile updated successfully!")
+        setLoading(false)
+        goToStep('onboardingForm')
+      }
+
+    } catch (err) {
+      console.log("Some Error:", err)
+    }
+  }
+
   return (
     <ProfileSetupWrapper>
       <TimeTag>~ 1 minute</TimeTag>
-      <div style={{ display: "flex", gap: "20px",marginTop:"50px" }}>
+      <div style={{ display: "flex", gap: "20px", marginTop: "50px" }}>
 
         <AvatarWrapper>
-          <Avatar src={image || AvatarImage}  />
+          <Avatar src={image || AvatarImage} />
           <FileInput type="file" id="fileUpload" onChange={handleImageChange} accept="image/*" />
           <UploadLabel htmlFor="fileUpload">Choose file</UploadLabel>
         </AvatarWrapper>
 
 
         <div>
-          <Input placeholder="Your Name" />
-          <BioTextArea placeholder="Your witty bio" />
+          <Input placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} />
+          <BioTextArea placeholder="Your witty bio" value={userBio} onChange={(e) => setUserBio(e.target.value)} />
         </div>
       </div>
 
-      <SurpriseText>Surprise me!</SurpriseText>
+      <SurpriseText onClick={getUserData}>Surprise me!</SurpriseText>
 
       <ButtonGroup>
         <BackButton>
-            <img src={BackIcon} alt="back-icon profile setup" />
+          <img src={BackIcon} onClick={goBack} alt="back-icon profile setup" />
         </BackButton>
         <CustomButtom
-                text='Continue'
-                minWidth='300px'
-                // loader={isRejectLoading}
-                // handleClick={rejectUserConsent}
-            />
+          text="Continue"
+          minWidth='300px'
+          loader={loading}
+          isDisable={loading}
+          handleClick={submitData}
+        />
       </ButtonGroup>
     </ProfileSetupWrapper>
   );

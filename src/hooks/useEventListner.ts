@@ -115,7 +115,6 @@ export const useRegisterEvent = () => {
                 })
 
                 if (smartProfileResponse.success) {
-                    // const litSignature = localStorage.getItem("signature")
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     await updateSmartProfileAction(profileTypeStreamId, smartProfile)

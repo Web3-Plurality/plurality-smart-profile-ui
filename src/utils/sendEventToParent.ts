@@ -52,7 +52,7 @@ export const sendUserDataEvent = (
         smartProfileData: parssedUserOrbisData,
     } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-    const consent = parssedUserOrbisData.data.smartProfile.extendedPublicData?.[clientId]?.consent;
+    const consent = parssedUserOrbisData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
 
     const { username,
         avatar,

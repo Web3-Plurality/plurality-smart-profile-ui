@@ -180,7 +180,7 @@ const getBtntext = (currStep: string) => {
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
     const isIframe = window.self !== window.top && currStep !== 'litLogin' && currStep !== 'otp'
-    if (isIframe || currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || currStep === 'profile' || loader) return false
+    if (isIframe || currStep === 'home' || currStep === 'success' || currStep === 'dashboard' || currStep === 'socialConnect' || currStep === 'profile'|| currStep === 'profileSetup' || currStep === 'onboardingForm'  || loader) return false
     return true
 }
 
@@ -204,13 +204,15 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
 
     const keysAndValues: Record<string, string> = {};
 
-    const { clientId, incentives, links, logo, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
+    const { clientId, incentives, links, logo, onboardingQuestions, showRoulette, profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${currentClientId}`)
 
     const updatedData = {
         clientId,
         incentives,
         links,
         logo,
+        showRoulette,
+        onboardingQuestions,
         profileTypeStreamId
     };
 

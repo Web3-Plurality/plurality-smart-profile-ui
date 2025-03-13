@@ -7,7 +7,8 @@ import {
     getLocalStorageValueofClient,
     setLocalStorageValue,
     getParentUrl,
-    showHeader
+    showHeader,
+    isInIframe
 } from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useState } from "react"
@@ -58,7 +59,7 @@ const Login = () => {
     const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
 
-    const { currentStep, goToStep } = useStepper()
+    const { currentStep, goToStep, previousStep } = useStepper()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -76,6 +77,7 @@ const Login = () => {
     const numberOfConnectedPlatforms = profileData?.data?.smartProfile?.connectedPlatforms?.length;
 
     const parentUrl = getParentUrl()
+    const isIframe = isInIframe()
 
     const {
         message: eventMessage,
@@ -120,7 +122,9 @@ const Login = () => {
                         logo: data.data.logo,
                         links: data.data.links,
                         incentives: data.data.incentiveType,
-                        walletData: SupportedNetwork
+                        walletData: SupportedNetwork,
+                        onboardingQuestions: data.data.onboardingConfig.questions,
+                        showRoulette: data.data.showRoulette
                     }
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
@@ -154,7 +158,7 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (walletAddress && !token && clientId === id) {
+        if (walletAddress && clientId === id) {
             generateMetamaskToken()
             const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
             const updatedData = {
@@ -167,19 +171,6 @@ const Login = () => {
     }, [walletAddress])
 
     useEffect(() => {
-        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-        const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-        if (profileData) {
-            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
-        }
-        if (consent && (consent == 'accepted' || consent == 'rejected')) {
-            sendUserDataEvent()
-            sendProfileConnectedEvent()
-        }
-    }, [])
-
-    useEffect(() => {
         if (clientId === id) {
             if (storedLitAccount || walletAddress) {
                 goToStep(currentStep!)
@@ -190,7 +181,27 @@ const Login = () => {
             }
         }
 
-    }, [walletAddress, currentStep, storedLitAccount])
+    }, [walletAddress, currentStep, storedLitAccount, previousStep])
+
+
+    useEffect(() => {
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
+        if (profileData) {
+            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
+        }
+
+        if(isIframe && !consent && token) {
+            goToStep('consent')
+            window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
+        }
+        if (consent && (consent == 'accepted' || consent == 'rejected')) {
+            sendUserDataEvent()
+            sendProfileConnectedEvent()
+        }
+    }, [])
+
 
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
