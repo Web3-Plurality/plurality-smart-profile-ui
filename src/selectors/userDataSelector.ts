@@ -51,3 +51,13 @@ export const selectSPDataId = createSelector(
     (state) => state.profileDataID,
 );
 
+export const selectProfileSetupData = createSelector(
+    [selectDomain],
+    (state) => state.profileSetupData,
+);
+
+export const selectSurprised = createSelector(
+    [selectDomain],
+    (state) => state.surprised,
+);
+

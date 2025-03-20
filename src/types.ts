@@ -16,6 +16,12 @@ export interface ProfileData {
     authentication?: boolean
 }
 
+export interface ProfileSetupData {
+    parsedName: string
+    parsedBio: string
+    parsedImage: string | null
+}
+
 interface Scores {
     scoreType: string
     scoreValue: number
@@ -73,6 +79,8 @@ export interface StepState {
     transactionData: SendTransactionData,
     contractData: ContractData | null
     profileDataID: string
+    profileSetupData: ProfileSetupData
+    surprised: boolean
 }
 
 export interface ContractData {

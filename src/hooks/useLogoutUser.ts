@@ -4,9 +4,12 @@ import { CLIENT_ID } from "../utils/EnvConfig";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useStepper } from "./useStepper";
+import { setSurprisedData } from "../Slice/userDataSlice";
+import { useDispatch } from "react-redux";
 
 export const useLogoutUser = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const { goToStep, resetSteps } = useStepper()
 
@@ -45,6 +48,7 @@ export const useLogoutUser = () => {
         // Reset Stepper on logout
         // Set Current Step to Email field in case of lit login
         resetSteps()
+        dispatch(setSurprisedData(false))
         navigate(redirectPath, { replace: true });
         if (!litRedirect) {
             // Relaod the page to get Fresh States and Data

@@ -3,12 +3,15 @@ import styled from "styled-components";
 import { message, Tag } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
-import BackIcon from './../../../assets/svgIcons/back-icon.svg'
 import { getLocalStorageValueofClient } from "../../../utils/Helpers";
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
 import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile";
 import axios from "axios";
 import { useStepper } from "../../../hooks/useStepper";
+import { useDispatch, useSelector } from "react-redux";
+import { selectProfileSetupData, selectSurprised } from "../../../selectors/userDataSelector";
+import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
+import { ProfileSetupData } from "../../../types";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -91,11 +94,13 @@ const BioTextArea = styled.textarea`
   font-family: "Lexend", sans-serif;
   outline: none;
 `;
-const SurpriseText = styled.p`
+const SurpriseText = styled.p<{surprised: boolean}>`
   font-size: 14px;
   color: #545454;
   margin-top: 10px;
   cursor:pointer;
+  cursor: ${({ surprised }) => (surprised ? 'not-allowed' : 'pointer')};
+  opacity: ${({ surprised }) => (surprised ? 0.5 : 1)};
 `;
 
 const ButtonGroup = styled.div`
@@ -105,35 +110,30 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
-const BackButton = styled.button`
-  width: 50px;
-  height: 51px;
-  background: #f1f1f1;
-  border: 1px solid #545454;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin-top: 1rem;
-`;
-
 const ProfileSetup = () => {
-  const [image, setImage] = useState<string | null>(null);
-  const [name, setName] = useState('')
-  const [userBio, setUserBio] = useState('')
+  const userData: ProfileSetupData = useSelector(selectProfileSetupData)
+  const isSurprised = useSelector(selectSurprised)
+  const [image, setImage] = useState<string | null>(userData.parsedImage);
+  const [name, setName] = useState(userData.parsedName)
+  const [userBio, setUserBio] = useState(userData.parsedBio)
   const [loading, setLoading] = useState(false)
 
-  const { goToStep, goBack } = useStepper()
+  const { goToStep } = useStepper()
+  const dispatch = useDispatch()
 
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get('client_id') || CLIENT_ID;
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        if (typeof reader.result === 'string') {
+          setImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(event.target.files[0]);
+
     }
   };
 
@@ -143,12 +143,14 @@ const ProfileSetup = () => {
   const { avatar, username, bio } = smartProfileData.data.smartProfile
 
   const getUserData = () => {
+    dispatch(setSurprisedData(true))
     setImage(avatar)
     setName(username)
     setUserBio(bio)
   }
 
   const submitData = async () => {
+    dispatch(setProfileSetupData({ parsedName: name, parsedBio: userBio, parsedImage: image }))
     if ((!name && !username && !userBio) || (avatar === image && username === name && bio === userBio)) {
       goToStep('onboardingForm')
       return
@@ -157,10 +159,14 @@ const ProfileSetup = () => {
       setLoading(true)
       const payLoaddata = {
         username: name,
-        profileImg: avatar,
+        profileImg: image,
         bio: userBio
       }
-      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: payLoaddata, smartProfile: smartProfileData.data.smartProfile }, {
+      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, 
+        { 
+          data: payLoaddata, 
+          smartProfile: smartProfileData.data.smartProfile 
+        }, {
         headers: {
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
@@ -200,15 +206,12 @@ const ProfileSetup = () => {
         </div>
       </div>
 
-      <SurpriseText onClick={getUserData}>Surprise me!</SurpriseText>
+      <SurpriseText onClick={getUserData} surprised={isSurprised}>Surprise me!</SurpriseText>
 
       <ButtonGroup>
-        <BackButton>
-          <img src={BackIcon} onClick={goBack} alt="back-icon profile setup" />
-        </BackButton>
         <CustomButtom
           text="Continue"
-          minWidth='300px'
+          minWidth='360px'
           loader={loading}
           isDisable={loading}
           handleClick={submitData}
