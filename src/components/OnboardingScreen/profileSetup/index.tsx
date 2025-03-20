@@ -173,8 +173,6 @@ const ProfileSetup = () => {
         }
       })
 
-
-
       const { success, smartProfile } = data
       if (success) {
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)

@@ -9,6 +9,7 @@ import { selectLoader } from "../../selectors/userDataSelector";
 import { useSelector } from "react-redux";
 import BackButton from "./backButton";
 import { useStepper } from "../../hooks/useStepper";
+import { hideBackButtonforSteps, hideBackButtonforStepsInIframe } from "../../utils/Constants";
 
 
 interface WidgetContentWrapperProps {
@@ -55,13 +56,9 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const showLoader = useSelector(selectLoader)
     const plaformImg = getPlatformImage()
 
-    // const showWidgetLogo = 
-    // !isIframe ? (currentStep === 'socialConnect' && platformsNum < 5) || currentStep !== 'socialConnect' && currentStep !== 'profile' 
-    // : (currentStep === 'socialConnect' && platformsNum < 5) || (currentStep !== 'socialConnect' && currentStep !== 'profileSettings' && currentStep !== 'profile' && currentStep !== 'consent')
-
     const isSocialConnectWithFewPlatforms = currentStep === 'socialConnect' && platformsNum < 5;
-    const isNotProfileOrSocialConnect = !['socialConnect', 'profile', 'profileSetup', 'onboardingForm'].includes(currentStep);
-    const isNotProfileSettingsOrConsent = !['socialConnect', 'profileSettings', 'profile', 'consent', 'profileSetup', 'onboardingForm'].includes(currentStep);
+    const isNotProfileOrSocialConnect = !hideBackButtonforSteps.includes(currentStep);
+    const isNotProfileSettingsOrConsent = !hideBackButtonforStepsInIframe.includes(currentStep);
 
     const showWidgetLogo = !isIframe
         ? isSocialConnectWithFewPlatforms || isNotProfileOrSocialConnect
