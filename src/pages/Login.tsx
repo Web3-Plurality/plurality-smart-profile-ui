@@ -124,6 +124,7 @@ const Login = () => {
                         incentives: data.data.incentiveType,
                         walletData: SupportedNetwork,
                         onboardingQuestions: data.data.onboardingConfig.questions,
+                        customOnboarding: data.data.onboardingConfig.customOnboarding,
                         showRoulette: data.data.showRoulette
                     }
 

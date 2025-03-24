@@ -23,9 +23,14 @@ interface Question {
   tagGroups?: TagGroup[]
 }
 
-// Updated answers structure to match the new question types
+interface AnswerObject {
+  question: string;
+  questionType: string;
+  answer: string | string[] | Record<string, string[]>;
+}
+
 interface Answers {
-  [key: number]: string | string[] | Record<string, string[]>
+  [key: number]: AnswerObject;
 }
 
 const Container = styled.div`
@@ -216,7 +221,7 @@ const OnboardingForm = () => {
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get("client_id") || CLIENT_ID
 
-  const { onboardingQuestions: ONBOARDING_QUESTIONS, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { onboardingQuestions: ONBOARDING_QUESTIONS, customOnboarding, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -247,50 +252,62 @@ const OnboardingForm = () => {
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers({
       ...answers,
-      [currentStep]: e.target.value,
-    })
-  }
+      [currentStep]: {
+        question: currentQuestion.question,
+        questionType: currentQuestion.type,
+        answer: e.target.value,
+      },
+    });
+  };
 
   const handleMultiChoiceChange = (value: unknown) => {
     setAnswers({
       ...answers,
-      [currentStep]: value as string,
-    })
-  }
-
+      [currentStep]: {
+        question: currentQuestion.question,
+        questionType: currentQuestion.type,
+        answer: value as string,
+      },
+    });
+  };
 
   const handleTagToggle = (category: string, tag: string) => {
-    const currentAnswers = (answers[2] as Record<string, string[]>) || {}
-    const currentTags = [...(currentAnswers[category] || [])]
-    const tagIndex = currentTags.indexOf(tag)
+    const currentAnswers = (answers[currentStep]?.answer as Record<string, string[]>) || {};
+    const currentTags = [...(currentAnswers[category] || [])];
+    const tagIndex = currentTags.indexOf(tag);
 
     if (tagIndex === -1) {
-      currentTags.push(tag)
+      currentTags.push(tag);
     } else {
-      currentTags.splice(tagIndex, 1)
+      currentTags.splice(tagIndex, 1);
     }
 
     setAnswers({
       ...answers,
-      2: {
-        ...currentAnswers,
-        [category]: currentTags,
+      [currentStep]: {
+        question: currentQuestion.question,
+        questionType: currentQuestion.type,
+        answer: {
+          ...currentAnswers,
+          [category]: currentTags,
+        },
       },
-    })
-  }
+    });
+  };
 
   const isTagSelected = (category: string, tag: string): boolean => {
-    const categoryAnswers = (answers[2] as Record<string, string[]>) || {}
-    return categoryAnswers[category]?.includes(tag) || false
-  }
+    const categoryAnswers = (answers[currentStep]?.answer as Record<string, string[]>) || {};
+    return categoryAnswers[category]?.includes(tag) || false;
+  };
 
   const prepareData = () => {
     const parsedSmartProfileData = { ...parsedUserOrbisData.data.smartProfile };
 
     // Add new data to the `extendedPublicData` object
-    parsedSmartProfileData.extendedPublicData[clientId] = {
+    parsedSmartProfileData.extendedPublicData = {
       ...parsedSmartProfileData.extendedPublicData[clientId],
-      onboardingData: answers
+      onboardingData: answers,
+      customOnboarding
     };
 
     return parsedSmartProfileData;
@@ -324,13 +341,31 @@ const OnboardingForm = () => {
     }
   }
 
+  const isAnswerValid = () => {
+    const answerData = answers[currentStep]?.answer; // Ensure answer is correctly accessed
+
+    switch (currentQuestion.type) {
+      case "SIMPLE_QUESTION":
+        return typeof answerData === "string" && answerData.trim().length > 0;
+
+      case "MULTICHOICE_QUESTION":
+        return typeof answerData === "string" && answerData !== "Select option";
+
+      case "CATEGORY_QUESTION":
+        return typeof answerData === "object" && Object.keys(answerData).length > 0;
+
+      default:
+        return true;
+    }
+  };
+
   const renderQuestionContent = () => {
     switch (currentQuestion.type) {
       case "SIMPLE_QUESTION":
         return (
           <StyledInput
             placeholder="Type your answer here"
-            value={answers[currentStep] as string}
+            value={answers[currentStep]?.answer as string}
             onChange={handleTextChange}
           />
         )
@@ -339,7 +374,7 @@ const OnboardingForm = () => {
         return (
           <StyledSelect
             placeholder="Select an option"
-            value={answers[currentStep] as string}
+            value={answers[currentStep]?.answer as string}
             onChange={handleMultiChoiceChange}
           >
             {currentQuestion.options?.map((option: string) => (
@@ -402,11 +437,7 @@ const OnboardingForm = () => {
           <CustomButton
             text={currentStep === totalSteps - 1 ? "Finish" : "Next"}
             minWidth="390px"
-            isDisable={
-              (currentQuestion.type === "MULTICHOICE_QUESTION" && (!answers[currentStep] || answers[currentStep] === "Select option")) ||
-              (currentQuestion.type === "SIMPLE_QUESTION" && !(answers[currentStep] as string)?.trim()) ||
-              (currentQuestion.type === "CATEGORY_QUESTION" && !(answers?.[currentStep] && Object.keys(answers[currentStep])?.length))
-            }
+            isDisable={!isAnswerValid()}
             handleClick={handleNext}
             loader={loading}
           />
