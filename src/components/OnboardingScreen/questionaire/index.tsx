@@ -377,9 +377,9 @@ const OnboardingForm = () => {
             value={answers[currentStep]?.answer as string}
             onChange={handleMultiChoiceChange}
           >
-            {currentQuestion.options?.map((option: string) => (
-              <Select.Option key={option} value={option}>
-                {option}
+            {currentQuestion.options?.map((option: any, i: number) => (
+              <Select.Option key={i} value={option.text}>
+                {option.text}
               </Select.Option>
             ))}
           </StyledSelect>
