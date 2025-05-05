@@ -69,7 +69,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const { connectAsync, connectors } = useConnect();
 
-    const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token, litWalletSig: storedLitAccount, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
@@ -125,7 +125,8 @@ const Login = () => {
                         walletData: SupportedNetwork,
                         onboardingQuestions: data.data.onboardingConfig.questions,
                         customOnboarding: data.data.onboardingConfig.customOnboarding,
-                        showRoulette: data.data.showRoulette
+                        showRoulette: data.data.showRoulette,
+                        authentication: data.data.authentication,
                     }
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
@@ -310,7 +311,12 @@ const Login = () => {
     const conditionalRendrer = () => {
         switch (currentStep) {
             case 'home':
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
+                return <Home 
+                    handleLitConnect={handleLitConnect} 
+                    handleMetamaskConnect={handleMetamaskConnect} 
+                    handleGoogleConnect={handleGoogleConnect}
+                    authentication={authentication}
+                    />
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':

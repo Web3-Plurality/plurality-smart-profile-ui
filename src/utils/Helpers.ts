@@ -243,6 +243,7 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
     logo,
     onboardingQuestions,
     customOnboarding,
+    authentication,
     showRoulette,
     profileTypeStreamId,
   } = getLocalStorageValueofClient(`clientID-${currentClientId}`);
@@ -255,6 +256,7 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
     showRoulette,
     onboardingQuestions,
     customOnboarding,
+    authentication,
     profileTypeStreamId,
   };
 
