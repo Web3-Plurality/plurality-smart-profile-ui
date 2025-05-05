@@ -15,24 +15,23 @@ interface HomeProps {
 }
 
 const Home = ({ handleLitConnect, handleMetamaskConnect, handleGoogleConnect, authentication }: HomeProps) => {
-    const { email, gmail, wallet } = authentication
     return (
         <>
-            {gmail && <SocialButton
+            {authentication?.gmail && <SocialButton
                 text={'Continue with Google'}
                 icon={google}
                 handleClick={handleGoogleConnect}
                 style={"translateY(2px)"}
             />}
 
-            {email && <SocialButton
+            {authentication?.email && <SocialButton
                 text={'Continue with Email'}
                 icon={mailIcon}
                 handleClick={handleLitConnect}
                 style={"translateY(2px)"}
             />}
 
-            {wallet && <SocialButton
+            {authentication?.wallet && <SocialButton
                 text={'Continue with Metamask'}
                 icon={metamaskIcon}
                 handleClick={handleMetamaskConnect}
