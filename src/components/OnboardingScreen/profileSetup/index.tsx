@@ -137,7 +137,7 @@ const ProfileSetup = () => {
     }
   };
 
-  const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { profileTypeStreamId, token, onboardingQuestions, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
   const { avatar, username, bio } = smartProfileData.data.smartProfile
@@ -178,6 +178,10 @@ const ProfileSetup = () => {
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
         message.success("Profile updated successfully!")
         setLoading(false)
+        if (showRoulette && !onboardingQuestions.length) {
+          goToStep("socialConnect")
+          return
+        }
         goToStep('onboardingForm')
       }
 

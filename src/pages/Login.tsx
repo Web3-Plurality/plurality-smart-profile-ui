@@ -352,7 +352,12 @@ const Login = () => {
             case 'onboardingForm':
                 return <OnboardingForm />
             default:
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
+                return <Home 
+                    handleLitConnect={handleLitConnect} 
+                    handleMetamaskConnect={handleMetamaskConnect} 
+                    handleGoogleConnect={handleGoogleConnect}
+                    authentication={authentication}
+                    />
         }
     }
 
