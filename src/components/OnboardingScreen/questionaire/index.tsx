@@ -321,7 +321,7 @@ const OnboardingForm = () => {
       const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {
         onboardingData: answers,
         // customOnboarding
-      }, smartProfile: parsedUserOrbisData }, {
+      }, smartProfile: parsedUserOrbisData?.data?.smartProfile }, {
         headers: {
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
