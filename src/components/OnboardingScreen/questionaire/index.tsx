@@ -300,25 +300,28 @@ const OnboardingForm = () => {
     return categoryAnswers[category]?.includes(tag) || false;
   };
 
-  const prepareData = () => {
-    const parsedSmartProfileData = { ...parsedUserOrbisData.data.smartProfile };
+  // const prepareData = () => {
+  //   const parsedSmartProfileData = { ...parsedUserOrbisData.data.smartProfile };
 
-    // Add new data to the `extendedPublicData` object
-    parsedSmartProfileData.extendedPublicData = {
-      ...parsedSmartProfileData.extendedPublicData[clientId],
-      onboardingData: answers,
-      customOnboarding
-    };
+  //   // Add new data to the `extendedPublicData` object
+  //   parsedSmartProfileData.extendedPublicData = {
+  //     ...parsedSmartProfileData.extendedPublicData[clientId],
+  //     onboardingData: answers,
+  //     customOnboarding
+  //   };
 
-    return parsedSmartProfileData;
-  }
+  //   return parsedSmartProfileData;
+  // }
 
   const submitData = async () => {
     try {
       setLoading(true)
       const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-      const finalData = prepareData()
-      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {}, smartProfile: finalData }, {
+      // const finalData = prepareData()
+      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {
+        onboardingData: answers,
+        // customOnboarding
+      }, smartProfile: parsedUserOrbisData }, {
         headers: {
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
