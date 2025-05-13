@@ -13,6 +13,7 @@ export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
         headers: {
             Authorization: `Bearer ${token}`,
             'x-profile-type-stream-id': profileTypeStreamId,
+            'x-client-app-id': clientId,
         }
     })
     if (data.success) {
@@ -47,6 +48,7 @@ export const resetSmartProfileAction = async (profileTypeStreamId: string, strea
         headers: {
             Authorization: `Bearer ${token}`,
             'x-profile-type-stream-id': profileTypeStreamId,
+            'x-client-app-id': clientId,
         }
     })
     if (data.success) {
