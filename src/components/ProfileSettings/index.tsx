@@ -84,6 +84,7 @@ const ProfileSettings = () => {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'x-profile-type-stream-id': profileTypeStreamId,
+                    'x-client-app-id': clientId,
                 }
             })
 
