@@ -221,7 +221,7 @@ const OnboardingForm = () => {
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get("client_id") || CLIENT_ID
 
-  const { onboardingQuestions: ONBOARDING_QUESTIONS, customOnboarding, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const { onboardingQuestions: ONBOARDING_QUESTIONS, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -300,27 +300,12 @@ const OnboardingForm = () => {
     return categoryAnswers[category]?.includes(tag) || false;
   };
 
-  // const prepareData = () => {
-  //   const parsedSmartProfileData = { ...parsedUserOrbisData.data.smartProfile };
-
-  //   // Add new data to the `extendedPublicData` object
-  //   parsedSmartProfileData.extendedPublicData = {
-  //     ...parsedSmartProfileData.extendedPublicData[clientId],
-  //     onboardingData: answers,
-  //     customOnboarding
-  //   };
-
-  //   return parsedSmartProfileData;
-  // }
-
   const submitData = async () => {
     try {
       setLoading(true)
       const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-      // const finalData = prepareData()
-      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {
+      const response = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {
         onboardingData: answers,
-        // customOnboarding
       }, smartProfile: parsedUserOrbisData?.data?.smartProfile }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -329,8 +314,8 @@ const OnboardingForm = () => {
         }
       })
 
-      const { success, smartProfile } = data
-      if (success) {
+      if (response && response.data && response.data.success) {
+        const { smartProfile } = response.data
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
         setLoading(false)
         if (showRoulette) {
