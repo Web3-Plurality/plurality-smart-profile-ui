@@ -217,33 +217,33 @@ const ButtonContainer = styled.div<{ type: string }>`
   align-items: center;
 `
 
-const OnboardingForm = () => {
+const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, setCurrentStep1: (step: number) => void}) => {
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get("client_id") || CLIENT_ID
 
   const { onboardingQuestions: ONBOARDING_QUESTIONS, profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-  const [currentStep, setCurrentStep] = useState(0)
+  // const [currentStep, setCurrentStep] = useState(0)
   const { goToStep } = useStepper()
   const [answers, setAnswers] = useState<Answers>({})
   const [loading, setLoading] = useState(false)
 
   const totalSteps = ONBOARDING_QUESTIONS.length
-  const currentQuestion = ONBOARDING_QUESTIONS[currentStep]
-  const progress = ((currentStep + 1) / totalSteps) * 100
+  const currentQuestion = ONBOARDING_QUESTIONS[currentStep1]
+  const progress = ((currentStep1 + 1) / totalSteps) * 100
 
   const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1)
+    if (currentStep1 < totalSteps - 1) {
+      setCurrentStep1(currentStep1 + 1)
     } else {
       submitData()
     }
   }
 
   const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+    if (currentStep1 > 0) {
+      setCurrentStep1(currentStep1 - 1)
     } else {
       goToStep('profileSetup')
     }
@@ -252,7 +252,7 @@ const OnboardingForm = () => {
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers({
       ...answers,
-      [currentStep]: {
+      [currentStep1]: {
         question: currentQuestion.question,
         questionType: currentQuestion.type,
         answer: e.target.value,
@@ -263,7 +263,7 @@ const OnboardingForm = () => {
   const handleMultiChoiceChange = (value: unknown) => {
     setAnswers({
       ...answers,
-      [currentStep]: {
+      [currentStep1]: {
         question: currentQuestion.question,
         questionType: currentQuestion.type,
         answer: value as string,
@@ -272,31 +272,40 @@ const OnboardingForm = () => {
   };
 
   const handleTagToggle = (category: string, tag: string) => {
-    const currentAnswers = (answers[currentStep]?.answer as Record<string, string[]>) || {};
+    const currentAnswers = (answers[currentStep1]?.answer as Record<string, string[]>) || {};
     const currentTags = [...(currentAnswers[category] || [])];
     const tagIndex = currentTags.indexOf(tag);
-
+  
     if (tagIndex === -1) {
       currentTags.push(tag);
     } else {
       currentTags.splice(tagIndex, 1);
     }
-
+  
+    // Clone the currentAnswers to modify it safely
+    const updatedAnswers = { ...currentAnswers };
+  
+    if (currentTags.length === 0) {
+      // Remove the entire category if no tags remain
+      delete updatedAnswers[category];
+    } else {
+      // Otherwise, update the category with the new tags
+      updatedAnswers[category] = currentTags;
+    }
+  
     setAnswers({
       ...answers,
-      [currentStep]: {
+      [currentStep1]: {
         question: currentQuestion.question,
         questionType: currentQuestion.type,
-        answer: {
-          ...currentAnswers,
-          [category]: currentTags,
-        },
+        answer: updatedAnswers,
       },
     });
   };
+  
 
   const isTagSelected = (category: string, tag: string): boolean => {
-    const categoryAnswers = (answers[currentStep]?.answer as Record<string, string[]>) || {};
+    const categoryAnswers = (answers[currentStep1]?.answer as Record<string, string[]>) || {};
     return categoryAnswers[category]?.includes(tag) || false;
   };
 
@@ -331,7 +340,9 @@ const OnboardingForm = () => {
   }
 
   const isAnswerValid = () => {
-    const answerData = answers[currentStep]?.answer; // Ensure answer is correctly accessed
+    const answerData = answers[currentStep1]?.answer; // Ensure answer is correctly accessed
+
+    console.log("Answer Data:", answerData,currentQuestion.type )
 
     switch (currentQuestion.type) {
       case "SIMPLE_QUESTION":
@@ -354,7 +365,7 @@ const OnboardingForm = () => {
         return (
           <StyledInput
             placeholder="Type your answer here"
-            value={answers[currentStep]?.answer as string}
+            value={answers[currentStep1]?.answer as string}
             onChange={handleTextChange}
           />
         )
@@ -363,7 +374,7 @@ const OnboardingForm = () => {
         return (
           <StyledSelect
             placeholder="Select an option"
-            value={answers[currentStep]?.answer as string}
+            value={answers[currentStep1]?.answer as string}
             onChange={handleMultiChoiceChange}
           >
             {currentQuestion.options?.map((option: any, i: number) => (
@@ -424,7 +435,7 @@ const OnboardingForm = () => {
 
         <ButtonContainer type={currentQuestion.type}>
           <CustomButton
-            text={currentStep === totalSteps - 1 ? "Finish" : "Next"}
+            text={currentStep1 === totalSteps - 1 ? "Finish" : "Next"}
             minWidth="390px"
             isDisable={!isAnswerValid()}
             handleClick={handleNext}

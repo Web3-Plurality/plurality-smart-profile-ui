@@ -58,6 +58,7 @@ const Login = () => {
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
     const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
+    const [currentStep1, setCurrentStep1] = useState(0)
 
     const { currentStep, goToStep, previousStep } = useStepper()
 
@@ -350,7 +351,10 @@ const Login = () => {
             case 'profileSetup':
                     return <ProfileSetup/>
             case 'onboardingForm':
-                return <OnboardingForm />
+                return <OnboardingForm
+                currentStep1={currentStep1}
+                setCurrentStep1={setCurrentStep1}
+                 />
             default:
                 return <Home 
                     handleLitConnect={handleLitConnect} 
@@ -403,7 +407,7 @@ const Login = () => {
                 handleCancel={handleCancel}
             />
 
-            <WidgetLayout connectedPlatforms={numberOfConnectedPlatforms}> {conditionalRendrer()}</WidgetLayout>
+            <WidgetLayout connectedPlatforms={numberOfConnectedPlatforms} currentStep1={currentStep1}> {conditionalRendrer()}</WidgetLayout>
         </>
     )
 }

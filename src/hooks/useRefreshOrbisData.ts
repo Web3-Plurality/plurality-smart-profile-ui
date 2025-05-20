@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  API_BASE_URL,
   CLIENT_ID,
   EAS_BLOCKCHAIN_RPC,
   EAS_CONTRACT_ADDRESS,
@@ -31,7 +30,6 @@ import {
   createSmartProfileAction,
   resetSmartProfileAction,
 } from "../utils/SmartProfile";
-import axios from "axios";
 
 type Platform = {
   platform: string;
@@ -41,7 +39,7 @@ type Platform = {
 const useRefreshOrbisData = (step: string) => {
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get("client_id") || CLIENT_ID;
-  const { profileTypeStreamId, onboardingQuestions, token } =
+  const { profileTypeStreamId, onboardingQuestions } =
     getLocalStorageValueofClient(`clientID-${clientId}`);
 
   const { platforms } = getLocalStorageValueofClient(
@@ -92,7 +90,9 @@ const useRefreshOrbisData = (step: string) => {
       throw new Error("No rows returned from selectProfileType()");
     }
 
-    const orbisData = JSON.parse(rows?.[0]?.platforms || []);
+    const orbisData = rows?.[0]?.platforms
+      ? JSON.parse(rows?.[0]?.platforms)
+      : [];
     if (orbisData) {
       const { platforms } = getLocalStorageValueofClient(
         `streamID-${profileTypeStreamId}`
@@ -112,17 +112,19 @@ const useRefreshOrbisData = (step: string) => {
         const { profileTypeStreamId } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
-        const { smartProfileData } = getLocalStorageValueofClient(
-          `streamID-${profileTypeStreamId}`
-        );
-        const consent =
-          smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]
-            ?.consent;
+        // const { smartProfileData } = getLocalStorageValueofClient(
+        //   `streamID-${profileTypeStreamId}`
+        // );
+        // const consent =
+        //   smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]
+        //     ?.consent;
         // no profile found in orbis for this user
         await createSmartProfileAction(profileTypeStreamId);
         dispatch(updateHeader());
         setLoading(false);
-        handleUserConsentFlow(consent, "profileSetup", prevStep, goToStep);
+        goToStep("profileSetup");
+
+        // handleUserConsentFlow(consent, "profileSetup", prevStep, goToStep);
       } else {
         const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
           `clientID-${clientId}`
@@ -163,41 +165,16 @@ const useRefreshOrbisData = (step: string) => {
         const parsedExtendedPublicData = JSON.parse(
           orbisSmartProfile.extendedPublicData
         );
-        const consent = parsedExtendedPublicData?.[clientId]?.consent
-
-        console.log("New onboarding: ", !Object.prototype.hasOwnProperty.call(parsedExtendedPublicData, clientId) , parsedExtendedPublicData)
-
+        const consent = parsedExtendedPublicData?.[clientId]?.consent;
         if (
           onboardingQuestions.length &&
-          !Object.prototype.hasOwnProperty.call(parsedExtendedPublicData, clientId)
+          parsedExtendedPublicData &&
+          (!Object.prototype.hasOwnProperty.call(parsedExtendedPublicData, clientId) ||
+          !Object.prototype.hasOwnProperty.call(parsedExtendedPublicData[clientId], "onboardingData"))
         ) {
-          const consent = parsedExtendedPublicData?.[clientId]?.consent;
-          const { profileTypeStreamId } = getLocalStorageValueofClient(
-            `clientID-${clientId}`
-          );
-          // POST Request
-
-          const { data } = await axios.post(
-            `${API_BASE_URL}/user/smart-profile`,
-            { smartProfile: orbisSmartProfile },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "x-profile-type-stream-id": profileTypeStreamId,
-                "x-client-app-id": clientId,
-              },
-            }
-          );
-          if (data.success) {
-            setLoading(false);
-            handleUserConsentFlow(
-              consent,
-              "onboardingForm",
-              prevStep,
-              goToStep
-            );
-            return;
-          }
+          setLoading(false);
+          handleUserConsentFlow(consent, "onboardingForm", prevStep, goToStep);
+          return;
         }
 
         if (smartprofileData) {

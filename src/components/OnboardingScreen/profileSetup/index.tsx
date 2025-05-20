@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { message, Tag } from "antd";
+import { Tag } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
 import { getLocalStorageValueofClient } from "../../../utils/Helpers";
@@ -94,7 +94,7 @@ const BioTextArea = styled.textarea`
   font-family: "Lexend", sans-serif;
   outline: none;
 `;
-const SurpriseText = styled.p<{surprised: boolean}>`
+const SurpriseText = styled.p<{ surprised: boolean }>`
   font-size: 14px;
   color: #545454;
   margin-top: 10px;
@@ -149,10 +149,21 @@ const ProfileSetup = () => {
     setUserBio(bio)
   }
 
+  const goToNextRoute = () => {
+    if (showRoulette && !onboardingQuestions.length) {
+      goToStep("socialConnect")
+      return
+    } else if (!showRoulette && !onboardingQuestions.length) {
+      goToStep("consent")
+    } else {
+      goToStep('onboardingForm')
+    }
+  }
+
   const submitData = async () => {
     dispatch(setProfileSetupData({ parsedName: name, parsedBio: userBio, parsedImage: image }))
     if ((!name && !username && !userBio) || (avatar === image && username === name && bio === userBio)) {
-      goToStep('onboardingForm')
+      goToNextRoute()
       return
     }
     try {
@@ -162,10 +173,10 @@ const ProfileSetup = () => {
         profileImg: image,
         bio: userBio
       }
-      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, 
-        { 
-          data: payLoaddata, 
-          smartProfile: smartProfileData.data.smartProfile 
+      const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`,
+        {
+          data: payLoaddata,
+          smartProfile: smartProfileData.data.smartProfile
         }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -177,15 +188,9 @@ const ProfileSetup = () => {
       const { success, smartProfile } = data
       if (success) {
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
-        message.success("Profile updated successfully!")
         setLoading(false)
-        if (showRoulette && !onboardingQuestions.length) {
-          goToStep("socialConnect")
-          return
-        }
-        goToStep('onboardingForm')
+        goToNextRoute()
       }
-
     } catch (err) {
       console.log("Some Error:", err)
     }
