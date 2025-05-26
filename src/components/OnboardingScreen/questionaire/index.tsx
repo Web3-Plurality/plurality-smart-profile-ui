@@ -88,7 +88,7 @@ const Title = styled.h1`
 `
 
 const Content = styled.div<{ questionType: string }>`
-  padding: 16px;
+  padding: 18px;
   gap: 8px;
   margin-top: ${({ questionType }) => (questionType === "CATEGORY_QUESTION" ? "-20px" : "70px")};
 `
@@ -382,7 +382,7 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
   }
 
   const isAnswerValid = () => {
-    const answerData = answers[currentStep1]?.answer; // Ensure answer is correctly accessed
+    const answerData = answers[currentStep1]?.answer; // Ensure answer is correctly accesse
 
     switch (currentQuestion.type) {
       case "SIMPLE_QUESTION":
@@ -469,6 +469,9 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
         </Header>
 
         <Content questionType={currentQuestion.type}>
+          {currentQuestion.type !== 'CATEGORY_QUESTION' ?
+            <p className="text-[#6b7280] mb-6">Question {currentStep1 + 1} of {totalSteps}</p>
+            : null}
           <Question>{currentQuestion.question}</Question>
           <Subtitle>{currentQuestion.supportingText || ""}</Subtitle>
           {renderQuestionContent()}
