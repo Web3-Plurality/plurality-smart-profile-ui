@@ -1,12 +1,10 @@
 FROM node:20
-RUN apt-get update
-RUN mkdir /app
 WORKDIR /app
-COPY package.json /app/
-COPY package-lock.json /app/
+COPY package*.json ./
 RUN npm install --legacy-peer-deps
-COPY . /app/
+COPY . .
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 RUN npm install -g serve
 EXPOSE 3000
-CMD ["serve", "-s","dist"]
+CMD ["serve", "-s", "dist"]
