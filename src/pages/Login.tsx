@@ -7,7 +7,8 @@ import {
     getLocalStorageValueofClient,
     setLocalStorageValue,
     getParentUrl,
-    showHeader
+    showHeader,
+    isInIframe
 } from "../utils/Helpers"
 import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useState } from "react"
@@ -40,6 +41,8 @@ import Transaction from "../components/Transaction"
 import Wallet from "../components/Wallet"
 import Signing from "../components/Signing"
 import Contract from "../components/Contract"
+import ProfileSetup from "../components/OnboardingScreen/profileSetup"
+import OnboardingForm from "../components/OnboardingScreen/questionaire"
 
 const Login = () => {
 
@@ -55,8 +58,9 @@ const Login = () => {
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
     const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
+    const [currentStep1, setCurrentStep1] = useState(0)
 
-    const { currentStep, goToStep } = useStepper()
+    const { currentStep, goToStep, previousStep } = useStepper()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -66,7 +70,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const { connectAsync, connectors } = useConnect();
 
-    const { token, litWalletSig: storedLitAccount, clientId: id } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token, litWalletSig: storedLitAccount, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
@@ -74,6 +78,7 @@ const Login = () => {
     const numberOfConnectedPlatforms = profileData?.data?.smartProfile?.connectedPlatforms?.length;
 
     const parentUrl = getParentUrl()
+    const isIframe = isInIframe()
 
     const {
         message: eventMessage,
@@ -118,7 +123,11 @@ const Login = () => {
                         logo: data.data.logo,
                         links: data.data.links,
                         incentives: data.data.incentiveType,
-                        walletData: SupportedNetwork
+                        walletData: SupportedNetwork,
+                        onboardingQuestions: data.data.onboardingConfig.questions,
+                        customOnboarding: data.data.onboardingConfig.customOnboarding,
+                        showRoulette: data.data.showRoulette,
+                        authentication: data.data.authentication,
                     }
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
@@ -152,7 +161,7 @@ const Login = () => {
     }, [clientId]);
 
     useEffect(() => {
-        if (walletAddress && !token && clientId === id) {
+        if (walletAddress && clientId === id) {
             generateMetamaskToken()
             const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
             const updatedData = {
@@ -165,19 +174,6 @@ const Login = () => {
     }, [walletAddress])
 
     useEffect(() => {
-        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-        const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-        if (profileData) {
-            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
-        }
-        if (consent && (consent == 'accepted' || consent == 'rejected')) {
-            sendUserDataEvent()
-            sendProfileConnectedEvent()
-        }
-    }, [])
-
-    useEffect(() => {
         if (clientId === id) {
             if (storedLitAccount || walletAddress) {
                 goToStep(currentStep!)
@@ -188,7 +184,27 @@ const Login = () => {
             }
         }
 
-    }, [walletAddress, currentStep, storedLitAccount])
+    }, [walletAddress, currentStep, storedLitAccount, previousStep])
+
+
+    useEffect(() => {
+        const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+        const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+        const consent = profileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
+        if (profileData) {
+            window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
+        }
+
+        if(isIframe && !consent && token) {
+            goToStep('consent')
+            window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
+        }
+        if (consent && (consent == 'accepted' || consent == 'rejected')) {
+            sendUserDataEvent()
+            sendProfileConnectedEvent()
+        }
+    }, [])
+
 
     const handlePkpWithMetamaskError = (val: boolean) => {
         setPkpWithMetamaskError(val)
@@ -296,7 +312,12 @@ const Login = () => {
     const conditionalRendrer = () => {
         switch (currentStep) {
             case 'home':
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
+                return <Home 
+                    handleLitConnect={handleLitConnect} 
+                    handleMetamaskConnect={handleMetamaskConnect} 
+                    handleGoogleConnect={handleGoogleConnect}
+                    authentication={authentication}
+                    />
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
@@ -327,8 +348,20 @@ const Login = () => {
                 return <Signing />
             case 'contract':
                 return <Contract />
+            case 'profileSetup':
+                    return <ProfileSetup/>
+            case 'onboardingForm':
+                return <OnboardingForm
+                currentStep1={currentStep1}
+                setCurrentStep1={setCurrentStep1}
+                 />
             default:
-                return <Home handleLitConnect={handleLitConnect} handleMetamaskConnect={handleMetamaskConnect} handleGoogleConnect={handleGoogleConnect} />
+                return <Home 
+                    handleLitConnect={handleLitConnect} 
+                    handleMetamaskConnect={handleMetamaskConnect} 
+                    handleGoogleConnect={handleGoogleConnect}
+                    authentication={authentication}
+                    />
         }
     }
 
@@ -374,7 +407,7 @@ const Login = () => {
                 handleCancel={handleCancel}
             />
 
-            <WidgetLayout connectedPlatforms={numberOfConnectedPlatforms}> {conditionalRendrer()}</WidgetLayout>
+            <WidgetLayout connectedPlatforms={numberOfConnectedPlatforms} currentStep1={currentStep1}> {conditionalRendrer()}</WidgetLayout>
         </>
     )
 }

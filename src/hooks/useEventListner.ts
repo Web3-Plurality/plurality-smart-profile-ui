@@ -107,15 +107,15 @@ export const useRegisterEvent = () => {
                     payload = localSmartProfile.data.smartProfile
                 }
 
-                const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: payload }, {
+                const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile/exchange-profile`, { smartProfile: payload }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'x-profile-type-stream-id': profileTypeStreamId,
+                        'x-client-app-id': clientId,
                     }
                 })
 
                 if (smartProfileResponse.success) {
-                    // const litSignature = localStorage.getItem("signature")
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                     await updateSmartProfileAction(profileTypeStreamId, smartProfile)

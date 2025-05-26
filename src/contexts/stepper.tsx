@@ -62,37 +62,38 @@ export const StepperProvider: React.FC<StepperProviderProps> = ({ children }) =>
 
     const goToStep = (step: string) => {
         setStepper((prev) => {
-            const existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
-            let updatedStepper = prev
-
-            const currentStepperData = isInIframe() ? existingData?.iframeStepper : existingData?.stepper
-
+            const existingData = getLocalStorageValueofClient(`clientID-${clientId}`);
+            let updatedStepper = prev;
+    
+            const currentStepperData = isInIframe() ? existingData?.iframeStepper : existingData?.stepper;
+    
             if (currentStepperData) {
-                updatedStepper = currentStepperData
+                updatedStepper = currentStepperData;
             }
-
-            const updatedHistory = new Set(updatedStepper.stepHistory)
-            updatedHistory.add(step)
-
-            const updatedHistoryList = Array.from(updatedHistory)
-            const prevstep = updatedHistoryList[updatedHistoryList.length - 2]
-
+    
+            // Filter out the step if it already exists, then add it to the end
+            const updatedHistoryList = updatedStepper.stepHistory.filter(s => s !== step);
+            updatedHistoryList.push(step);
+    
+            const prevstep = updatedHistoryList.length > 1 ? updatedHistoryList[updatedHistoryList.length - 2] : "";
+    
             const newStepper = {
                 stepHistory: updatedHistoryList,
                 currentStep: step,
                 previousStep: prevstep,
-            }
-
+            };
+    
             const updatedData = {
                 ...existingData,
                 ...(isInIframe() ? { iframeStepper: newStepper } : { stepper: newStepper }),
-            }
-
-            setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData))
-
-            return newStepper
-        })
-    }
+            };
+    
+            setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(updatedData));
+    
+            return newStepper;
+        });
+    };
+    
 
     const goBack = () => {
         setStepper((prev) => {
@@ -111,7 +112,7 @@ export const StepperProvider: React.FC<StepperProviderProps> = ({ children }) =>
             const newStepper = {
                 stepHistory: updatedHistory,
                 currentStep: updatedHistory[updatedHistory.length - 1] || "home",
-                previousStep: updatedStepper.currentStep,
+                previousStep: updatedStepper.currentStep || "",
             }
 
             const updatedData = {

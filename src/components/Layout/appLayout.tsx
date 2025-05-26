@@ -5,9 +5,10 @@ import BackButton from './backButton';
 import WidgetContent from './widgetContent';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getBtntext, isBackBtnVisible } from '../../utils/Helpers';
+import { getBtntext, getLocalStorageValueofClient, isBackBtnVisible } from '../../utils/Helpers';
 import { selectCurrentWalletTab, selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
 import { useStepper } from '../../hooks/useStepper';
+import { CLIENT_ID } from '../../utils/EnvConfig';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -49,9 +50,10 @@ const WidgetLayoutWrapper = styled.div<WidgetLayoutWrapperProps>`
 
 
 const WidgetLayout = ({
+    currentStep1,
     connectedPlatforms,
     children,
-}: { connectedPlatforms:number,children: ReactNode }) => {
+}: { currentStep1: number, connectedPlatforms: number, children: ReactNode }) => {
 
     const { goToStep, goBack, currentStep } = useStepper()
     const showLoader = useSelector(selectLoader)
@@ -63,10 +65,17 @@ const WidgetLayout = ({
 
     const isIframe = window.self !== window.top;
 
+    const queryParams = new URLSearchParams(location.search)
+    const clientId = queryParams.get("client_id") || CLIENT_ID
+
+    const { onboardingQuestions: ONBOARDING_QUESTIONS } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const currentQuestion = ONBOARDING_QUESTIONS?.[currentStep1]
+    const currentQuestionType = currentQuestion?.type
+
     return (
         <WidgetLayoutWrapper isIframe={isIframe}>
             <div className='widget'>
-                <WidgetContent children={children} />
+                {currentStep !== 'onboardingForm' ? <WidgetContent children={children} /> : children}
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
                 {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
                 {isIframe &&
@@ -74,10 +83,12 @@ const WidgetLayout = ({
                     currentStep !== 'signing' &&
                     currentStep !== 'contract' &&
                     currentStep !== 'profile' &&
+                    (currentStep !== 'onboardingForm' || currentQuestionType !== 'CATEGORY_QUESTION') &&
                     (currentStep !== 'wallet' || (activeWalletTab !== 'receive' && activeWalletTab !== 'send')) && (
                         <PoweredByFooter />
                     )
                 }
+
             </div>
             {!isIframe && <PoweredByFooter />}
         </WidgetLayoutWrapper >

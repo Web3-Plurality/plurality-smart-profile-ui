@@ -94,7 +94,7 @@ export const socialConnectButtons = [
         iconName: "insta",
         displayName: 'Instagram',
         icon: instaIcon,
-        active: true,
+        active: false,
         activeIcon: instaIconColored
     },
     {
@@ -158,7 +158,7 @@ export const socialConnectButtons = [
         iconName: "meta",
         displayName: 'Meta',
         icon: metaIcon,
-        active: true,
+        active: false,
         activeIcon: metaIconColored
     },
     {
@@ -193,7 +193,7 @@ export const metaverseHubButtons = [
         iconName: "insta",
         displayName: 'Instagram',
         icon: instaIcon,
-        active: true,
+        active: false,
         activeIcon: instaIconColored,
     },
     {
@@ -360,4 +360,9 @@ export const overRideConsentComponents = [
     'consent',
     'contract',
     'signing',
+    'profileSetup',
+    'onboardingForm'
 ]
+
+export const hideBackButtonforSteps = ['socialConnect', 'profile', 'profileSetup', 'onboardingForm']
+export const hideBackButtonforStepsInIframe = ['socialConnect', 'profileSettings', 'profile', 'consent', 'profileSetup', 'onboardingForm']

@@ -5,36 +5,44 @@ import { data, orbisdb } from "./orbisConfig";
 
 export async function selectProfileType(stream_id: string) {
     try {
-        const selectStatement = await orbisdb
-            .select()
-            .from(data.models.profile_type)
-            .where({
-                stream_id: stream_id
-            })
-            .context(PLURALITY_CONTEXT)
-
-        const query = selectStatement.build()
-        console.log("Query that will be run", query)
-        const result = await selectStatement.run();
-        console.log(result);
-        const fetchedPlatforms: ProfileData[] = JSON.parse(result.rows[0].platforms)
-        const neededPlatforms: ProfileData[] = []
-        // set platforms this workflow needs
-        for (const platform of socialConnectButtons) {
-            // in order to minimize the changes, we use the contant as our maximal platforms, and we iterate over it based on the platforms we fetched from orbis
-            if (fetchedPlatforms.find((x: ProfileData) => x.platform === platform.displayName)) {
-                neededPlatforms.push(platform)
-            }
+      const selectStatement = await orbisdb
+        .select()
+        .from(data.models.profile_type)
+        .where({ stream_id })
+        .context(PLURALITY_CONTEXT);
+  
+      const query = selectStatement.build();
+      console.log("Query that will be run", query);
+  
+      const result = await selectStatement.run();
+      const rawPlatforms = result?.rows?.[0]?.platforms;
+  
+      let fetchedPlatforms: ProfileData[] = [];
+      if (rawPlatforms) {
+        try {
+          fetchedPlatforms = JSON.parse(rawPlatforms);
+        } catch (e) {
+          console.error("Failed to parse platforms JSON:", rawPlatforms, e);
         }
-
-        const { columns, rows } = result
-        console.log("select first: ", { columns, rows, neededPlatforms });
-        return { columns, rows, neededPlatforms };
+      }
+  
+      const neededPlatforms: ProfileData[] = [];
+  
+      for (const platform of socialConnectButtons) {
+        if (fetchedPlatforms.find((x: ProfileData) => x.platform === platform.displayName)) {
+          neededPlatforms.push(platform);
+        }
+      }
+  
+      const { columns, rows } = result;
+      console.log("select first: ", { columns, rows, neededPlatforms });
+  
+      return { columns, rows, neededPlatforms };
+    } catch (error) {
+      console.log("Error", error);
     }
-    catch (error) {
-        console.log("Error", error)
-    }
-}
+  }
+  
 
 // export async function selectProfileType() {
 //     try {
