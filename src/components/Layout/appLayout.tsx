@@ -11,6 +11,7 @@ import { useStepper } from '../../hooks/useStepper';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { setSocialConnectPath } from '../../Slice/userDataSlice';
+import { sendUserConsentEvent } from '../../utils/sendEventToParent';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -81,6 +82,7 @@ const WidgetLayout = ({
             <div className='widget'>
                 {currentStep !== 'onboardingForm' ? <WidgetContent children={children} /> : children}
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
+                // check 86-93
                 {currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
                     if(isIframe) {
                         goToStep('consent')
@@ -88,6 +90,16 @@ const WidgetLayout = ({
                     }else{
                         navigate(`dashboard?client_id=${clientId}`);
                     }
+                }} />}
+                //check 94-102
+                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
+                    const socialConnection = localStorage.getItem("connectSocail") ?? 'false';
+                    localStorage.removeItem("connectSocail")
+                    if (JSON.parse(socialConnection)) {
+                        goToStep('profile');
+                        sendUserConsentEvent()
+                    }
+                    else goToStep('consent');
                 }} />}
                 {isIframe &&
                     currentStep !== 'consent' &&
