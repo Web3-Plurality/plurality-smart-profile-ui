@@ -351,8 +351,6 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
   const isAnswerValid = () => {
     const answerData = answers[currentStep1]?.answer; // Ensure answer is correctly accessed
 
-    console.log("Answer Data:", answerData,currentQuestion.type )
-
     switch (currentQuestion.type) {
       case "SIMPLE_QUESTION":
         return typeof answerData === "string" && answerData.trim().length > 0;

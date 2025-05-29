@@ -21,6 +21,8 @@ const Header = () => {
     const [toggle, setToggle] = useState(false)
     const handleLogoutUser = useLogoutUser()
 
+    const route = window.location.pathname
+
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
@@ -48,7 +50,14 @@ const Header = () => {
     if (!isHeaderVisible) return
 
     return (
-        <div className={classNames('header-wrapper', { iframeHeader: isIframe })}>
+        <div className={classNames('header-wrapper', { iframeHeader: isIframe, dashboard: route === '/dashboard' })}>
+            {route === '/dashboard' && <img src={'/header-logo.png'} alt='logo' className='dashboard-logo' />}
+            {route === '/dashboard' && (
+                <div className='dashboard-header-links'>
+                    <p className='link-1'>Earn Points</p>
+                    <p className='link-2'>Discover<span className='discover-coming-soon'>(Coming Soon)</span></p>
+                </div>
+            )}
             <div className='user-detail'>
                 <div className='user-info'>
                     <span>{name || 'John Doe'}</span>

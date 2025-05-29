@@ -22,6 +22,7 @@ import { ErrorMessages } from './utils/Constants';
 import Unauthorized from './pages/UnAuthorizedDomain';
 import EventListener from './components/EventListener';
 import { StepperProvider } from './contexts/stepper';
+import Dashboard from './pages/Dashboard';
 
 
 
@@ -54,6 +55,7 @@ function App() {
                     <Route path="/" element={<Login />} />
                     <Route path="/auth-callback" element={<CallBackUrl />} />
                     <Route path="/auth-start" element={<AuthStart />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/unauthorized" element={<Unauthorized />} />
                     <Route path="*" element={<PageNotFound />} />
                   </Routes>

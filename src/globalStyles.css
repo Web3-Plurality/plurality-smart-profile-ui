@@ -3,7 +3,7 @@ body {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Lexend', sans-serif;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 p {
@@ -168,6 +168,17 @@ p.message-card__prompt {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 0.5rem;
+}
+
+.step-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+
+.step-list > p{
+    font-size: 1.5rem;
 }
 
 @keyframes spinner {
