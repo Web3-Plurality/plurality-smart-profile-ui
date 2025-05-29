@@ -309,6 +309,15 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
     return categoryAnswers[category]?.includes(tag) || false;
   };
 
+  const postResponse = () => {
+    setLoading(false)
+    if (showRoulette) {
+      goToStep("socialConnect")
+    } else {
+      goToStep("consent")
+    }
+  }
+
   const submitData = async () => {
     try {
       setLoading(true)
@@ -320,22 +329,22 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
           'x-client-app-id': clientId,
-        }
+        },
+        validateStatus: () => true,
       })
-
-      if (response && response.data && response.data.success) {
+      console.log("Response", response)
+      if (response.status === 200) {
         const { smartProfile } = response.data
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
-        setLoading(false)
-        if (showRoulette) {
-          goToStep("socialConnect")
-        } else {
-          goToStep("consent")
-        }
+        postResponse()
+      }else{
+        postResponse()
       }
 
     } catch (err) {
       console.log("Some Error:", err)
+    }finally {
+      setLoading(false)
     }
   }
 
