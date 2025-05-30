@@ -70,16 +70,20 @@ const Dashboard = () => {
       const queryParams = new URLSearchParams(location.search);
       const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-      const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`);
+      const { profileTypeStreamId, token } = getLocalStorageValueofClient(`clientID-${clientId}`);
       const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
       const url = import.meta.env.VITE_APP_API_BASE_URL!;
       const payload = smartProfileData?.data?.smartProfile;
 
       try {
         setIsLoading(true);
-        const response = await axios.post(`${url}/user/analyse`, {
-          smartProfile: payload
-        });
+        const response = await axios.post(
+          `${url}/user/analyse`, 
+          { smartProfile: payload },
+          { headers :{
+              Authorization: `Bearer ${token}`,
+          } } 
+        );
 
         if (response.status === 200) {
           setData(response.data.paragraph);
