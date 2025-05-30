@@ -14,6 +14,9 @@ import { useEffect, useState } from 'react';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { useLogoutUser } from '../../hooks/useLogoutUser';
 import { useStepper } from '../../hooks/useStepper';
+import {useMediaQuery} from 'react-responsive';
+import { breakpoints } from '../../utils/breakpoints';
+import { Avatar } from 'antd';
 
 const isIframe = window.location !== window.parent.location
 
@@ -47,41 +50,75 @@ const Header = () => {
         setToggle(!toggle)
     }, [shouldUpdate])
 
+    const isMobile = useMediaQuery({ maxWidth: breakpoints.mobile });
+    const isTablet = useMediaQuery({ 
+        minWidth: breakpoints.mobile + 1, 
+        maxWidth: breakpoints.tablet 
+    });
+    const isDesktop = useMediaQuery({ minWidth: breakpoints.tablet + 1 });
+
+
     if (!isHeaderVisible) return
 
     return (
-        <div className={classNames('header-wrapper', { iframeHeader: isIframe, dashboard: route === '/dashboard' })}>
-            {route === '/dashboard' && <img src={'/header-logo.png'} alt='logo' className='dashboard-logo' />}
+        <div className={classNames('header-wrapper', { 
+            iframeHeader: isIframe, 
+            dashboard: route === '/dashboard',
+            'mobile-header': isMobile,
+            'tablet-header': isTablet
+        })}>
+            {/* Logo - always shown */}
             {route === '/dashboard' && (
-                <div className='dashboard-header-links'>
-                    <p className='link-1'>Earn Points</p>
-                    <p className='link-2'>Discover<span className='discover-coming-soon'>(Coming Soon)</span></p>
+                <img src={'/header-logo.png'} alt='logo' className='dashboard-logo' />
+            )}
+
+            {/* Desktop View - show full header */}
+            {isDesktop && (
+                <>
+                    {route === '/dashboard' && (
+                        <div className='dashboard-header-links'>
+                            <p className='link-1'>Earn Points</p>
+                            <p className='link-2'>Discover<span className='discover-coming-soon'>(Coming Soon)</span></p>
+                        </div>
+                    )}
+                    <div className='user-detail'>
+                        <div className='user-info'>
+                            <span>{name || 'John Doe'}</span>
+                            {incentiveType && incentiveType === 'POINTS' && (
+                                <div className='icon-box'>
+                                    <span>{score || 0}</span>
+                                    <CustomIcon path={BadgeIcon} />
+                                </div>
+                            )}
+                            {incentiveType && incentiveType === 'STARS' && (
+                                <div>
+                                    <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
+                                </div>
+                            )}
+                        </div>
+                        <Drawer
+                            handleLogout={handleLogoutUser}
+                            address={metamaskAddress || litAddress}
+                            isMobile={isMobile}
+                            isTablet={isTablet}
+                        />
+                    </div>
+                </>
+            )}
+
+            {/* Tablet/Mobile View - simplified header */}
+            {(isTablet || isMobile) && (
+                <div className='compact-header'>
+                    <Drawer
+                        handleLogout={handleLogoutUser}
+                        address={metamaskAddress || litAddress}
+                        isMobile={isMobile}
+                        isTablet={isTablet}
+                    />
                 </div>
             )}
-            <div className='user-detail'>
-                <div className='user-info'>
-                    <span>{name || 'John Doe'}</span>
-                    {incentiveType && incentiveType === 'POINTS' && (
-                        <div className='icon-box'>
-                            <span>{score || 0}</span>
-                            <CustomIcon path={BadgeIcon} />
-                        </div>
-                    )}
-
-                    {incentiveType && incentiveType === 'STARS' && (
-                        <div>
-                            <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
-                        </div>
-                    )}
-
-                </div>
-                <Drawer
-                    handleLogout={handleLogoutUser}
-                    address={metamaskAddress || litAddress}
-                />
-            </div>
         </div>
-    )
-}
+    );
+};
 
 export default Header

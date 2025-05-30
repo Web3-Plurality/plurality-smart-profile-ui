@@ -41,6 +41,10 @@ function App() {
     }
   }, [isMobileScreen]);
 
+  const pathname = window.location.pathname;
+
+  console.log('Current Pathname:', pathname);
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -49,7 +53,7 @@ function App() {
             <StytchProvider stytch={stytch}>
               <StepperProvider>
                 <Router>
-                  {!isTabScreen && !isMobileScreen && <Header />}
+                  {(!isMobileScreen && !isTabScreen) || pathname === '/dashboard' ? <Header /> : null}
                   <EventListener />
                   <Routes>
                     <Route path="/" element={<Login />} />

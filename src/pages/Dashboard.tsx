@@ -26,7 +26,6 @@ const AntMessageStyle = createGlobalStyle`
 `;
 
 const Wrapper = styled.div`
-  position: relative;
   min-height: 100vh;
   width: 100%;
   background-image: url('/dashboard-bg.png?height=1080&width=1920');
@@ -36,8 +35,7 @@ const Wrapper = styled.div`
 `;
 
 const Content = styled.div`
-  position: relative;
-  z-index: 1;
+
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -48,6 +46,7 @@ const Content = styled.div`
     flex-direction: column;
     align-items: center;
     padding: 2rem;
+    gap: 4rem
   }
 `;
 
@@ -105,6 +104,7 @@ const Dashboard = () => {
 
     fetchHighlights();
   }, []);
+  
 
   return (
     <>
@@ -120,7 +120,7 @@ const Dashboard = () => {
           </ConfettiWrapper>
         )}
         <Content>
-          <StepList />
+          <StepList data={data}/>
           <ProfileHighlight data={data} isLoading={isLoading} />
         </Content>
       </Wrapper>

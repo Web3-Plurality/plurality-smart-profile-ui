@@ -9,14 +9,13 @@ const StepsWrapper = styled.div`
   align-items: flex-start;
 
   @media (max-width: 768px) {
-    align-items: center;
+    margin-top: 2rem;
   }
 `;
 
-
 const StepItem = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   position: relative;
 `;
 
@@ -59,12 +58,14 @@ const StepText = styled.p`
   line-height: 1.5;
   color: black;
   white-space: normal;
-  max-width: 300px;
+  max-width: 550px;
+
+  @media (max-width: 1024px) {
+    max-width: 100%;
+  }
 
   @media (max-width: 768px) {
     font-size: 18px;
-    max-width: 100%;
-    text-align: center;
   }
 
   @media (max-width: 480px) {
@@ -84,47 +85,65 @@ const ComingSoon = styled.span`
   font-style: italic;
 `;
 
-const StepList = () => {
+const StepList = ({ data}:{data: string | null}) => {
   const navigate = useNavigate()
 
-      const queryParams = new URLSearchParams(location.search);
-      const clientId = queryParams.get('client_id') || CLIENT_ID;
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-  return(
-  <div className='step-list'>
-  <p>Earn more points by</p>
-  <StepsWrapper>
-    <StepItem>
-      <StepMarker>
-        <StepCircle>1</StepCircle>
-        <VerticalConnector />
-      </StepMarker>
-      <StepText>
-        <LinkText onClick={() => navigate(`/?client_id=${clientId}`)}>Connecting</LinkText> more platforms in your profile
-      </StepText>
-    </StepItem>
+  const handleShare = () => {
+    // Get the current URL
+    const url = encodeURIComponent('https://app.plurality.network');
 
-    <StepItem>
-      <StepMarker>
-        <StepCircle>2</StepCircle>
-        <VerticalConnector />
-      </StepMarker>
-      <StepText>
-        Share what your profile thinks the <LinkText>best thing about you</LinkText>
-      </StepText>
-    </StepItem>
+    // Create the tweet text with hashtags
+    const text = encodeURIComponent(`${data} #PluralityWeb3`);
 
-    <StepItem>
-      <StepMarker>
-        <StepCircle>3</StepCircle>
-        {/* No connector for last item */}
-      </StepMarker>
-      <StepText>
-        Try out apps that match your taste <ComingSoon>(Coming Soon)</ComingSoon>
-      </StepText>
-    </StepItem>
-  </StepsWrapper>
-  </div>
-)};
+    // Open Twitter with pre-filled tweet
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  };
+
+
+
+  return (
+    <div className='step-list'>
+      <p>Earn more points by</p>
+      <StepsWrapper>
+        <StepItem>
+          <StepMarker>
+            <StepCircle>1</StepCircle>
+            <VerticalConnector />
+          </StepMarker>
+          <StepText>
+            <LinkText onClick={() => navigate(`/?client_id=${clientId}`)}>Connecting</LinkText> more platforms in your profile
+          </StepText>
+        </StepItem>
+
+        <StepItem>
+          <StepMarker>
+            <StepCircle>2</StepCircle>
+            <VerticalConnector />
+          </StepMarker>
+          <StepText>
+            Share what your profile thinks the <LinkText onClick={handleShare}>best thing about you</LinkText>
+          </StepText>
+        </StepItem>
+
+        <StepItem>
+          <StepMarker>
+            <StepCircle>3</StepCircle>
+            {/* No connector for last item */}
+          </StepMarker>
+          <StepText>
+            Try out apps that match your taste <ComingSoon>(Coming Soon)</ComingSoon>
+          </StepText>
+        </StepItem>
+      </StepsWrapper>
+    </div>
+  )
+};
 
 export default StepList;
