@@ -30,6 +30,7 @@ import {
   createSmartProfileAction,
   resetSmartProfileAction,
 } from "../utils/SmartProfile";
+import { sendUserDataEvent } from "../utils/sendEventToParent";
 
 type Platform = {
   platform: string;
@@ -173,7 +174,9 @@ const useRefreshOrbisData = (step: string) => {
           !Object.prototype.hasOwnProperty.call(parsedExtendedPublicData[clientId], "onboardingData"))
         ) {
           setLoading(false);
-          handleUserConsentFlow(consent, "onboardingForm", prevStep, goToStep);
+          goToStep("onboardingForm");
+          sendUserDataEvent();
+          // handleUserConsentFlow(consent, "onboardingForm", prevStep, goToStep);
           return;
         }
 
