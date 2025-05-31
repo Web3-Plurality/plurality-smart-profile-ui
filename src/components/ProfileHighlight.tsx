@@ -47,27 +47,25 @@ const TextContent = styled.div<{wordsLength: number}>`
   text-align: left;
 
   @media (max-width: 1024px) {
-    position: static;
-    transform: none;
-    margin-top: 1.5rem;
-    text-align: center;
+       position: absolute;
+    top: ${({ wordsLength }) => (wordsLength > 45 ? '60%' : '44%')};
   }
 
     @media (max-width: 768px) {
     position: absolute;
-    top: ${({ wordsLength }) => (wordsLength > 45 ? '40%' : '44%')};
+    top: ${({ wordsLength }) => (wordsLength > 45 ? '60%' : '44%')};
     left: 12%;
   }
 
   @media (max-width: 430px) {
     position: absolute;
-    top: ${({ wordsLength }) => (wordsLength > 45 ? '33%' : '36%')};
+    top: ${({ wordsLength }) => (wordsLength > 45 ? '61%' : '36%')};
     left: 12%;
   }
 
     @media (max-width: 380px) {
     position: absolute;
-    top: ${({ wordsLength }) => (wordsLength > 45 ? '28%' : '30%')};
+    top: ${({ wordsLength }) => (wordsLength > 45 ? '60%' : '30%')};
     left: 12%;
   }
 `;

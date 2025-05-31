@@ -2,9 +2,8 @@
   display: flex;
   /* flex-direction: column; */
   justify-content: flex-end;
-  align-items: center;
   padding: 16px;
-  background-color: #efefef;
+  background-color: #EFEFEF;
   position: fixed;
   top: 0;
   left: 0;
@@ -13,6 +12,7 @@
 }
 
 .header-wrapper.dashboard {
+  width: 100%;
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
@@ -24,7 +24,7 @@
     gap: 3.5rem
 }
 
-.link-1:hover, .link-2:hover{
+.link-1:hover{
     cursor: pointer;
     text-decoration: underline;
 }
@@ -34,18 +34,24 @@
 }
 
 .dashboard-logo {
-    max-height: 48px; /* Or whatever your header height allows */
-    height: auto;
-    width: auto;
-    object-fit: contain;
-    display: block;
-  }
+  max-height: 48px;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
 
 .mobile-header-wrapper {
   position: absolute;
   top: 23px;
   right: 2px;
   cursor: pointer;
+}
+
+.dashboard-header-links{
+  display: flex;
+  align-items: center;
+  gap: 3.5rem
 }
 
 .iframeHeader {
@@ -56,14 +62,17 @@
 .user-detail {
   display: flex;
   align-items: center;
-  /* justify-content: space-around; */
   gap: 16px;
+}
+
+.userDetailDashboard{
+  margin-right: 40px;
 }
 
 .user-detail-mobile {
   display: flex;
   /* align-items: center;
-    gap: 16px; */
+  gap: 16px; */
 }
 
 .user-detail-mobile .icon-box {
@@ -81,19 +90,22 @@
   margin-top: 5px;
 }
 
+
+
 .mobile-scores {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-right: 10px;
   padding: 2px;
-  gap: 3px;
+  gap: 3px
 }
 
 .mobile-scores img {
   margin-bottom: 3px;
   position: relative;
   margin-left: 2px;
+
 }
 
 .options-wrapper {
@@ -102,83 +114,184 @@
 
 @media (max-width: 1280px) {
   .header-wrapper {
-    right: 230px;
+      right: 230px;
   }
 }
 
 @media (max-width: 835px) {
   .header-wrapper {
-    /* display: none; */
-    right: 100px;
+      display: none;
+      right: 100px;
   }
+
+  .header-wrapper.dashboard {
+    display: block;
+}
 
   .options-wrapper {
-    margin-left: 30px;
+      margin-left: 30px;
   }
 }
 
-@media (max-width: 1285px) {
-  .header-wrapper.dashboard {
-      width: 100%;
-      
-  }
+/* Header Wrapper */
+/* .header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 60px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+} */
 
-  .user-detail {
-    margin-right: 40px;
-  }
+.header-wrapper.dashboard {
+  background-color: #f8f9fa;
 }
 
-/* Mobile and Tablet shared styles */
-.mobile-header, .tablet-header {
+.header-wrapper.mobile-view.dashboard {
   justify-content: space-between;
 }
 
-.compact-user-info {
+/* Dashboard Logo */
+/* .dashboard-logo {
+  height: 30px;
+  width: auto;
+} */
+
+/* Dashboard Header Links */
+.dashboard-header-links {
+  display: flex;
+  gap: 20px;
+  margin-left: 20px;
+}
+
+.dashboard-header-links p {
+  margin: 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+}
+
+.dashboard-header-links p:hover {
+  color: #00CEBA;
+}
+
+.discover-coming-soon {
+  font-size: 0.8em;
+  margin-left: 5px;
+  color: #999;
+}
+
+/* User Detail */
+.user-detail {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
-/* Tablet specific styles */
-.tablet-dropdown-trigger {
-  position: relative;
+/* .user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+} */
+
+.icon-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 12px;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 8px;
+  margin-right: 30px;
 }
 
-.tablet-dropdown {
+.hamburger-menu svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Mobile Dashboard Menu */
+.mobile-dashboard-menu {
   position: absolute;
-  top: 100%;
+  top: 60px;
   right: 0;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 1rem;
-  z-index: 100;
+  width: 250px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 0 8px;
+  padding: 15px;
+  z-index: 999;
 }
 
-/* Mobile specific styles */
-.mobile-header .user-detail {
-  display: none; /* Hide regular user detail in mobile */
+.mobile-user-info {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+  justify-content: space-between;
+  margin-right: 40px;
 }
 
-/* Drawer Wrapper */
+.mobile-user-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.mobile-icon-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mobile-menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-link {
+  margin: 0;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.mobile-link:hover {
+  color: #00CEBA;
+}
+
+/* Drawer Styles */
 .drawer-wrapper {
   display: flex;
   align-items: center;
 }
 
-/* Tablet Styles */
 .avatar-trigger {
   cursor: pointer;
 }
 
-.tablet-avatar {
+.desktop-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-/* Mobile Styles */
 .mobile-trigger {
   cursor: pointer;
   padding: 8px;
@@ -189,15 +302,17 @@
   height: 24px;
 }
 
+/* Mobile Drawer Content */
 .mobile-drawer-content {
   padding: 20px;
 }
 
-.mobile-user-info {
+/* .mobile-user-info {
   display: flex;
+  flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
-}
+} */
 
 .mobile-avatar {
   margin-right: 16px;
@@ -243,151 +358,18 @@
   border-bottom: none;
 }
 
-/* Desktop Styles */
-.desktop-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* Header Wrapper */
-.header-wrapper {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  height: 60px;
-  background-color: #efefef;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
-
-/* Mobile Header */
-.mobile-header {
-  justify-content: space-between;
-}
-
-/* Tablet Header */
-.tablet-header {
-  justify-content: space-between;
-}
-
-/* Compact Header */
-.compact-header {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-
-/* Drawer Wrapper */
-.drawer-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-/* Avatar Triggers */
-.avatar-trigger {
-  cursor: pointer;
-}
-
-.mobile-trigger {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-/* Avatar Images */
-.desktop-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.tablet-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.mobile-avatar-img {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-/* Dropdown Menus */
-.tablet-dropdown .ant-dropdown-menu {
-  min-width: 200px;
-}
-
-.desktop-dropdown .ant-dropdown-menu {
-  min-width: 220px;
-}
-
-/* Mobile Drawer */
-.mobile-drawer-content {
-  padding: 20px;
-}
-
-.mobile-user-info {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.mobile-avatar {
-  margin-right: 16px;
-}
-
-.mobile-avatar img {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.mobile-user-details h3 {
-  margin: 0;
-  font-size: 18px;
-  color: #333;
-}
-
-.mobile-user-details .address {
-  margin: 4px 0 0;
-  color: #666;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.mobile-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.mobile-menu-item {
-  padding: 12px 0;
-  font-size: 16px;
-  color: #333;
-  cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.mobile-menu-item:last-child {
-  border-bottom: none;
-}
-
-@media (max-width: 1024px) {
-  .compact-header {
-    margin-right: 40px;
-      
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .header-wrapper.dashboard {
+    display: flex;
+      right: 0;
+  }
+  
+  .dashboard-header-links {
+      display: none;
+  }
+  
+  .user-detail:not(.userDetailDashboard) {
+      display: none;
   }
 }
