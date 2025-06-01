@@ -298,7 +298,7 @@ const redirectUserOnLogout = (
 ) => {
   let path = "/";
   if (appClientId) {
-    path = `${location.pathname}?client_id=${currentClientId}`;
+    path = `${path}?client_id=${currentClientId}`;
   }
 
   return path;

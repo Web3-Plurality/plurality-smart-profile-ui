@@ -251,21 +251,21 @@ const useRefreshOrbisData = (step: string) => {
           }
         } else {
           // the profile is not present in localstorage so we take the orbis profile
-          let privataDataObj;
+          let privateDataObj;
           if (!orbisSmartProfile.privateData) {
             // the privata data is empty it means we need to initialize the object
-            privataDataObj = new ProfilePrivateData();
+            privateDataObj = new ProfilePrivateData();
           } else {
             // the privata data is not empty it means we need to decrypt the data
-            const privataDataObj = await decryptData(
+            privateDataObj = await decryptData(
               orbisSmartProfile.privateData
             );
-            if (privataDataObj.code === -32603) {
+            if (privateDataObj.code === -32603) {
               goToStep("success");
               return;
             }
           }
-          await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
+          await deserializeSmartProfile(orbisSmartProfile, privateDataObj);
 
           // verify attestation
           const smartProfile = normalizeSmartProfile(orbisSmartProfile);

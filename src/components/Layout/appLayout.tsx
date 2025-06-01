@@ -9,6 +9,7 @@ import { getBtntext, getLocalStorageValueofClient, isBackBtnVisible } from '../.
 import { selectCurrentWalletTab, selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
 import { useStepper } from '../../hooks/useStepper';
 import { CLIENT_ID } from '../../utils/EnvConfig';
+import { useNavigate } from 'react-router-dom';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -56,6 +57,7 @@ const WidgetLayout = ({
 }: { currentStep1: number, connectedPlatforms: number, children: ReactNode }) => {
 
     const { goToStep, goBack, currentStep } = useStepper()
+    const navigate = useNavigate()
     const showLoader = useSelector(selectLoader)
     const profileConnected = useSelector(selectProfileConnected)
     const activeWalletTab = useSelector(selectCurrentWalletTab)
@@ -77,7 +79,13 @@ const WidgetLayout = ({
             <div className='widget'>
                 {currentStep !== 'onboardingForm' ? <WidgetContent children={children} /> : children}
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
-                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => goToStep('consent')} />}
+                {currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
+                    if(isIframe) {
+                        goToStep('consent')
+                    }else{
+                        navigate(`dashboard?client_id=${clientId}`);
+                    }
+                }} />}
                 {isIframe &&
                     currentStep !== 'consent' &&
                     currentStep !== 'signing' &&
