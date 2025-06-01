@@ -93,14 +93,14 @@ const StepList = ({ data}:{data: string | null}) => {
 
   const handleShare = () => {
     // Get the current URL
-    const url = encodeURIComponent('https://app.plurality.network');
+    //const heading = encodeURIComponent('Here is what @PluralityWeb3 thinks about me 👇');
 
     // Create the tweet text with hashtags
-    const text = encodeURIComponent(`${data} #PluralityWeb3`);
+    const text = encodeURIComponent(`Here is what @PluralityWeb3 thinks about me 👇\n${data}`);
 
     // Open Twitter with pre-filled tweet
     window.open(
-      `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      `https://twitter.com/intent/tweet?text=${text}`,
       '_blank',
       'noopener,noreferrer'
     );
