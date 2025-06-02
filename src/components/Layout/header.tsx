@@ -3,14 +3,15 @@ import styled from 'styled-components'
 import { getDescription, getLocalStorageValueofClient, getTitleText } from '../../utils/Helpers'
 import { useStepper } from '../../hooks/useStepper'
 import { CLIENT_ID } from '../../utils/EnvConfig'
+import useResponsive from '../../hooks/useResponsive'
 
-const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string }>`
+const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string, mobileHeaderText: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: ${({ isIframe, currentStep }) => (isIframe && (currentStep === 'litLogin' || currentStep === 'otp') ? '30%'
-    : isIframe && (currentStep === 'dashboard' || currentStep === 'home' || currentStep === 'wallet') ? '12%' : '')};
+  margin-top: ${({ isIframe, currentStep, mobileHeaderText }) => (isIframe && (currentStep === 'litLogin' || currentStep === 'otp') ? '30%'
+    : isIframe && (currentStep === 'dashboard' || currentStep === 'home' || currentStep === 'wallet') ? '12%' : (mobileHeaderText && !isIframe && (currentStep === 'litLogin' || currentStep === 'otp')) ? '20%': mobileHeaderText && !isIframe && (currentStep === 'success')? '30%' : '')};
 
   &.toggleShow {
     display: none;
@@ -96,7 +97,8 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string 
     }
 
     @media (max-width: 440px) {
-      font-size: 16px !important;
+      max-width: 235px !important;
+      font-size: 12px !important;
     }
 
     @media (max-width: 400px) {
@@ -118,12 +120,16 @@ export default function WidgetHeader() {
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get('client_id') || CLIENT_ID;
 
+  const {isExtraSmallScreen, isMobileScreen } = useResponsive();
+
+  const mobileHeaderText = isMobileScreen || isExtraSmallScreen;
+
   const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { platforms: socailIcons } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
   const socilasLength = socailIcons?.length
 
   return (
-    <WidgetHeaderWrapper id="w-header" isIframe={isIframe} currentStep={currentStep}>
+    <WidgetHeaderWrapper id="w-header" isIframe={isIframe} currentStep={currentStep} mobileHeaderText={mobileHeaderText}>
       <h1 className={
         classNames({
           isdescription: description,
@@ -142,7 +148,7 @@ export default function WidgetHeader() {
         {title}
       </h1>
       {description && (
-        <p className={classNames({ successDescription: currentStep === "success" })}>
+        <p className={classNames({ successDescription: currentStep === "success", mobileDesktopDescription: mobileHeaderText && !isIframe })}>
           {description}
         </p>
       )}

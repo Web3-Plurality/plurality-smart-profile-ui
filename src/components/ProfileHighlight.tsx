@@ -117,7 +117,7 @@ const MobileQuoteContent = styled.div`
 
 const DesktopTextContent = styled.div<{wordsLength: number}>`
   position: absolute;
-  top: ${({ wordsLength }) => (wordsLength > 45 ? '60%' : '44%')};
+  top: 60%;
   left: 22%;
   transform: translateY(-50%);
   text-align: left;

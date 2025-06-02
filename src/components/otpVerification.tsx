@@ -52,7 +52,7 @@ const Input = styled.input`
         color: white;
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 440px) {
         width: 25px!important;
         height: 2rem!important;
         margin-left: 15px!important;

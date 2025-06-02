@@ -15,6 +15,7 @@ import { hideBackButtonforSteps, hideBackButtonforStepsInIframe } from "../../ut
 interface WidgetContentWrapperProps {
     isIframe: boolean;
     currentStep: string;
+    mobileHeader: boolean;
 }
 
 const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
@@ -27,7 +28,7 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
 
     .app-logo {
         position: absolute;
-        bottom: ${({ isIframe, currentStep }) => ((isIframe && currentStep === 'home') ? '80%' : (isIframe && currentStep !== 'home') ? '87%' : '100%')};
+        bottom: ${({ isIframe, currentStep, mobileHeader }) => ((isIframe && currentStep === 'home') ? '80%' : (mobileHeader && currentStep === 'home') ? '85%' : ((isIframe || mobileHeader) && currentStep !== 'home') ? '87%' : '100%')};
         left: 50%;
         transform: translate(-50%, 50%);
         height: 120px;
@@ -68,11 +69,12 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)
 
+    const mobileHeader = isMobileScreen || isExtraSmallScreen
 
     const isSmallScreen = isTabScreen || isMobileScreen || isExtraSmallScreen 
 
     return (
-        <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep}>
+        <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep} mobileHeader={mobileHeader}>
             {showWidgetLogo && plaformImg && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />

@@ -30,7 +30,7 @@ const InputField = styled(Input)`
         resize: none;
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 440px) {
         max-width: 310px;
     }
 `;
