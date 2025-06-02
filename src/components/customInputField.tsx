@@ -29,6 +29,10 @@ const InputField = styled(Input)`
         box-sizing: border-box;
         resize: none;
     }
+
+    @media (max-width: 420px) {
+        max-width: 310px;
+    }
 `;
 
 const StyledTextAreaContainer = styled.div`
