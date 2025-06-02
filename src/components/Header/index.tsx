@@ -124,7 +124,10 @@ const Header = () => {
                             <div className="mobile-menu-links">
                                 <p className='mobile-link' onClick={() => navigate(`/?client_id=${clientId}`)}>Earn Points</p>
                                 <p className='mobile-link'>Discover<span className='discover-coming-soon'>(Coming Soon)</span></p>
-                                <p className='mobile-link' onClick={() => goToStep('profileSettings')}>Profile Settings</p>
+                                <p className='mobile-link' onClick={() => {
+                                    goToStep('profileSettings');
+                                    navigate(`/?client_id=${clientId}`);
+                                }}>Profile Settings</p>
                                 <p className='mobile-link' role='button' onClick={() => handleLogoutUser()}>Logout</p>
                             </div>
                         </div>

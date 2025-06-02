@@ -175,6 +175,7 @@ p.message-card__prompt {
     flex-direction: column;
     gap: 0.5rem;
     padding: 1rem;
+    margin: 0 auto;
 }
 
 @media (max-width: 1024px) {

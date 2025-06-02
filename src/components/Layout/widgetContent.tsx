@@ -64,12 +64,12 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
         ? isSocialConnectWithFewPlatforms || isNotProfileOrSocialConnect
         : isSocialConnectWithFewPlatforms || isNotProfileSettingsOrConsent;
 
-    const { isTabScreen, isMobileScreen } = useResponsive()
+    const { isTabScreen, isMobileScreen, isExtraSmallScreen } = useResponsive()
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
     const text = getBtntext(currentStep)
 
 
-    const isSmallScreen = isTabScreen || isMobileScreen
+    const isSmallScreen = isTabScreen || isMobileScreen || isExtraSmallScreen 
 
     return (
         <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep}>

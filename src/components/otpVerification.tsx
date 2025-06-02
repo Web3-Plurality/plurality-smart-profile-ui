@@ -51,6 +51,16 @@ const Input = styled.input`
         background-color: black;
         color: white;
     }
+
+    @media (max-width: 420px) {
+        width: 25px!important;
+        height: 2rem!important;
+        margin-left: 15px!important;
+
+        &:first-child {
+            margin-left: 0!important;
+        }
+    }
 `;
 
 const CodeResend = styled.p`
