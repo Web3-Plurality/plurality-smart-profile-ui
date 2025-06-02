@@ -50,7 +50,7 @@ const SocialButtonWrapper = styled(Button) <{ styleProp?: string }>`
         }
     }
 
-    @media (max-width: 420px) {
+    @media (max-width: 440px) {
         min-width: calc(100% - 40px);
     }
 

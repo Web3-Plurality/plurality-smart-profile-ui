@@ -18,6 +18,10 @@ const FooterWrapper = styled.div`
         width: 80px;
         margin-top: 2px;
     }
+
+    @media (max-width: 575px) {
+        display: none;
+    }
 `;
 
 const PoweredByFooter = () => {
