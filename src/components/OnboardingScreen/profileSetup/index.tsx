@@ -43,6 +43,12 @@ const Avatar = styled.img`
   border-radius: 100px;
   box-shadow: 5px 4px 8px rgba(0, 0, 0, 0.25);
   background: #e0e0e0;
+
+  @media (max-width: 400px) {
+    width: 100px;
+    height: 100px;
+  }
+
 `;
 
 const FileInput = styled.input`
@@ -65,6 +71,10 @@ const UploadLabel = styled.label`
     background: #e0e0e0;
     transform: scale(1.05);
   }
+
+  @media (max-width: 400px) {
+    font-size: 12px;
+  }
 `;
 
 const Input = styled.input`
@@ -78,6 +88,9 @@ const Input = styled.input`
   margin-top: 10px;
   font-family: "Lexend", sans-serif;
   outline: none;
+  @media (max-width: 400px) {
+    font-size: 12px;
+  }
 `;
 
 const BioTextArea = styled.textarea`
@@ -93,6 +106,9 @@ const BioTextArea = styled.textarea`
   resize: none;
   font-family: "Lexend", sans-serif;
   outline: none;
+  @media (max-width: 400px) {
+    font-size: 12px;
+  }
 `;
 const SurpriseText = styled.p<{ surprised: boolean }>`
   font-size: 14px;
@@ -101,6 +117,10 @@ const SurpriseText = styled.p<{ surprised: boolean }>`
   cursor:pointer;
   cursor: ${({ surprised }) => (surprised ? 'not-allowed' : 'pointer')};
   opacity: ${({ surprised }) => (surprised ? 0.5 : 1)};
+  @media (max-width: 400px) {
+  margin-top: 20px;
+    font-size: 12px;
+  }
 `;
 
 const ButtonGroup = styled.div`
