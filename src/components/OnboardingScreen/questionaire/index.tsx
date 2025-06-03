@@ -48,6 +48,9 @@ const Card = styled.div`
   align-items: stretch;
   border-radius: 24px;
   min-height: 500px;
+  @media (max-width: 440px) {
+            width: auto; 
+        }
 `
 
 const Header = styled.div<{ questionType: string }>`
@@ -87,7 +90,7 @@ const Title = styled.h1`
 const Content = styled.div<{ questionType: string }>`
   padding: 16px;
   gap: 8px;
-  margin-top: ${({ questionType }) => (questionType === "CATEGORY_QUESTION" ? "0" : "70px")};
+  margin-top: ${({ questionType }) => (questionType === "CATEGORY_QUESTION" ? "-20px" : "70px")};
 `
 
 const Question = styled.h2`
