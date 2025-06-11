@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Input, Select, Tag } from "antd"
 import styled from "styled-components"
 import CustomButton from "../../customButton"
@@ -123,7 +123,7 @@ const StyledInput = styled(Input)`
   }
 `
 
-const StyledSelect = styled(Select)`
+const StyledSelect = styled(Select)<{isIframe: boolean}>`
   width: 400px;
   margin: 20px 0;
   .ant-select-selector {
@@ -137,6 +137,15 @@ const StyledSelect = styled(Select)`
     font-size: 16px;
     display: flex;
     align-items: center;
+  }
+
+  @media (max-width: 440px) {
+    max-width: ${({ isIframe }) => (isIframe ? "338px" : "352px")};
+   ; 
+  }
+
+  @media (max-width: 380px) {
+    max-width: ${({ isIframe }) => (isIframe ? "288px" : "300px")};
   }
 `
 
@@ -220,7 +229,7 @@ const ButtonContainer = styled.div<{ type: string }>`
   align-items: center;
 `
 
-const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, setCurrentStep1: (step: number) => void}) => {
+const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: number, setCurrentStep1: (step: number) => void }) => {
   const queryParams = new URLSearchParams(location.search)
   const clientId = queryParams.get("client_id") || CLIENT_ID
 
@@ -231,14 +240,25 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
   const { goToStep } = useStepper()
   const [answers, setAnswers] = useState<Answers>({})
   const [loading, setLoading] = useState(false)
+  const tagsContainerRef = useRef<HTMLDivElement>(null)
 
   const totalSteps = ONBOARDING_QUESTIONS.length
   const currentQuestion = ONBOARDING_QUESTIONS[currentStep1]
   const progress = ((currentStep1 + 1) / totalSteps) * 100
 
+  // Reset scroll position when navigating between questions
+  const resetScroll = () => {
+    if (tagsContainerRef.current) {
+      tagsContainerRef.current.scrollTop = 0
+    }
+  }
+
+  // Use this in handleNext and handleBack
   const handleNext = () => {
     if (currentStep1 < totalSteps - 1) {
       setCurrentStep1(currentStep1 + 1)
+      // Reset scroll position after state update
+      setTimeout(resetScroll, 0)
     } else {
       submitData()
     }
@@ -247,10 +267,18 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
   const handleBack = () => {
     if (currentStep1 > 0) {
       setCurrentStep1(currentStep1 - 1)
+      // Reset scroll position after state update
+      setTimeout(resetScroll, 0)
     } else {
       goToStep('profileSetup')
     }
   }
+
+  // Also reset scroll when component mounts or currentStep1 changes
+  useEffect(() => {
+    // Use setTimeout to ensure this runs after render
+    setTimeout(resetScroll, 0)
+  }, [currentStep1])
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers({
@@ -278,16 +306,16 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
     const currentAnswers = (answers[currentStep1]?.answer as Record<string, string[]>) || {};
     const currentTags = [...(currentAnswers[category] || [])];
     const tagIndex = currentTags.indexOf(tag);
-  
+
     if (tagIndex === -1) {
       currentTags.push(tag);
     } else {
       currentTags.splice(tagIndex, 1);
     }
-  
+
     // Clone the currentAnswers to modify it safely
     const updatedAnswers = { ...currentAnswers };
-  
+
     if (currentTags.length === 0) {
       // Remove the entire category if no tags remain
       delete updatedAnswers[category];
@@ -295,7 +323,7 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
       // Otherwise, update the category with the new tags
       updatedAnswers[category] = currentTags;
     }
-  
+
     setAnswers({
       ...answers,
       [currentStep1]: {
@@ -305,7 +333,7 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
       },
     });
   };
-  
+
 
   const isTagSelected = (category: string, tag: string): boolean => {
     const categoryAnswers = (answers[currentStep1]?.answer as Record<string, string[]>) || {};
@@ -325,9 +353,11 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
     try {
       setLoading(true)
       const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-      const response = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: {
-        onboardingData: answers,
-      }, smartProfile: parsedUserOrbisData?.data?.smartProfile }, {
+      const response = await axios.put(`${API_BASE_URL}/user/smart-profile`, {
+        data: {
+          onboardingData: answers,
+        }, smartProfile: parsedUserOrbisData?.data?.smartProfile
+      }, {
         headers: {
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
@@ -340,13 +370,13 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
         const { smartProfile } = response.data
         await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
         postResponse()
-      }else{
+      } else {
         postResponse()
       }
 
     } catch (err) {
       console.log("Some Error:", err)
-    }finally {
+    } finally {
       setLoading(false)
     }
   }
@@ -386,8 +416,9 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
             placeholder="Select an option"
             value={answers[currentStep1]?.answer as string}
             onChange={handleMultiChoiceChange}
+            isIframe = {window.location !== window.parent.location}
           >
-            {currentQuestion.options?.map((option: any, i: number) => (
+            {currentQuestion.options?.map((option: { text: string }, i: number) => (
               <Select.Option key={i} value={option.text}>
                 {option.text}
               </Select.Option>
@@ -398,7 +429,7 @@ const OnboardingForm = ({currentStep1, setCurrentStep1}:{currentStep1: number, s
 
       case "CATEGORY_QUESTION":
         return (
-          <TagsContainer>
+          <TagsContainer ref={tagsContainerRef}>
             <ScrollableTagsSection>
               {currentQuestion.tagGroups?.map((group: Tags) => (
                 <div key={group.category}>

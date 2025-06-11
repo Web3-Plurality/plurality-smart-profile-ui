@@ -37,9 +37,7 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string,
       margin-top: -20px;
     }
 
-    &.topSpacingIframeProfile{
-      margin-top: -95px;
-    }
+
 
     &.topSpacingIframeConsent{
       margin-top: -100px;

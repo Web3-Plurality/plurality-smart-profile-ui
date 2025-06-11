@@ -25,6 +25,7 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
     justify-content: center;
     align-items: center;
     padding: 60px 0;
+    padding: ${({ isIframe, currentStep}) => ((!isIframe && currentStep === 'profileSettings') ? '0' : '60px 0' )};
 
     .app-logo {
         position: absolute;
