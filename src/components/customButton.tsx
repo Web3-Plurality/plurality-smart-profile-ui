@@ -41,11 +41,11 @@ const ButtonWrapper = styled(Button) <ButtonWrapperProps>`
     }
 
     @media (max-width: 441px) {
-        min-width: ${({ consent, currentStep }) => (consent ? '' : currentStep === 'profileSettings' ? '350px' :'320px')};
+        min-width: ${({ consent, currentStep }) => (consent ? '' : currentStep === 'profileSettings' || currentStep === 'profileSetup' ? '350px' :'320px')};
     }
 
     @media (max-width: 376px) {
-        min-width: ${({ consent, currentStep }) => (consent ? '' : currentStep === 'profileSettings' ? '280px' : '250px')};
+        min-width: ${({ consent, currentStep }) => (consent ? '' : currentStep === 'profileSettings' || currentStep === 'profileSetup'? '280px' : '250px')};
     }
 
     .ant-spin {

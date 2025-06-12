@@ -61,3 +61,8 @@ export const selectSurprised = createSelector(
     (state) => state.surprised,
 );
 
+export const selectIframeToProfile = createSelector(
+    [selectDomain],
+    (state) => state.iframeToProfiles,
+);
+

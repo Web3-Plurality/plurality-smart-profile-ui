@@ -81,6 +81,7 @@ export interface StepState {
     profileDataID: string
     profileSetupData: ProfileSetupData
     surprised: boolean
+    iframeToProfiles: boolean
 }
 
 export interface ContractData {

@@ -3,13 +3,14 @@ import { ReactNode } from 'react';
 import PoweredByFooter from './poweredByFooter';
 import BackButton from './backButton';
 import WidgetContent from './widgetContent';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getBtntext, getLocalStorageValueofClient, isBackBtnVisible } from '../../utils/Helpers';
 import { selectCurrentWalletTab, selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
 import { useStepper } from '../../hooks/useStepper';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
+import { setSocialConnectPath } from '../../Slice/userDataSlice';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -58,6 +59,7 @@ const WidgetLayout = ({
 
     const { goToStep, goBack, currentStep } = useStepper()
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const showLoader = useSelector(selectLoader)
     const profileConnected = useSelector(selectProfileConnected)
     const activeWalletTab = useSelector(selectCurrentWalletTab)
@@ -82,6 +84,7 @@ const WidgetLayout = ({
                 {currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
                     if(isIframe) {
                         goToStep('consent')
+                        dispatch(setSocialConnectPath(false))
                     }else{
                         navigate(`dashboard?client_id=${clientId}`);
                     }

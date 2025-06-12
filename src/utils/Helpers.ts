@@ -367,15 +367,19 @@ const handleUserConsentFlow = (
   consent: string,
   step: string,
   prevStep: string,
-  cb: (step: string) => void
+  prevStep2: string,
+  cb: (step: string) => void,
+  handleShouldProfilesRender: () => void
 ) => {
   const ignoreConsent = overRideConsentComponents.includes(prevStep);
+  const stepDetails = step == 'socialConnect' && prevStep2 == 'success'
 
-  if ((consent == "accepted" || consent == "rejected") && !ignoreConsent) {
+  if ((consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails) {
     sendUserConsentEvent();
     sendProfileConnectedEvent();
   } else {
     cb(step);
+    handleShouldProfilesRender();
   }
   sendUserDataEvent();
 };
