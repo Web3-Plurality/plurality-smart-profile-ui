@@ -195,15 +195,15 @@ const Login = () => {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
 
-    //     if(isIframe && !consent && token) {
-    //         goToStep('consent')
-    //         window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
-    //     }
-    //     if (consent && (consent == 'accepted' || consent == 'rejected')) {
-    //         sendUserDataEvent()
-    //         sendProfileConnectedEvent()
-    //     }
-    // }, [])
+        if(isIframe && !consent && token) {
+            goToStep('consent')
+            window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
+        }
+        if (consent && (consent == 'accepted' || consent == 'rejected')) {
+            sendUserDataEvent()
+            sendProfileConnectedEvent()
+        }
+    }, [])
 
 
     const handlePkpWithMetamaskError = (val: boolean) => {
@@ -413,4 +413,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default Login;
