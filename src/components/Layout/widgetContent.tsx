@@ -16,6 +16,7 @@ interface WidgetContentWrapperProps {
     isIframe: boolean;
     currentStep: string;
     mobileHeader: boolean;
+    loader: boolean;
 }
 
 const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
@@ -29,7 +30,7 @@ const WidgetContentWrapper = styled.div<WidgetContentWrapperProps>`
 
     .app-logo {
         position: absolute;
-        bottom: ${({ isIframe, currentStep, mobileHeader }) => ((isIframe && currentStep === 'home') ? '80%' : (mobileHeader && currentStep === 'home') ? '85%' : ((isIframe || mobileHeader) && currentStep !== 'home') ? '87%' : '100%')};
+        bottom: ${({ isIframe, currentStep, mobileHeader, loader }) => ((isIframe && currentStep === 'home') || (isIframe && currentStep === 'verification')  || (loader && currentStep === 'success')? '80%' : (mobileHeader && currentStep === 'home') ? '85%' :((isIframe || mobileHeader) && currentStep !== 'home') ? '87%' : '100%')};
         left: 50%;
         transform: translate(-50%, 50%);
         height: 120px;
@@ -75,7 +76,7 @@ const WidgetContent = ({ children }: { children: ReactNode }) => {
     const isSmallScreen = isTabScreen || isMobileScreen || isExtraSmallScreen 
 
     return (
-        <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep} mobileHeader={mobileHeader}>
+        <WidgetContentWrapper isIframe={isIframe} currentStep={currentStep} mobileHeader={mobileHeader} loader={showLoader.loadingState}>
             {showWidgetLogo && plaformImg && <img className="app-logo" src={plaformImg} alt='' />}
             {showLoader && showLoader.loadingState ? (
                 <Loader message={showLoader.text} />
