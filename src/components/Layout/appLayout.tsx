@@ -82,25 +82,32 @@ const WidgetLayout = ({
             <div className='widget'>
                 {currentStep !== 'onboardingForm' ? <WidgetContent children={children} /> : children}
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
-                // check 86-93
                 {currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
-                    if(isIframe) {
-                        goToStep('consent')
+                    if (isIframe) {
+                        // goToStep('consent')
+                        // dispatch(setSocialConnectPath(false))
+                        const socialConnection = localStorage.getItem("connectSocial") ?? 'false';
+                        localStorage.removeItem("connectSocial")
+                        if (JSON.parse(socialConnection)) {
+                            goToStep('profile');
+                            sendUserConsentEvent()
+                        }
+                        else goToStep('consent');
                         dispatch(setSocialConnectPath(false))
-                    }else{
+                    } else {
                         navigate(`dashboard?client_id=${clientId}`);
                     }
                 }} />}
-                //check 94-102
+                {/* //check 94-102
                 {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
-                    const socialConnection = localStorage.getItem("connectSocail") ?? 'false';
-                    localStorage.removeItem("connectSocail")
+                    const socialConnection = localStorage.getItem("connectSocial") ?? 'false';
+                    localStorage.removeItem("connectSocial")
                     if (JSON.parse(socialConnection)) {
                         goToStep('profile');
                         sendUserConsentEvent()
                     }
                     else goToStep('consent');
-                }} />}
+                }} />} */}
                 {isIframe &&
                     currentStep !== 'consent' &&
                     currentStep !== 'signing' &&

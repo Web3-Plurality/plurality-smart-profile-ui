@@ -261,7 +261,7 @@ const Login = () => {
 
     const handleIconClick = (index: number) => {
         const handleSocialConnectClick = () => {
-            localStorage.setItem("connectSocail", "true")
+            localStorage.setItem("connectSocial", "true")
             const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
             const { smartProfileData, platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
             const parsedPlatforms = platforms || []
