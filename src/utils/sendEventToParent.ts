@@ -14,6 +14,7 @@ const getParentUrl = () => {
 
 export const sendUserConsentEvent = () => {
     const connection =  localStorage.getItem("connectSocail") ?? 'false';
+    localStorage.removeItem("connectSocial")
     window.parent.postMessage({ eventName: 'consentData', data: { consent: true, socialConnection: JSON.parse(connection) } }, getParentUrl());
 }
 

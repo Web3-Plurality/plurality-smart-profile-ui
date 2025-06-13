@@ -11,7 +11,6 @@ import { useStepper } from '../../hooks/useStepper';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { setSocialConnectPath } from '../../Slice/userDataSlice';
-import { sendUserConsentEvent } from '../../utils/sendEventToParent';
 
 interface WidgetLayoutWrapperProps {
     isIframe: boolean;
@@ -84,30 +83,12 @@ const WidgetLayout = ({
                 {isVisible && !isIframe && <BackButton text={text} handleClick={() => goBack()} />}
                 {currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
                     if (isIframe) {
-                        // goToStep('consent')
-                        // dispatch(setSocialConnectPath(false))
-                        const socialConnection = localStorage.getItem("connectSocial") ?? 'false';
-                        localStorage.removeItem("connectSocial")
-                        if (JSON.parse(socialConnection)) {
-                            goToStep('profile');
-                            sendUserConsentEvent()
-                        }
-                        else goToStep('consent');
+                        goToStep('consent');
                         dispatch(setSocialConnectPath(false))
                     } else {
                         navigate(`dashboard?client_id=${clientId}`);
                     }
                 }} />}
-                {/* //check 94-102
-                {isIframe && currentStep === 'socialConnect' && <BackButton text={profileConnected || connectedPlatforms ? 'Continue' : 'Skip for now'} handleClick={() => {
-                    const socialConnection = localStorage.getItem("connectSocial") ?? 'false';
-                    localStorage.removeItem("connectSocial")
-                    if (JSON.parse(socialConnection)) {
-                        goToStep('profile');
-                        sendUserConsentEvent()
-                    }
-                    else goToStep('consent');
-                }} />} */}
                 {isIframe &&
                     currentStep !== 'consent' &&
                     currentStep !== 'signing' &&
