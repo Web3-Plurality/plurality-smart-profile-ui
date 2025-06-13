@@ -373,9 +373,9 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
       } else {
         postResponse()
       }
-
     } catch (err) {
       console.log("Some Error:", err)
+      postResponse()
     } finally {
       setLoading(false)
     }
