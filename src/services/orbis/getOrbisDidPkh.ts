@@ -3,15 +3,17 @@ import { generatePkpWalletInstance } from "./generatePkpWallet";
 import { orbisdb } from "./orbisConfig";
 import { OrbisConnectResult } from "@useorbis/db-sdk";
 import { getLocalStorageValueofClient } from "../../utils/Helpers";
-import { CLIENT_ID } from "../../utils/EnvConfig";
+import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig";
 import { autoConnect } from "./autoConnect";
+import axios from "axios";
 
 export async function connectOrbisDidPkh() {
     let auth;
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { signature: sessionSigs, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const {  signature: sessionSigs, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    // const { streamId } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
     const currentUser = await autoConnect()
 
     if (!currentUser || currentUser?.did !== userDid) {

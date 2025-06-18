@@ -1,14 +1,16 @@
 import axios from "axios";
 import { encryptData } from "../services/EncryptionDecryption/encryption"
-import { updatePublicSmartProfile, updateSmartProfile } from "../services/orbis/updateQuery";
+// import { updateSmartProfile } from "../services/orbis/updateQuery";
 import { API_BASE_URL, CLIENT_ID } from "./EnvConfig";
 import { deserializeSmartProfile, getLocalStorageValueofClient, reGenerateUserDidAddress } from "./Helpers"
-import { insertSmartProfile } from "../services/orbis/insertQueries";
+import { updateSmartProfile} from "../services/orbisMap/updateQuery";
+import { insertSmartProfile} from "../services/orbisMap/insertQueries";
+// import { insertSmartProfile } from "../services/orbis/insertQueries";
 
 export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -18,15 +20,17 @@ export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
     })
     if (data.success) {
         const privateDataObj = data.smartProfile.privateData
-        data.smartProfile.privateData=''
+        // data.smartProfile.privateData=''
         await reGenerateUserDidAddress()
-        const insertionResult = await insertSmartProfile(data.smartProfile)
+        const insertionResult = await insertSmartProfile(data.smartProfile, userDid)
+
         // save smart profile in local storage along with the returned stream id
+        await deserializeSmartProfile(insertionResult, privateDataObj);
+        const {id, ...rest} = insertionResult
         if (insertionResult) {
-            await deserializeSmartProfile(data.smartProfile, privateDataObj);
             const objData = {
-                streamId: insertionResult?.id,
-                data: { smartProfile: data.smartProfile }
+                streamId: id,
+                data: { smartProfile: rest }
             }
             const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
             let existingData = existingDataString ? JSON.parse(existingDataString) : {}
@@ -92,7 +96,7 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
     const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
     // save smart profile in local storage along with the returned stream id
     if (updationResult) {
-        await deserializeSmartProfile(smartProfile, privateDataObj);
+        await deserializeSmartProfile(updationResult, privateDataObj);
         const objData = {
             streamId: updationResult?.id,
             data: { smartProfile: smartProfile }
@@ -111,13 +115,15 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
 export const updatePublicSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any) => {
     const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
     await reGenerateUserDidAddress()
-    const updationResult = await updatePublicSmartProfile(smartProfile, streamData.smartProfileData.streamId)
+    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
+    console.log("Updation result", updationResult)
     // save smart profile in local storage along with the returned stream id
     if (updationResult) {
         await deserializeSmartProfile(smartProfile);
+        const { id, ...rest } = updationResult;
         const objData = {
-            streamId: updationResult?.id,
-            data: { smartProfile: smartProfile }
+            streamId: id,
+            data: { smartProfile: rest }
         }
         const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
         let existingData = existingDataString ? JSON.parse(existingDataString) : {}

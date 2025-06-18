@@ -338,18 +338,31 @@ const serializeSmartProfile = (smartProfile: any) => {
   }
 };
 
+const tryParseJSON = (str: string, fallback = {}) => {
+  try {
+      if(str){
+        console.log("strrrrr", str)
+      }
+      return str ? JSON.parse(str) : fallback;
+  } catch (e) {
+      console.warn("Failed to parse JSON:", str, e);
+      return fallback;
+  }
+};
+
 const deserializeSmartProfile = (
   smartProfile: any,
   unecryptedPrivateDataObj?: any
 ) => {
-  smartProfile.scores = JSON.parse(smartProfile.scores);
-  smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms);
-  smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData);
-  smartProfile.attestation = JSON.parse(smartProfile.attestation);
+  smartProfile.scores = tryParseJSON(smartProfile.scores, {});
+  smartProfile.connectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, {});
+  smartProfile.extendedPublicData = tryParseJSON(smartProfile.extendedPublicData, {});
+  smartProfile.attestation = tryParseJSON(smartProfile.attestation, {});
+  console.log("samrt", unecryptedPrivateDataObj)
   if (unecryptedPrivateDataObj) {
     smartProfile.privateData = unecryptedPrivateDataObj;
   } else {
-    smartProfile.privateData = JSON.parse(smartProfile.privateData);
+    smartProfile.privateData = tryParseJSON(smartProfile.privateData, {});
   }
 };
 

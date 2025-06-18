@@ -29,7 +29,6 @@ import { AuthUserInformation } from "@useorbis/db-sdk"
 import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
-import { selectProfileType } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
 import axios from "axios"
 import { useLogoutUser } from "../hooks/useLogoutUser"
@@ -43,6 +42,7 @@ import Signing from "../components/Signing"
 import Contract from "../components/Contract"
 import ProfileSetup from "../components/OnboardingScreen/profileSetup"
 import OnboardingForm from "../components/OnboardingScreen/questionaire"
+import { selectProfileType } from "../services/orbisMap/selectQueries"
 
 const Login = () => {
 
@@ -133,6 +133,7 @@ const Login = () => {
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
                     //firstly initilize the roulette constant
                     const selectedResult = await selectProfileType(data.data.streamId)
+                    console.log(selectedResult)
                     if (selectedResult?.neededPlatforms) {
                         setSocialButtons(selectedResult?.neededPlatforms);
                     }
@@ -142,8 +143,8 @@ const Login = () => {
                         ...existingDataStreamId,
                         clientId,
                         platforms: selectedResult?.neededPlatforms,
-                        platformName: selectedResult?.rows[0].profile_name,
-                        platformDescription: selectedResult?.rows[0].description
+                        platformName: selectedResult?.profileTypeData.profile_name,
+                        platformDescription: selectedResult?.profileTypeData.description
 
                     }
 

@@ -5,7 +5,6 @@ import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
 import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers";
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
-import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile";
 import axios from "axios";
 import { useStepper } from "../../../hooks/useStepper";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +12,7 @@ import { selectProfileSetupData, selectSurprised } from "../../../selectors/user
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
 import { useNavigate } from "react-router-dom";
+import { updateSmartProfileAction, updateSmartProfileAction } from "../../../utils/SmartProfile";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -164,6 +164,8 @@ const ProfileSetup = () => {
   const { profileTypeStreamId, token, onboardingQuestions, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
+  console.log("Helllo", smartProfileData)
+
   const { avatar, username, bio } = smartProfileData.data.smartProfile
 
   const getUserData = () => {
@@ -201,6 +203,8 @@ const ProfileSetup = () => {
         profileImg: image,
         bio: userBio
       }
+      // const {id, ...rest}= smartProfileData.data.smartProfile
+      
       const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`,
         {
           data: payLoaddata,
@@ -215,7 +219,7 @@ const ProfileSetup = () => {
 
       const { success, smartProfile } = data
       if (success) {
-        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+        await updateSmartProfileAction(profileTypeStreamId, smartProfile)
         setLoading(false)
         goToNextRoute()
       }

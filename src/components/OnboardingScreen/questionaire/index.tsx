@@ -6,7 +6,7 @@ import { useStepper } from "../../../hooks/useStepper"
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig"
 import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers"
 import { Tags } from "../../../types"
-import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile"
+import { updateSmartProfileAction } from "../../../utils/SmartProfile"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
@@ -377,7 +377,7 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
       console.log("Response", response)
       if (response.status === 200) {
         const { smartProfile } = response.data
-        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+        await updateSmartProfileAction(profileTypeStreamId, smartProfile)
         postResponse()
       } else {
         postResponse()

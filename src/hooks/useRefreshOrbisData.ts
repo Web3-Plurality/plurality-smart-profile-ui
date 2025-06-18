@@ -7,10 +7,6 @@ import {
 } from "../utils/EnvConfig";
 import { ProfileData } from "../types";
 import { decryptData } from "../services/EncryptionDecryption/decryption";
-import {
-  selectProfileType,
-  selectSmartProfiles,
-} from "../services/orbis/selectQueries";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
 import {
@@ -32,6 +28,8 @@ import {
 } from "../utils/SmartProfile";
 import { sendUserDataEvent } from "../utils/sendEventToParent";
 import { useNavigate } from "react-router-dom";
+import { selectProfileType } from "../services/orbisMap/selectQueries";
+import { selectSmartProfiles } from "../services/orbisMap/selectQueries";
 
 type Platform = {
   platform: string;
@@ -93,14 +91,12 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
       throw new Error("Failed to fetch data from selectProfileType()");
     }
 
-    const { rows } = selectResult;
-    if (!rows || !rows.length) {
+    const platformsData = selectResult?.profileTypeData?.platforms;
+    if (!platformsData) {
       throw new Error("No rows returned from selectProfileType()");
     }
 
-    const orbisData = rows?.[0]?.platforms
-      ? JSON.parse(rows?.[0]?.platforms)
-      : [];
+    const orbisData = platformsData ? JSON.parse(platformsData) : [];
     if (orbisData) {
       const { platforms, showRoulette } = getLocalStorageValueofClient(
         `streamID-${profileTypeStreamId}`
@@ -112,28 +108,32 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             button?.displayName?.toLowerCase().replace(/\s+/g, "")
         )
       );
+
       setSocialIcons(activePlatforms);
+
       await reGenerateUserDidAddress();
       const response = await selectSmartProfiles(profileTypeStreamId, userDid);
 
-      if (!response?.rows?.length) {
+      
+      if (!response) {
         const { profileTypeStreamId } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
         // const { smartProfileData } = getLocalStorageValueofClient(
-        //   `streamID-${profileTypeStreamId}`
-        // );
-        // const consent =
-        //   smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]
-        //     ?.consent;
-        // no profile found in orbis for this user
-        await createSmartProfileAction(profileTypeStreamId);
-        dispatch(updateHeader());
-        setLoading(false);
-        goToStep("profileSetup");
-
-        // handleUserConsentFlow(consent, "profileSetup", prevStep, goToStep);
-      } else {
+          //   `streamID-${profileTypeStreamId}`
+          // );
+          // const consent =
+          //   smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]
+          //     ?.consent;
+          // no profile found in orbis for this user
+          await createSmartProfileAction(profileTypeStreamId);
+          dispatch(updateHeader());
+          setLoading(false);
+          goToStep("profileSetup");
+          
+          // handleUserConsentFlow(consent, "profileSetup", prevStep, goToStep);
+        } else {
+        await deserializeSmartProfile(response)
         const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
@@ -161,24 +161,51 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           extendedPublicData,
           attestation,
           privateData,
-        }))(response.rows[0]);
+        }))(response);
 
-        const streamId = response.rows[0].stream_id;
+        const streamId = response.id;
 
         const pluralityAttestation = new PluralityAttestation({
           signerAddress: OWNER_WALLET_ADDRESS || "",
           easContractAddress: EAS_CONTRACT_ADDRESS || "",
           rpcProvider: EAS_BLOCKCHAIN_RPC || "",
         });
-        const parsedExtendedPublicData = JSON.parse(
-          orbisSmartProfile.extendedPublicData
+
+
+        const { id, ...rest } = response;
+        const objData = {
+          streamId: id,
+          data: { smartProfile: rest },
+        };
+        const existingDataString = localStorage.getItem(
+          `streamID-${profileTypeStreamId}`
         );
+        let existingData = existingDataString
+          ? JSON.parse(existingDataString)
+          : {};
+
+        existingData = {
+          ...existingData,
+          smartProfileData: objData,
+        };
+        localStorage.setItem(
+          `streamID-${profileTypeStreamId}`,
+          JSON.stringify(existingData)
+        );
+
+        const parsedExtendedPublicData =  orbisSmartProfile.extendedPublicData
         const consent = parsedExtendedPublicData?.[clientId]?.consent;
         if (
           onboardingQuestions.length &&
           parsedExtendedPublicData &&
-          (!Object.prototype.hasOwnProperty.call(parsedExtendedPublicData, clientId) ||
-          !Object.prototype.hasOwnProperty.call(parsedExtendedPublicData[clientId], "onboardingData"))
+          (!Object.prototype.hasOwnProperty.call(
+            parsedExtendedPublicData,
+            clientId
+          ) ||
+            !Object.prototype.hasOwnProperty.call(
+              parsedExtendedPublicData[clientId],
+              "onboardingData"
+            ))
         ) {
           setLoading(false);
           goToStep("onboardingForm");
@@ -205,7 +232,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             } else {
               // the privata data is not empty it means we need to decrypt the data
               const privataDataObj = await decryptData(
-                orbisSmartProfile.privateData
+                JSON.stringify(orbisSmartProfile.privateData)
               );
               if (privataDataObj.code === -32603) {
                 goToStep("success");
@@ -224,9 +251,10 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
             if (isVerifiedSmartProfileAttestaion) {
               console.log("Attestation Verified");
+              const { id, ...rest } = response;
               const objData = {
-                streamId: response.rows[0].stream_id,
-                data: { smartProfile: orbisSmartProfile },
+                streamId: id,
+                data: { smartProfile: rest },
               };
               const existingDataString = localStorage.getItem(
                 `streamID-${profileTypeStreamId}`
@@ -264,9 +292,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             privateDataObj = new ProfilePrivateData();
           } else {
             // the privata data is not empty it means we need to decrypt the data
-            privateDataObj = await decryptData(
-              orbisSmartProfile.privateData
-            );
+            privateDataObj = await decryptData(orbisSmartProfile.privateData);
             if (privateDataObj.code === -32603) {
               goToStep("success");
               return;
@@ -283,9 +309,10 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             );
           if (isVerifiedSmartProfileAttestaion) {
             console.log("Attestation Verified");
+            const { id, ...rest } = response;
             const objData = {
-              streamId: response.rows[0].stream_id,
-              data: { smartProfile: orbisSmartProfile },
+              streamId: id,
+              data: { smartProfile: rest },
             };
             const existingDataString = localStorage.getItem(
               `streamID-${profileTypeStreamId}`

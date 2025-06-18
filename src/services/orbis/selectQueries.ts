@@ -43,28 +43,8 @@ export async function selectProfileType(stream_id: string) {
     }
   }
   
-
-// export async function selectProfileType() {
-//     try {
-//         const selectStatement = await orbisdb
-//             .select()
-//             .from(data.models.profile_type)
-//             .where({
-//                 stream_id: PROFILE_TYPE_STREAM_ID
-//             })
-//             .context(PLURALITY_CONTEXT)
-
-//         const result = await selectStatement.run();
-//         const { columns, rows } = result
-//         return { columns, rows };
-//     }
-//     catch (error) {
-//         console.log("Error", error)
-//     }
-// }
 export async function selectSmartProfiles(stream_id: string, userDid: string) {
     try {
-
         if (userDid) {
             const selectStatement = await orbisdb
                 .select()
