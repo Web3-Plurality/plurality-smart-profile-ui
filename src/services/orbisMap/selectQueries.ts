@@ -35,9 +35,7 @@ export async function selectSmartProfiles(stream_id: string, userDid: string) {
   const apiUrl = `${API_BASE_URL}/orbis-map/smart-profiles/by-mapping/${stream_id}/${sanitizedDid}`
   const result = await axios.get(apiUrl)
 
-  console.log("Resut", result)
-
-  if(!result) return null
+  if(result.data.newUser) return null
 
   return result.data.data
 }

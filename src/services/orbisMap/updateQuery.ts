@@ -7,8 +7,6 @@ export async function updateSmartProfile(smartProfile: any, stream_id: string) {
 
     const result = await axios.put(apiUrl, {...smartProfile})
   
-    console.log("Updation result", result)
-  
     if(!result) return null
   
     return result.data.data
