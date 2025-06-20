@@ -13,7 +13,6 @@ import {
   deserializeSmartProfile,
   getLocalStorageValueofClient,
   handleUserConsentFlow,
-  reGenerateUserDidAddress,
 } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
 import {
@@ -111,7 +110,6 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
       setSocialIcons(activePlatforms);
 
-      await reGenerateUserDidAddress();
       const response = await selectSmartProfiles(profileTypeStreamId, userDid);
 
       

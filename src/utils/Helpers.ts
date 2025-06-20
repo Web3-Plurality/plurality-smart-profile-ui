@@ -1,4 +1,3 @@
-import { AuthUserInformation } from "@useorbis/db-sdk";
 import {
   AIDRESSING_ROUTE,
   ARTIFICIAL_ROME_ROUTE,
@@ -17,8 +16,6 @@ import {
   TWITTER_ROUTE,
 } from "./Constants";
 import { CLIENT_ID } from "./EnvConfig";
-import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
-import { message } from "antd";
 import {
   sendProfileConnectedEvent,
   sendUserConsentEvent,
@@ -304,25 +301,6 @@ const redirectUserOnLogout = (
   return path;
 };
 
-const reGenerateUserDidAddress = async () => {
-  const queryParams = new URLSearchParams(location.search);
-  const clientId = queryParams.get("client_id") || CLIENT_ID;
-
-  const userDidAddress: AuthUserInformation | "" | "error" | undefined =
-    await connectOrbisDidPkh();
-  if (userDidAddress === "error") {
-    message.error("Something went Wrong!");
-  } else if (userDidAddress && userDidAddress.did) {
-    const existingDataString = localStorage.getItem(`clientID-${clientId}`);
-    let existingData = existingDataString ? JSON.parse(existingDataString) : {};
-
-    existingData = {
-      ...existingData,
-      userDid: userDidAddress?.did,
-    };
-    localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData));
-  }
-};
 
 const serializeSmartProfile = (smartProfile: any) => {
   smartProfile.scores = JSON.stringify(smartProfile.scores);
@@ -340,9 +318,6 @@ const serializeSmartProfile = (smartProfile: any) => {
 
 const tryParseJSON = (str: string, fallback = {}) => {
   try {
-      if(str){
-        console.log("strrrrr", str)
-      }
       return str ? JSON.parse(str) : fallback;
   } catch (e) {
       console.warn("Failed to parse JSON:", str, e);
@@ -358,7 +333,7 @@ const deserializeSmartProfile = (
   smartProfile.connectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, {});
   smartProfile.extendedPublicData = tryParseJSON(smartProfile.extendedPublicData, {});
   smartProfile.attestation = tryParseJSON(smartProfile.attestation, {});
-  console.log("samrt", unecryptedPrivateDataObj)
+
   if (unecryptedPrivateDataObj) {
     smartProfile.privateData = unecryptedPrivateDataObj;
   } else {
@@ -444,7 +419,6 @@ export {
   addGlobalLitData,
   removeGlobalLitData,
   redirectUserOnLogout,
-  reGenerateUserDidAddress,
   serializeSmartProfile,
   deserializeSmartProfile,
   truncateAddress,

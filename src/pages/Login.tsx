@@ -25,8 +25,6 @@ import { useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
 import LogoutModal from "../components/LogoutModal"
-import { AuthUserInformation } from "@useorbis/db-sdk"
-import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
 import { setLoadingState } from "../Slice/userDataSlice"
@@ -196,7 +194,7 @@ const Login = () => {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
 
-        if(isIframe && !consent && token) {
+        if (isIframe && !consent && token) {
             goToStep('consent')
             window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
         }
@@ -286,7 +284,7 @@ const Login = () => {
                 const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);
                 const clickedIconDisplayName = clickedIcon?.displayName?.toLowerCase().replace(/\s+/g, '')
                 const selectedItem = parsedUrls.find((item: ProfileData) => item?.platformName?.toLowerCase() === clickedIconDisplayName)
-                if(selectedItem.url){
+                if (selectedItem.url) {
                     window.open(selectedItem.url, '_blank');
                 }
             }
@@ -314,12 +312,12 @@ const Login = () => {
     const conditionalRendrer = () => {
         switch (currentStep) {
             case 'home':
-                return <Home 
-                    handleLitConnect={handleLitConnect} 
-                    handleMetamaskConnect={handleMetamaskConnect} 
+                return <Home
+                    handleLitConnect={handleLitConnect}
+                    handleMetamaskConnect={handleMetamaskConnect}
                     handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
-                    />
+                />
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
@@ -351,41 +349,25 @@ const Login = () => {
             case 'contract':
                 return <Contract />
             case 'profileSetup':
-                    return <ProfileSetup/>
+                return <ProfileSetup />
             case 'onboardingForm':
                 return <OnboardingForm
-                currentStep1={currentStep1}
-                setCurrentStep1={setCurrentStep1}
-                 />
+                    currentStep1={currentStep1}
+                    setCurrentStep1={setCurrentStep1}
+                />
             default:
-                return <Home 
-                    handleLitConnect={handleLitConnect} 
-                    handleMetamaskConnect={handleMetamaskConnect} 
+                return <Home
+                    handleLitConnect={handleLitConnect}
+                    handleMetamaskConnect={handleMetamaskConnect}
                     handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
-                    />
+                />
         }
     }
 
     const handleOk = async () => {
         if (ceramicError) {
-            const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
-            if (result === "error") {
-                console.error("Error connecting to Orbis");
-                setCeramicError(true)
-            } else if (result && result.did) {
-                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
-                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                existingData = {
-                    ...existingData,
-                    userDid: result?.did
-                }
-                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-                setCeramicError(false)
-            } else {
-                setCeramicError(true)
-            }
+            setCeramicError(true)
         } else if (pkpWithMetamakError) {
             setPkpWithMetamaskError(false)
             goToStep('verification')

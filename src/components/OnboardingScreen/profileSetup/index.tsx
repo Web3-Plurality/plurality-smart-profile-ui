@@ -164,8 +164,6 @@ const ProfileSetup = () => {
   const { profileTypeStreamId, token, onboardingQuestions, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
   const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
-  console.log("Helllo", smartProfileData)
-
   const { avatar, username, bio } = smartProfileData.data.smartProfile
 
   const getUserData = () => {
