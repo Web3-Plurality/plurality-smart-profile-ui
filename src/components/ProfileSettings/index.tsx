@@ -14,6 +14,7 @@ import { useStepper } from "../../hooks/useStepper"
 import { sendUserDataEvent } from "../../utils/sendEventToParent"
 import { updateSmartProfileAction } from "../../utils/SmartProfile"
 import styled from "styled-components"
+import { useLogoutUser } from "../../hooks/useLogoutUser"
 // import { ProfileSetupData } from "../../types"
 // import { useSelector } from "react-redux"
 // import { selectProfileSetupData } from "../../selectors/userDataSelector"
@@ -128,6 +129,7 @@ const ButtonGroup = styled.div`
 
 const ProfileSettings = () => {
     const { goBack, goToStep } = useStepper()
+    const handleLogout = useLogoutUser()
     const [loading, setLoading] = useState(false)
 
     const queryParams = new URLSearchParams(location.search);
@@ -205,7 +207,7 @@ const ProfileSettings = () => {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-                await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+                await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                 message.success("Profile updated successfully!")
                 setLoading(false)
                 if (isIframe && (consent && consent === 'accepted')) {

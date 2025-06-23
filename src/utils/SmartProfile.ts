@@ -5,10 +5,10 @@ import { deserializeSmartProfile, getLocalStorageValueofClient } from "./Helpers
 import { updateSmartProfile} from "../services/orbisMap/updateQuery";
 import { insertSmartProfile} from "../services/orbisMap/insertQueries";
 
-export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
+export const createSmartProfileAction = async (profileTypeStreamId: string, logoutUser: () => void) =>{
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { token, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +19,7 @@ export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
     if (data.success) {
         const privateDataObj = data.smartProfile.privateData
         // data.smartProfile.privateData=''
-        const insertionResult = await insertSmartProfile(data.smartProfile, userDid)
+        const insertionResult = await insertSmartProfile(data.smartProfile, token, logoutUser)
 
         // save smart profile in local storage along with the returned stream id
         await deserializeSmartProfile(insertionResult, privateDataObj);
@@ -41,7 +41,7 @@ export const createSmartProfileAction = async (profileTypeStreamId: string) =>{
     }
 }  
 
-export const resetSmartProfileAction = async (profileTypeStreamId: string, streamId: string) =>{
+export const resetSmartProfileAction = async (profileTypeStreamId: string, streamId: string, logoutUser: () => void) =>{
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
@@ -55,7 +55,7 @@ export const resetSmartProfileAction = async (profileTypeStreamId: string, strea
     if (data.success) {
         const privateDataObj = data.smartProfile.privateData
         data.smartProfile.privateData=''
-        const updationResult = await updateSmartProfile(data.smartProfile, streamId)
+        const updationResult = await updateSmartProfile(data.smartProfile, streamId, token, logoutUser)
         // save smart profile in local storage along with the returned stream id
         if (updationResult) {
             await deserializeSmartProfile(data.smartProfile, privateDataObj);
@@ -75,11 +75,11 @@ export const resetSmartProfileAction = async (profileTypeStreamId: string, strea
     }
 }
 
-export const updateSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any) => {
+export const updateSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any, handleLogoutUser: () => void) => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { signature: litSignature } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { signature: litSignature, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     if (!litSignature) {
@@ -88,7 +88,7 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
     const privateDataObj = smartProfile.privateData
     const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
     smartProfile.privateData = encryptedPrivateData
-    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
+    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId, token, handleLogoutUser)
     // save smart profile in local storage along with the returned stream id
     if (updationResult) {
         await deserializeSmartProfile(updationResult, privateDataObj);
@@ -107,9 +107,12 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
     }
 }
 
-export const updatePublicSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any) => {
+export const updatePublicSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any, logoutUser: () => void) => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId)
+    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId, token, logoutUser)
     console.log("Updation result", updationResult)
     // save smart profile in local storage along with the returned stream id
     if (updationResult) {

@@ -130,7 +130,7 @@ const Login = () => {
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
                     //firstly initilize the roulette constant
-                    const selectedResult = await selectProfileType(data.data.streamId)
+                    const selectedResult = await selectProfileType(data.data.streamId, handleLogoutUser)
                     console.log(selectedResult)
                     if (selectedResult?.neededPlatforms) {
                         setSocialButtons(selectedResult?.neededPlatforms);

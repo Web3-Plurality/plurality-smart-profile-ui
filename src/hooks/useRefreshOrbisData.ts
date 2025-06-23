@@ -29,6 +29,7 @@ import { sendUserDataEvent } from "../utils/sendEventToParent";
 import { useNavigate } from "react-router-dom";
 import { selectProfileType } from "../services/orbisMap/selectQueries";
 import { selectSmartProfiles } from "../services/orbisMap/selectQueries";
+import { useLogoutUser } from "./useLogoutUser";
 
 type Platform = {
   platform: string;
@@ -49,6 +50,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const naviagte = useNavigate();
+  const handleLogout = useLogoutUser()
 
   const { goToStep, stepHistory } = useStepper();
   const prevStep = stepHistory[stepHistory.length - 1];
@@ -82,10 +84,10 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
   const getSmartProfileFromOrbis = async (
     profileTypeStreamId: string,
-    userDid: string
+    userId: string
   ) => {
     setLoading(true);
-    const selectResult = await selectProfileType(profileTypeStreamId);
+    const selectResult = await selectProfileType(profileTypeStreamId, handleLogout);
     if (!selectResult) {
       throw new Error("Failed to fetch data from selectProfileType()");
     }
@@ -110,26 +112,17 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
       setSocialIcons(activePlatforms);
 
-      const response = await selectSmartProfiles(profileTypeStreamId, userDid);
+      const response = await selectSmartProfiles(profileTypeStreamId, userId, handleLogout);
 
-      
       if (!response) {
         const { profileTypeStreamId } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
-        // const { smartProfileData } = getLocalStorageValueofClient(
-          //   `streamID-${profileTypeStreamId}`
-          // );
-          // const consent =
-          //   smartProfileData?.data?.smartProfile?.extendedPublicData?.[clientId]
-          //     ?.consent;
           // no profile found in orbis for this user
-          await createSmartProfileAction(profileTypeStreamId);
+          await createSmartProfileAction(profileTypeStreamId, handleLogout);
           dispatch(updateHeader());
           setLoading(false);
           goToStep("profileSetup");
-          
-          // handleUserConsentFlow(consent, "profileSetup", prevStep, goToStep);
         } else {
         await deserializeSmartProfile(response)
         const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
@@ -276,7 +269,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
               message.info(
                 "Could not validate your profile, Let's reset your profile"
               );
-              await resetSmartProfileAction(profileTypeStreamId, streamId);
+              await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
               dispatch(updateHeader());
               setLoading(false);
               goToStep(step);
@@ -290,7 +283,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             privateDataObj = new ProfilePrivateData();
           } else {
             // the privata data is not empty it means we need to decrypt the data
-            privateDataObj = await decryptData(orbisSmartProfile.privateData);
+            privateDataObj = await decryptData( JSON.stringify(orbisSmartProfile.privateData));
             if (privateDataObj.code === -32603) {
               goToStep("success");
               return;
@@ -334,7 +327,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             message.info(
               "Could not validate your profile, Let's reset your profile"
             );
-            await resetSmartProfileAction(profileTypeStreamId, streamId);
+            await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
             dispatch(updateHeader());
             setLoading(false);
             goToStep(step);

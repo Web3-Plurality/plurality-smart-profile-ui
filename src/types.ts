@@ -73,7 +73,6 @@ export interface SendTransactionData {
 export interface StepState {
     litSigs: string
     isLoading: LoaderData
-    userDid: string
     profileConnected: boolean
     currentWalletTab: string
     messageToBeSigned: MesssageSignatureData

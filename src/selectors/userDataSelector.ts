@@ -15,11 +15,6 @@ export const selectLoader = createSelector(
     (state) => state.isLoading,
 );
 
-export const selecUserDID = createSelector(
-    [selectDomain],
-    (state) => state.userDid,
-);
-
 export const selectProfileConnected = createSelector(
     [selectDomain],
     (state) => state.profileConnected,

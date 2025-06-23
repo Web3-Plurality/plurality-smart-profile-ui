@@ -12,7 +12,8 @@ import { selectProfileSetupData, selectSurprised } from "../../../selectors/user
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
 import { useNavigate } from "react-router-dom";
-import { updateSmartProfileAction, updateSmartProfileAction } from "../../../utils/SmartProfile";
+import { updateSmartProfileAction } from "../../../utils/SmartProfile";
+import { useLogoutUser } from "../../../hooks/useLogoutUser";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -141,7 +142,8 @@ const ProfileSetup = () => {
 
   const { goToStep } = useStepper()
   const dispatch = useDispatch()
-    const navigate = useNavigate()
+  const navigate = useNavigate()
+  const handleLogout= useLogoutUser()
 
   const isIframe = isInIframe()
 
@@ -217,7 +219,7 @@ const ProfileSetup = () => {
 
       const { success, smartProfile } = data
       if (success) {
-        await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+        await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
         setLoading(false)
         goToNextRoute()
       }
