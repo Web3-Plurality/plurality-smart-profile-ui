@@ -116,7 +116,7 @@ export const updatePublicSmartProfileAction = async (profileTypeStreamId: string
     console.log("Updation result", updationResult)
     // save smart profile in local storage along with the returned stream id
     if (updationResult) {
-        await deserializeSmartProfile(smartProfile);
+        await deserializeSmartProfile(updationResult);
         const { id, ...rest } = updationResult;
         const objData = {
             streamId: id,
