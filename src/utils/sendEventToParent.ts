@@ -49,7 +49,7 @@ export const sendUserDataEvent = (
     event: string = '',
     resetSPId: () => void = () => { }
 ) => {
-    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId, showRoulette } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const {
         smartProfileData: parssedUserOrbisData,
     } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
@@ -73,6 +73,7 @@ export const sendUserDataEvent = (
         rating: connectedPlatforms?.length,
         bio,
         consent: 'rejected',
+        showRoulette
     }
 
     if (consent && consent === 'accepted') {

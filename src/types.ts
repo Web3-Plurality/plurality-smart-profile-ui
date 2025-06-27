@@ -37,6 +37,7 @@ export interface DAppData {
     collections?: string[]
     badges?: string[]
     consent?: string
+    showRoulette: boolean
 }
 
 export interface SelectedNetworkType {

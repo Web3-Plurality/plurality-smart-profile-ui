@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Tag } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
-import { getLocalStorageValueofClient } from "../../../utils/Helpers";
+import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers";
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
 import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile";
 import axios from "axios";
@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectProfileSetupData, selectSurprised } from "../../../selectors/userDataSelector";
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
+import { useNavigate } from "react-router-dom";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -140,6 +141,9 @@ const ProfileSetup = () => {
 
   const { goToStep } = useStepper()
   const dispatch = useDispatch()
+    const navigate = useNavigate()
+
+  const isIframe = isInIframe()
 
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -174,8 +178,12 @@ const ProfileSetup = () => {
       goToStep("socialConnect")
       return
     } else if (!showRoulette && !onboardingQuestions.length) {
-      goToStep("consent")
-    } else {
+      if(isIframe){
+        goToStep("consent")
+      }else{
+        navigate(`/dashboard?client_id=${clientId}`, {replace: true})
+      }
+    }else {
       goToStep('onboardingForm')
     }
   }

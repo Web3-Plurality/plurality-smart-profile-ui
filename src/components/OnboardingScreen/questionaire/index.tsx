@@ -4,10 +4,11 @@ import styled from "styled-components"
 import CustomButton from "../../customButton"
 import { useStepper } from "../../../hooks/useStepper"
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig"
-import { getLocalStorageValueofClient } from "../../../utils/Helpers"
+import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers"
 import { Tags } from "../../../types"
 import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 // Updated interfaces to match the new data structure
 interface TagGroup {
@@ -238,9 +239,13 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
 
   // const [currentStep, setCurrentStep] = useState(0)
   const { goToStep } = useStepper()
+  const navigate = useNavigate()
   const [answers, setAnswers] = useState<Answers>({})
   const [loading, setLoading] = useState(false)
   const tagsContainerRef = useRef<HTMLDivElement>(null)
+
+  const isIframe = isInIframe()
+
 
   const totalSteps = ONBOARDING_QUESTIONS.length
   const currentQuestion = ONBOARDING_QUESTIONS[currentStep1]
@@ -345,7 +350,11 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
     if (showRoulette) {
       goToStep("socialConnect")
     } else {
-      goToStep("consent")
+      if(isIframe){
+        goToStep("consent")
+      }else{
+        navigate(`/dashboard?client_id=${clientId}}`, {replace: true})
+      }
     }
   }
 
