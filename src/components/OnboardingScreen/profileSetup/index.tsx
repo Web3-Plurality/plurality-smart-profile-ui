@@ -14,6 +14,7 @@ import { ProfileSetupData } from "../../../types";
 import { useNavigate } from "react-router-dom";
 import { updateSmartProfileAction } from "../../../utils/SmartProfile";
 import { useLogoutUser } from "../../../hooks/useLogoutUser";
+import { useNavigate } from "react-router-dom";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -141,6 +142,7 @@ const ProfileSetup = () => {
   const [loading, setLoading] = useState(false)
 
   const { goToStep } = useStepper()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const handleLogout= useLogoutUser()
@@ -180,12 +182,12 @@ const ProfileSetup = () => {
       goToStep("socialConnect")
       return
     } else if (!showRoulette && !onboardingQuestions.length) {
-      if(isIframe){
+      if(isInIframe()){
         goToStep("consent")
       }else{
-        navigate(`/dashboard?client_id=${clientId}`)
+        navigate(`/dashboard?client_id=${clientId}`, { replace: true })
       }
-    }else {
+    } else {
       goToStep('onboardingForm')
     }
   }
