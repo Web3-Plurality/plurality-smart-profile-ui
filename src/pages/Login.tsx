@@ -141,7 +141,7 @@ const Login = () => {
                         ...existingDataStreamId,
                         clientId,
                         platforms: selectedResult?.neededPlatforms,
-                        platformName: selectedResult?.profileTypeData.profile_name,
+                        platformName: selectedResult?.profileTypeData.profileName,
                         platformDescription: selectedResult?.profileTypeData.description
 
                     }
