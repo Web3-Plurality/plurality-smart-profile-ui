@@ -31,6 +31,7 @@ import {
   resetSmartProfileAction,
 } from "../utils/SmartProfile";
 import { sendUserDataEvent } from "../utils/sendEventToParent";
+import { useNavigate } from "react-router-dom";
 
 type Platform = {
   platform: string;
@@ -50,10 +51,15 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const naviagte = useNavigate();
 
   const { goToStep, stepHistory } = useStepper();
   const prevStep = stepHistory[stepHistory.length - 1];
   const prevStep2 = stepHistory[stepHistory.length - 2];
+
+  const handleNavigation = () => {
+    naviagte(`/dashboard?client_id=${clientId}`);
+  }
 
   useEffect(() => {
     if (socialIcons && profileTypeStreamId) {
@@ -96,7 +102,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
       ? JSON.parse(rows?.[0]?.platforms)
       : [];
     if (orbisData) {
-      const { platforms } = getLocalStorageValueofClient(
+      const { platforms, showRoulette } = getLocalStorageValueofClient(
         `streamID-${profileTypeStreamId}`
       );
       const activePlatforms = platforms?.filter((button: ProfileData) =>
@@ -189,7 +195,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           ) {
             // same profile is already present in localstorage
             setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
+            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
           } else {
             // the profile in localstorage and orbis are different so we take the orbis profile
             let privataDataObj;
@@ -239,7 +245,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
               );
               dispatch(updateHeader());
               setLoading(false);
-              handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
+              handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
             } else {
               message.info(
                 "Could not validate your profile, Let's reset your profile"
@@ -298,7 +304,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             );
             dispatch(updateHeader());
             setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
+            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
           } else {
             message.info(
               "Could not validate your profile, Let's reset your profile"

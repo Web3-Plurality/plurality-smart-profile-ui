@@ -55,7 +55,7 @@ const Header = () => {
         setMobileMenuOpen(!mobileMenuOpen);
     };
 
-    if (!isHeaderVisible) return null;
+    if (!isHeaderVisible &&  route !== '/dashboard') return null;
 
     return (
         <div className={classNames('header-wrapper', { 

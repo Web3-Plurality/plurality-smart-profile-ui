@@ -181,7 +181,7 @@ const ProfileSetup = () => {
       if(isIframe){
         goToStep("consent")
       }else{
-        navigate(`/dashboard?client_id=${clientId}`, {replace: true})
+        navigate(`/dashboard?client_id=${clientId}`)
       }
     }else {
       goToStep('onboardingForm')
