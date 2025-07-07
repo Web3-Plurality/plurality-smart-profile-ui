@@ -4,6 +4,13 @@ import { generatePkpWalletInstance } from "../orbis/generatePkpWallet"
 import * as ethersV5 from 'ethers-v5';
 import { sendUserConsentEvent } from "../../utils/sendEventToParent";
 import { ContractData } from "../../types";
+import { createPublicClient, encodeFunctionData, http } from 'viem';
+import { toSafeSmartAccount } from 'permissionless/accounts';
+import { sepolia } from 'viem/chains';
+import { entryPoint07Address } from "viem/account-abstraction";
+import { createPimlicoClient } from 'permissionless/clients/pimlico';
+import { createSmartAccountClient } from 'permissionless';
+import { API_BASE_URL } from "../../utils/EnvConfig";
 
 const parentUrl = getParentUrl()
 
@@ -44,6 +51,74 @@ export const getAccount = async () => {
     const pkpWallet = await generatePkpWalletInstance();
     const account = await pkpWallet!.getAddress();
     return account;
+}
+
+// TODO create a button in rep connect widget to trigger this function
+export const sendGaslessTransaction = async () => {
+    const pkpWallet = await generatePkpWalletInstance();
+    const rpc = "https://eth-sepolia.g.alchemy.com/v2/-Wu369VGLVlWnEt3VXbHLUoJxzkJzwi7"
+    const pimlicoUrl = `${API_BASE_URL}/api/proxy`
+ 
+    const publicClient = createPublicClient({
+        chain: sepolia,
+        transport: http(rpc),
+    })
+    const pimlicoClient = createPimlicoClient({
+        transport: http(pimlicoUrl),
+        entryPoint: {
+            address: entryPoint07Address,
+            version: "0.7",
+        },
+    })
+    const account = await toSafeSmartAccount({
+      client: publicClient,
+      owner: {
+        ...pkpWallet!,
+        signTypedData: ({domain, types, message, primaryType}) => {
+          return pkpWallet?._signTypedData(domain, {[primaryType]: types[primaryType]}, message)
+        }
+      },
+      entryPoint: {
+          address: entryPoint07Address,
+          version: "0.7",
+      },
+      version: "1.4.1",
+  })
+  const smartAccountClient = createSmartAccountClient({
+      account,
+      chain: sepolia,
+      bundlerTransport: http(pimlicoUrl),
+      paymaster: pimlicoClient,
+      userOperation: {
+          estimateFeesPerGas: async () => {
+              return (await pimlicoClient.getUserOperationGasPrice()).fast
+          },
+      },
+  })
+    const txHash = await smartAccountClient.sendTransaction({
+      // TODO parameterize this block of code, it should come from rep connect widget
+      calls: [{ 
+          to: "0x8E26aa0b6c7A396C92237C6a87cCD6271F67f937", 
+          data: encodeFunctionData({
+            abi: [
+              {
+                inputs: [{ name: "value", type: "uint256" }],
+                name: "store",
+                outputs: [],
+                stateMutability: "nonpayable",
+                type: "function",
+              },
+            ],
+            functionName: "store",
+            args: [10n],
+          }),
+          value: 0n 
+      }] 
+  }) 
+
+  console.log({
+    tx: txHash
+  })
 }
 
 export const getBalance = async (rpc: string) => {
