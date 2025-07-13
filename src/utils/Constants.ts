@@ -365,4 +365,4 @@ export const overRideConsentComponents = [
 ]
 
 export const hideBackButtonforSteps = ['socialConnect', 'profile', 'profileSetup', 'onboardingForm']
-export const hideBackButtonforStepsInIframe = ['socialConnect', 'profileSettings', 'profile', 'consent', 'profileSetup', 'onboardingForm']
+export const hideBackButtonforStepsInIframe = ['socialConnect', 'profile', 'consent', 'profileSetup', 'onboardingForm']

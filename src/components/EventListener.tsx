@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 import { useDispatch } from 'react-redux';
-import { setContractData, setProfileDataID, setSignatureMessage, setTransactionData } from '../Slice/userDataSlice';
+import { setContractData, setProfileDataID, setSignatureMessage, setSocialConnectPath, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
 import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
 
@@ -46,6 +46,7 @@ const EventListener: React.FC = () => {
                 sendExtentedPublicData(data.id, data.key)
             }else if (data.method === 'navigateTo') {
                 const {step} = data
+                dispatch(setSocialConnectPath(true))
                 goToStep(step)
             } else if (data.method === 'setAppData') {
                 try {

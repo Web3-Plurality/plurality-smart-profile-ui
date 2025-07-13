@@ -16,9 +16,9 @@ import { client, queryClient } from './services/WagmiConfig'
 
 import './globalStyles.css'
 import Header from './components/Header';
-import { message } from 'antd';
-import { useEffect } from 'react';
-import { ErrorMessages } from './utils/Constants';
+// import { message } from 'antd';
+// import { useEffect } from 'react';
+// import { ErrorMessages } from './utils/Constants';
 import Unauthorized from './pages/UnAuthorizedDomain';
 import EventListener from './components/EventListener';
 import { StepperProvider } from './contexts/stepper';
@@ -29,21 +29,19 @@ import Dashboard from './pages/Dashboard';
 function App() {
   const { isMobileScreen, isTabScreen } = useResponsive()
 
-  useEffect(() => {
-    const isSafari = () => {
-      const userAgent = navigator.userAgent.toLowerCase();
-      return /safari/.test(userAgent) && !/chrome/.test(userAgent);
-    };
+  // useEffect(() => {
+  //   const isSafari = () => {
+  //     const userAgent = navigator.userAgent.toLowerCase();
+  //     return /safari/.test(userAgent) && !/chrome/.test(userAgent);
+  //   };
 
-    // safari on mobile
-    if (isMobileScreen && isSafari()) {
-      message.warning(ErrorMessages.SAFARI_ERROR)
-    }
-  }, [isMobileScreen]);
+  //   // safari on mobile
+  //   if (isMobileScreen && isSafari()) {
+  //     message.warning(ErrorMessages.SAFARI_ERROR)
+  //   }
+  // }, [isMobileScreen]);
 
   const pathname = window.location.pathname;
-
-  console.log('Current Pathname:', pathname);
 
   return (
     <Provider store={store}>

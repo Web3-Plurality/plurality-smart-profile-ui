@@ -7,6 +7,7 @@ import ConfettiExplosion from 'react-confetti-explosion';
 import axios from 'axios';
 import { getLocalStorageValueofClient } from '../utils/Helpers';
 import { CLIENT_ID } from '../utils/EnvConfig';
+import { useLogoutUser } from './../hooks/useLogoutUser';
 
 const AntMessageStyle = createGlobalStyle`
   .ant-message-notice {
@@ -63,6 +64,8 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  const handleLogoutUser = useLogoutUser();
+
   const confettiDuration = 4000;
 
   useEffect(() => {
@@ -101,6 +104,7 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Error fetching profile highlight:', error);
         message.error('Failed to generate profile highlight.');
+        handleLogoutUser()
       } finally {
         setIsLoading(false);
       }

@@ -32,6 +32,7 @@ export const initialState: StepState = {
         parsedImage: null
     },
     surprised: false,
+    iframeToProfiles: false,
 };
 
 export const UserDataSlice = createSlice({
@@ -72,6 +73,9 @@ export const UserDataSlice = createSlice({
         },
         setSurprisedData: (state, action: PayloadAction<boolean>) => {
             state.surprised = action.payload
+        },
+        setSocialConnectPath: (state, action: PayloadAction<boolean>) => {
+            state.iframeToProfiles = action.payload
         }
     },
 })
@@ -87,7 +91,8 @@ export const {
     setContractData,
     setProfileDataID,
     setProfileSetupData,
-    setSurprisedData
+    setSurprisedData,
+    setSocialConnectPath
 } = UserDataSlice.actions
 
 export default UserDataSlice.reducer

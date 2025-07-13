@@ -261,6 +261,7 @@ const Login = () => {
 
     const handleIconClick = (index: number) => {
         const handleSocialConnectClick = () => {
+            localStorage.setItem("connectSocial", "true")
             const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
             const { smartProfileData, platforms } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
             const parsedPlatforms = platforms || []
@@ -412,4 +413,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default Login;

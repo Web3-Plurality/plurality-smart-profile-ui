@@ -4,6 +4,8 @@ import Loader from './Loader';
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { getLocalStorageValueofClient } from '../utils/Helpers';
 import SocialProfiles from './SocialProfiles';
+import { useSelector } from 'react-redux';
+import { selectIframeToProfile } from '../selectors/userDataSelector';
 interface SocialConnectProps {
     activeStates: boolean[],
     handleIconClick: (idx: number) => void
@@ -11,7 +13,15 @@ interface SocialConnectProps {
 
 const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) => {
     const [, setRefresh] = useState(false)
-    const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData('socialConnect')
+    const [shouldRender, setShouldRender] = useState(false);
+
+    const handleShouldProfilesRender = () => {
+        setShouldRender(true)
+    }
+    const isIframe = window.location !== window.parent.location;
+    const iframeToProfile = useSelector(selectIframeToProfile)
+
+    const { loading, getSmartProfileFromOrbis } = useRefreshOrbisData('socialConnect', handleShouldProfilesRender)
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -34,7 +44,7 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
         window.addEventListener('message', handleMessage);
     }, [])
 
-    if (loading) {
+    if (loading || (isIframe && !shouldRender && !iframeToProfile)) {
         return <Loader message={'Looking up your profiles...'} />;
     }
 

@@ -37,7 +37,7 @@ type Platform = {
   authentication: boolean;
 };
 
-const useRefreshOrbisData = (step: string) => {
+const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => void) => {
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get("client_id") || CLIENT_ID;
   const { profileTypeStreamId, onboardingQuestions } =
@@ -53,6 +53,7 @@ const useRefreshOrbisData = (step: string) => {
 
   const { goToStep, stepHistory } = useStepper();
   const prevStep = stepHistory[stepHistory.length - 1];
+  const prevStep2 = stepHistory[stepHistory.length - 2];
 
   useEffect(() => {
     if (socialIcons && profileTypeStreamId) {
@@ -188,7 +189,7 @@ const useRefreshOrbisData = (step: string) => {
           ) {
             // same profile is already present in localstorage
             setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, goToStep);
+            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
           } else {
             // the profile in localstorage and orbis are different so we take the orbis profile
             let privataDataObj;
@@ -238,7 +239,7 @@ const useRefreshOrbisData = (step: string) => {
               );
               dispatch(updateHeader());
               setLoading(false);
-              handleUserConsentFlow(consent, step, prevStep, goToStep);
+              handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
             } else {
               message.info(
                 "Could not validate your profile, Let's reset your profile"
@@ -297,7 +298,7 @@ const useRefreshOrbisData = (step: string) => {
             );
             dispatch(updateHeader());
             setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, goToStep);
+            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, handleShouldProfilesRender);
           } else {
             message.info(
               "Could not validate your profile, Let's reset your profile"
