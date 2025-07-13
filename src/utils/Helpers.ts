@@ -369,17 +369,27 @@ const handleUserConsentFlow = (
   prevStep: string,
   prevStep2: string,
   cb: (step: string) => void,
+  showRoulette: boolean,
+  handleNavigation: () => void
   handleShouldProfilesRender: () => void
+
 ) => {
   const ignoreConsent = overRideConsentComponents.includes(prevStep);
   const stepDetails = step == 'socialConnect' && prevStep2 == 'success'
+  const isIframe = isInIframe();
 
   if ((consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails) {
     sendUserConsentEvent();
     sendProfileConnectedEvent();
   } else {
-    cb(step);
-    handleShouldProfilesRender();
+    if(showRoulette){
+      cb(step);
+      handleShouldProfilesRender();
+    }else if(!showRoulette && isIframe) {
+      cb('consent');
+    }else{
+      handleNavigation()
+    }
   }
   sendUserDataEvent();
 };
