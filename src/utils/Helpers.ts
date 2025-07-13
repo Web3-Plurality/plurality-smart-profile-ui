@@ -370,7 +370,7 @@ const handleUserConsentFlow = (
   prevStep2: string,
   cb: (step: string) => void,
   showRoulette: boolean,
-  handleNavigation: () => void
+  handleNavigation: () => void,
   handleShouldProfilesRender: () => void
 
 ) => {
