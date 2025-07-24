@@ -257,11 +257,13 @@ const EventListener: React.FC = () => {
             //     }
             // }
             else if (event.data.type === 'goToStep') {
-                const { step } = event.data
-
-                if (step) {
-                    goToStep(step)
+                const { step, action } = event.data
+                if(step == 'profileSettings' && action == 'profile'){
+                    dispatch(setSocialConnectPath(true))
+                }else{
+                    dispatch(setSocialConnectPath(false))
                 }
+                goToStep(step)
             }
         }
     };
