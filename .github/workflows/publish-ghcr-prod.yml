@@ -39,8 +39,8 @@ jobs:
       
       - name: Build and Push Docker Image
         run: |
-          docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-widget-ui:latest \
-          && docker push ghcr.io/web3-plurality/plurality-widget-ui:latest \
-          && docker tag ghcr.io/web3-plurality/plurality-widget-ui:latest ghcr.io/web3-plurality/plurality-widget-ui:${{ env.VERSION }} \
-          && docker push ghcr.io/web3-plurality/plurality-widget-ui:${{ env.VERSION }}
+          docker build . --file Dockerfile --tag ghcr.io/web3-plurality/plurality-smart-profile-ui:latest \
+          && docker push ghcr.io/web3-plurality/plurality-smart-profile-ui:latest \
+          && docker tag ghcr.io/web3-plurality/plurality-smart-profile-ui:latest ghcr.io/web3-plurality/plurality-smart-profile-ui:${{ env.VERSION }} \
+          && docker push ghcr.io/web3-plurality/plurality-smart-profile-ui:${{ env.VERSION }}
           
