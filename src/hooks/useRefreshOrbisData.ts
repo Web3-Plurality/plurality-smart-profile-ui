@@ -99,8 +99,11 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
     const orbisData = platformsData ? JSON.parse(platformsData) : [];
     if (orbisData) {
-      const { platforms, showRoulette } = getLocalStorageValueofClient(
+      const { platforms } = getLocalStorageValueofClient(
         `streamID-${profileTypeStreamId}`
+      );
+      const { showRoulette } = getLocalStorageValueofClient(
+        `clientID-${clientId}`
       );
       const activePlatforms = platforms?.filter((button: ProfileData) =>
         orbisData.some(

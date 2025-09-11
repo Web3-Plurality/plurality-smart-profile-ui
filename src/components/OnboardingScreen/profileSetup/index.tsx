@@ -144,7 +144,6 @@ const ProfileSetup = () => {
   const { goToStep } = useStepper()
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const handleLogout= useLogoutUser()
 
   const isIframe = isInIframe()
