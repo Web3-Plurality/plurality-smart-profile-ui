@@ -1,4 +1,3 @@
-import { AuthUserInformation } from "@useorbis/db-sdk";
 import {
   AIDRESSING_ROUTE,
   ARTIFICIAL_ROME_ROUTE,
@@ -17,8 +16,6 @@ import {
   TWITTER_ROUTE,
 } from "./Constants";
 import { CLIENT_ID } from "./EnvConfig";
-import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh";
-import { message } from "antd";
 import {
   sendProfileConnectedEvent,
   sendUserConsentEvent,
@@ -304,25 +301,6 @@ const redirectUserOnLogout = (
   return path;
 };
 
-const reGenerateUserDidAddress = async () => {
-  const queryParams = new URLSearchParams(location.search);
-  const clientId = queryParams.get("client_id") || CLIENT_ID;
-
-  const userDidAddress: AuthUserInformation | "" | "error" | undefined =
-    await connectOrbisDidPkh();
-  if (userDidAddress === "error") {
-    message.error("Something went Wrong!");
-  } else if (userDidAddress && userDidAddress.did) {
-    const existingDataString = localStorage.getItem(`clientID-${clientId}`);
-    let existingData = existingDataString ? JSON.parse(existingDataString) : {};
-
-    existingData = {
-      ...existingData,
-      userDid: userDidAddress?.did,
-    };
-    localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData));
-  }
-};
 
 const serializeSmartProfile = (smartProfile: any) => {
   smartProfile.scores = JSON.stringify(smartProfile.scores);
@@ -338,18 +316,28 @@ const serializeSmartProfile = (smartProfile: any) => {
   }
 };
 
+const tryParseJSON = (str: string, fallback = {}) => {
+  try {
+      return str ? JSON.parse(str) : fallback;
+  } catch (e) {
+      console.warn("Failed to parse JSON:", str, e);
+      return fallback;
+  }
+};
+
 const deserializeSmartProfile = (
   smartProfile: any,
   unecryptedPrivateDataObj?: any
 ) => {
-  smartProfile.scores = JSON.parse(smartProfile.scores);
-  smartProfile.connectedPlatforms = JSON.parse(smartProfile.connectedPlatforms);
-  smartProfile.extendedPublicData = JSON.parse(smartProfile.extendedPublicData);
-  smartProfile.attestation = JSON.parse(smartProfile.attestation);
+  smartProfile.scores = tryParseJSON(smartProfile.scores, {});
+  smartProfile.connectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, {});
+  smartProfile.extendedPublicData = tryParseJSON(smartProfile.extendedPublicData, {});
+  smartProfile.attestation = tryParseJSON(smartProfile.attestation, {});
+
   if (unecryptedPrivateDataObj) {
     smartProfile.privateData = unecryptedPrivateDataObj;
   } else {
-    smartProfile.privateData = JSON.parse(smartProfile.privateData);
+    smartProfile.privateData = tryParseJSON(smartProfile.privateData, {});
   }
 };
 
@@ -431,7 +419,6 @@ export {
   addGlobalLitData,
   removeGlobalLitData,
   redirectUserOnLogout,
-  reGenerateUserDidAddress,
   serializeSmartProfile,
   deserializeSmartProfile,
   truncateAddress,

@@ -5,13 +5,14 @@ import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
 import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers";
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
-import { updatePublicSmartProfileAction } from "../../../utils/SmartProfile";
 import axios from "axios";
 import { useStepper } from "../../../hooks/useStepper";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProfileSetupData, selectSurprised } from "../../../selectors/userDataSelector";
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
+import { updateSmartProfileAction } from "../../../utils/SmartProfile";
+import { useLogoutUser } from "../../../hooks/useLogoutUser";
 import { useNavigate } from "react-router-dom";
 
 const ProfileSetupWrapper = styled.div`
@@ -140,10 +141,9 @@ const ProfileSetup = () => {
   const [loading, setLoading] = useState(false)
 
   const { goToStep } = useStepper()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
-    const navigate = useNavigate()
-
-  const isIframe = isInIframe()
+  const handleLogout= useLogoutUser()
 
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -178,12 +178,12 @@ const ProfileSetup = () => {
       goToStep("socialConnect")
       return
     } else if (!showRoulette && !onboardingQuestions.length) {
-      if(isIframe){
+      if(isInIframe()){
         goToStep("consent")
       }else{
-        navigate(`/dashboard?client_id=${clientId}`)
+        navigate(`/dashboard?client_id=${clientId}`, { replace: true })
       }
-    }else {
+    } else {
       goToStep('onboardingForm')
     }
   }
@@ -201,6 +201,8 @@ const ProfileSetup = () => {
         profileImg: image,
         bio: userBio
       }
+      // const {id, ...rest}= smartProfileData.data.smartProfile
+      
       const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`,
         {
           data: payLoaddata,
@@ -215,7 +217,7 @@ const ProfileSetup = () => {
 
       const { success, smartProfile } = data
       if (success) {
-        await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+        await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
         setLoading(false)
         goToNextRoute()
       }

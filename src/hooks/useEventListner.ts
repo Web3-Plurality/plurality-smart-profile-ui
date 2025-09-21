@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
 import { updateSmartProfileAction } from '../utils/SmartProfile'
+import { useLogoutUser } from './useLogoutUser'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')
@@ -16,6 +17,7 @@ export const useRegisterEvent = () => {
 
     const { goToStep } = useStepper()
     const dispatch = useDispatch()
+    const handleLogout = useLogoutUser()
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -118,7 +120,7 @@ export const useRegisterEvent = () => {
                 if (smartProfileResponse.success) {
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                         dispatch(setProfileConnected())
                 }
                 

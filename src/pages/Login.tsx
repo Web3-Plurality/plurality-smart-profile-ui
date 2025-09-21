@@ -25,11 +25,8 @@ import { useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
 import LogoutModal from "../components/LogoutModal"
-import { AuthUserInformation } from "@useorbis/db-sdk"
-import { connectOrbisDidPkh } from "../services/orbis/getOrbisDidPkh"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
-import { selectProfileType } from "../services/orbis/selectQueries"
 import { setLoadingState } from "../Slice/userDataSlice"
 import axios from "axios"
 import { useLogoutUser } from "../hooks/useLogoutUser"
@@ -43,6 +40,7 @@ import Signing from "../components/Signing"
 import Contract from "../components/Contract"
 import ProfileSetup from "../components/OnboardingScreen/profileSetup"
 import OnboardingForm from "../components/OnboardingScreen/questionaire"
+import { selectProfileType } from "../services/orbisMap/selectQueries"
 
 const Login = () => {
 
@@ -132,7 +130,8 @@ const Login = () => {
 
                     localStorage.setItem(`clientID-${clientId}`, JSON.stringify(ClientIdData))
                     //firstly initilize the roulette constant
-                    const selectedResult = await selectProfileType(data.data.streamId)
+                    const selectedResult = await selectProfileType(data.data.streamId, handleLogoutUser)
+                    console.log(selectedResult)
                     if (selectedResult?.neededPlatforms) {
                         setSocialButtons(selectedResult?.neededPlatforms);
                     }
@@ -142,8 +141,8 @@ const Login = () => {
                         ...existingDataStreamId,
                         clientId,
                         platforms: selectedResult?.neededPlatforms,
-                        platformName: selectedResult?.rows[0].profile_name,
-                        platformDescription: selectedResult?.rows[0].description
+                        platformName: selectedResult?.profileTypeData.profileName,
+                        platformDescription: selectedResult?.profileTypeData.description
 
                     }
 
@@ -195,7 +194,7 @@ const Login = () => {
             window.parent.postMessage({ eventName: 'smartProfileData', data: { profileData } }, parentUrl);
         }
 
-        if(isIframe && !consent && token) {
+        if (isIframe && !consent && token) {
             goToStep('consent')
             window.parent.postMessage({ eventName: 'unifiedLogin', data: 'unifiedLogin' }, parentUrl);
         }
@@ -285,7 +284,7 @@ const Login = () => {
                 const clickedIcon = socialButtons?.find((x: ProfileData) => x?.id === index);
                 const clickedIconDisplayName = clickedIcon?.displayName?.toLowerCase().replace(/\s+/g, '')
                 const selectedItem = parsedUrls.find((item: ProfileData) => item?.platformName?.toLowerCase() === clickedIconDisplayName)
-                if(selectedItem.url){
+                if (selectedItem.url) {
                     window.open(selectedItem.url, '_blank');
                 }
             }
@@ -313,12 +312,12 @@ const Login = () => {
     const conditionalRendrer = () => {
         switch (currentStep) {
             case 'home':
-                return <Home 
-                    handleLitConnect={handleLitConnect} 
-                    handleMetamaskConnect={handleMetamaskConnect} 
+                return <Home
+                    handleLitConnect={handleLitConnect}
+                    handleMetamaskConnect={handleMetamaskConnect}
                     handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
-                    />
+                />
             case 'litLogin':
                 return <LitLogin setEmailId={setEmailId} />
             case 'otp':
@@ -350,41 +349,25 @@ const Login = () => {
             case 'contract':
                 return <Contract />
             case 'profileSetup':
-                    return <ProfileSetup/>
+                return <ProfileSetup />
             case 'onboardingForm':
                 return <OnboardingForm
-                currentStep1={currentStep1}
-                setCurrentStep1={setCurrentStep1}
-                 />
+                    currentStep1={currentStep1}
+                    setCurrentStep1={setCurrentStep1}
+                />
             default:
-                return <Home 
-                    handleLitConnect={handleLitConnect} 
-                    handleMetamaskConnect={handleMetamaskConnect} 
+                return <Home
+                    handleLitConnect={handleLitConnect}
+                    handleMetamaskConnect={handleMetamaskConnect}
                     handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
-                    />
+                />
         }
     }
 
     const handleOk = async () => {
         if (ceramicError) {
-            const result: AuthUserInformation | "" | "error" | undefined = await connectOrbisDidPkh();
-            if (result === "error") {
-                console.error("Error connecting to Orbis");
-                setCeramicError(true)
-            } else if (result && result.did) {
-                const existingDataString = localStorage.getItem(`clientID-${clientId}`)
-                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-                existingData = {
-                    ...existingData,
-                    userDid: result?.did
-                }
-                localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-                setCeramicError(false)
-            } else {
-                setCeramicError(true)
-            }
+            setCeramicError(true)
         } else if (pkpWithMetamakError) {
             setPkpWithMetamaskError(false)
             goToStep('verification')

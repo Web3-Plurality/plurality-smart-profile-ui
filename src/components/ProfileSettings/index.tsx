@@ -11,9 +11,12 @@ import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import CustomButtom from "../customButton"
 import { getLocalStorageValueofClient } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
-import { updatePublicSmartProfileAction } from "../../utils/SmartProfile"
 import { sendUserDataEvent } from "../../utils/sendEventToParent"
+import { updateSmartProfileAction } from "../../utils/SmartProfile"
 import styled from "styled-components"
+import { useSelector } from "react-redux"
+import { selectIframeToProfile } from "../../selectors/userDataSelector"
+import { useLogoutUser } from "../../hooks/useLogoutUser"
 // import { ProfileSetupData } from "../../types"
 // import { useSelector } from "react-redux"
 // import { selectProfileSetupData } from "../../selectors/userDataSelector"
@@ -61,7 +64,7 @@ const FileInput = styled.input`
   display: none;
 `;
 
-const UploadLabel = styled.label`
+const UploadLabel = styled.label<{ disabled?: boolean }>`
   margin-top: 10px;
   padding: 6px 12px;
   background: #f9f9f9;
@@ -81,38 +84,57 @@ const UploadLabel = styled.label`
   @media (max-width: 400px) {
     font-size: 12px;
   }
+
+  ${({ disabled }) =>
+    disabled &&
+    `
+      pointer-events: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      background: #f0f0f0;
+      box-shadow: none;
+  `}
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ disabled?: boolean }>`
   padding: 10px;
   border-radius: 10px;
   border: none;
-  background: #f9f9f9;
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.41), -4px -4px 6px #ffffff;
+  background: ${({ disabled }) => (disabled ? '#f0f0f0' : '#f9f9f9')};
+  box-shadow: ${({ disabled }) =>
+    disabled
+      ? 'none'
+      : '2px 4px 6px rgba(0, 0, 0, 0.41), -4px -4px 6px #ffffff'};
   font-size: 14px;
-  color: #4c4c4c;
+  color: ${({ disabled }) => (disabled ? '#a0a0a0' : '#4c4c4c')};
   margin-top: 10px;
   font-family: "Lexend", sans-serif;
   outline: none;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'auto')};
 
   @media (max-width: 400px) {
     font-size: 12px;
   }
 `;
 
-const BioTextArea = styled.textarea`
+const BioTextArea = styled.textarea<{ disabled?: boolean }>`
   height: 100px;
   padding: 10px;
   border-radius: 10px;
   border: none;
-  background: #f9f9f9;
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.41), -4px -4px 6px #ffffff;
+  background: ${({ disabled }) => (disabled ? '#f0f0f0' : '#f9f9f9')};
+  box-shadow: ${({ disabled }) =>
+    disabled
+      ? 'none'
+      : '2px 4px 6px rgba(0, 0, 0, 0.41), -4px -4px 6px #ffffff'};
   font-size: 14px;
-  color: #4c4c4c;
+  color: ${({ disabled }) => (disabled ? '#a0a0a0' : '#4c4c4c')};
   margin-top: 10px;
   resize: none;
   font-family: "Lexend", sans-serif;
   outline: none;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'auto')};
 
   @media (max-width: 400px) {
     font-size: 12px;
@@ -128,7 +150,10 @@ const ButtonGroup = styled.div`
 
 const ProfileSettings = () => {
     const { goBack, goToStep } = useStepper()
+    const handleLogout = useLogoutUser()
     const [loading, setLoading] = useState(false)
+
+    const isEventProfile = useSelector(selectIframeToProfile)
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
@@ -205,7 +230,7 @@ const ProfileSettings = () => {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-                await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+                await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                 message.success("Profile updated successfully!")
                 setLoading(false)
                 if (isIframe && (consent && consent === 'accepted')) {
@@ -270,7 +295,6 @@ const ProfileSettings = () => {
         // </div>
 
         <ProfileSetupWrapper>
-            {/* <div style={{ display: "flex", gap: "20px", marginTop: "50px" }}> */}
             <SectionContentWrapper>
                 <AvatarWrapper>
                     {profilePic ? (
@@ -278,22 +302,22 @@ const ProfileSettings = () => {
                     ) : (
                         <UserAvatar address={litAddress || metamaskAddress} size={100} />
                     )}
-                    <FileInput type="file" id="fileUpload" onChange={handleInputChange} accept="image/*" />
-                    <UploadLabel htmlFor="fileUpload">Choose file</UploadLabel>
+                    <FileInput type="file" id="fileUpload" onChange={handleInputChange} accept="image/*" disabled={isEventProfile} />
+                    <UploadLabel htmlFor="fileUpload" disabled={isEventProfile}>Choose file</UploadLabel>
                 </AvatarWrapper>
 
 
                 <div>
-                    <Input name='username' placeholder="Username" value={username} onChange={handleInputChange} />
-                    <BioTextArea name='userBio' placeholder="Enter Your Bio" value={userBio} onChange={(e) => setUserBio(e.target.value)} />
+                    <Input name='username' placeholder="Username" value={username} onChange={handleInputChange} disabled={isEventProfile} />
+                    <BioTextArea name='userBio' placeholder="Enter Your Bio" value={userBio} onChange={(e) => setUserBio(e.target.value)} disabled={isEventProfile} />
                 </div>
             </SectionContentWrapper>
 
             <ButtonGroup>
                 <CustomButtom
-                    text={loading ? 'Updating Profile...' : "Update Profile"}
+                    text={isEventProfile ? 'Profile Details' : loading ? 'Updating Profile...' : "Update Profile"}
                     isDisable={(!username && !profilePic && !userBio) || loading}
-                    handleClick={handleDataSumbit}
+                    handleClick={isEventProfile ? () => goToStep('profile') : () => handleDataSumbit()}
                 />
             </ButtonGroup>
         </ProfileSetupWrapper>

@@ -23,12 +23,13 @@ import Unauthorized from './pages/UnAuthorizedDomain';
 import EventListener from './components/EventListener';
 import { StepperProvider } from './contexts/stepper';
 import Dashboard from './pages/Dashboard';
+import { getParentUrl } from './utils/Helpers';
 
 
 
 function App() {
   const { isMobileScreen, isTabScreen } = useResponsive()
-
+  const parentUrl = getParentUrl()
   // useEffect(() => {
   //   const isSafari = () => {
   //     const userAgent = navigator.userAgent.toLowerCase();
@@ -42,7 +43,7 @@ function App() {
   // }, [isMobileScreen]);
 
   const pathname = window.location.pathname;
-
+  window.parent.postMessage({ eventName: 'appLoaded', loader: 'fasle' }, parentUrl);
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>

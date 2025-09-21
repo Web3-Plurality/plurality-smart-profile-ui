@@ -24,6 +24,7 @@ export default function useAccounts() {
         // Fetch PKPs tied to given auth method
         const myPKPs = await getPKPs(authMethod);
         setAccounts(myPKPs);
+
         setIsFetchTriggered(true)
         // If only one PKP, set as current account
         if (myPKPs.length === 1) {

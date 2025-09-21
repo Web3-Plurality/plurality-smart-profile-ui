@@ -110,6 +110,7 @@ export const useMetamaskToken = (walletAddress: string) => {
                 existingData = {
                     ...existingData,
                     token: data.token,
+                    userId: data.user.id
                 }
                 localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
                  dispatch(setLoadingState({ loadingState: false, text: '' }))

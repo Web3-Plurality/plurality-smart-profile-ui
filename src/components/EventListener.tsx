@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { setContractData, setProfileDataID, setSignatureMessage, setSocialConnectPath, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
 import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
+import { useLogoutUser } from '../hooks/useLogoutUser';
 
 const EventListener: React.FC = () => {
     const queryParams = new URLSearchParams(location.search);
@@ -17,6 +18,7 @@ const EventListener: React.FC = () => {
     const { goToStep, resetSteps } = useStepper()
     const navigate = useNavigate();
     const dispatch = useDispatch()
+    const handleLogoutUser =  useLogoutUser()
 
     const receiveMessage = async (event: MessageEvent) => {
         const parentUrl = getParentUrl()
@@ -66,7 +68,7 @@ const EventListener: React.FC = () => {
                     
                     smartProfile.extendedPublicData[clientId][data.key] = data.value;
         
-                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile);
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
                     window.parent.postMessage({ id: data.id, eventName: 'setAppData', data: "received" }, parentUrl);                  
                 }
                 catch (error) {
@@ -178,7 +180,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.extendedPublicData[data?.key] = data?.value;
-                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile)
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser)
                     window.parent.postMessage({ id: data.id, eventName: 'setPublicData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {
@@ -208,7 +210,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.privateData.extendedPrivateData[data?.key] = data?.value;
-                    await updateSmartProfileAction(profileTypeStreamId, smartProfile)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser)
                     window.parent.postMessage({ id: data.id, eventName: 'setPrivateData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {
@@ -255,11 +257,13 @@ const EventListener: React.FC = () => {
             //     }
             // }
             else if (event.data.type === 'goToStep') {
-                const { step } = event.data
-
-                if (step) {
-                    goToStep(step)
+                const { step, action } = event.data
+                if(step == 'profileSettings' && action == 'profile'){
+                    dispatch(setSocialConnectPath(true))
+                }else{
+                    dispatch(setSocialConnectPath(false))
                 }
+                goToStep(step)
             }
         }
     };

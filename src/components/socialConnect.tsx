@@ -26,13 +26,13 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { profileTypeStreamId, userDid } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const { profileTypeStreamId, userId } = getLocalStorageValueofClient(`clientID-${clientId}`);
 
     useEffect(() => {
-        if (profileTypeStreamId && userDid) {
-            getSmartProfileFromOrbis(profileTypeStreamId, JSON.stringify(userDid))
+        if (profileTypeStreamId && userId) {
+            getSmartProfileFromOrbis(profileTypeStreamId, userId)
         }
-    }, [profileTypeStreamId, userDid])
+    }, [profileTypeStreamId, userId])
 
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {

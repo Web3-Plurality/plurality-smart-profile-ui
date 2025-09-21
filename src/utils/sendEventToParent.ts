@@ -19,7 +19,12 @@ export const sendUserConsentEvent = () => {
 }
 
 export const sendProfileConnectedEvent = (id?: string) => {
-    const { litWalletSig, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId, litWalletSig, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+
+    const username = smartProfileData?.data?.smartProfile?.username || '';
+    const avatar = smartProfileData?.data?.smartProfile?.avatar || ''; 
+
     let event;
     if (id) {
         event = {
@@ -36,6 +41,8 @@ export const sendProfileConnectedEvent = (id?: string) => {
             data: {
                 isConnected: !!litWalletSig,
                 token,
+                username,
+                avatar,
                 logout: false
             }
         }

@@ -8,7 +8,6 @@ export const initialState: StepState = {
         loadingState: false,
         text: ''
     },
-    userDid: '',
     profileConnected: false,
     currentWalletTab: 'balance',
     messageToBeSigned: {
@@ -47,9 +46,6 @@ export const UserDataSlice = createSlice({
             state.isLoading.loadingState = loadingState
             state.isLoading.text = text
         },
-        setUserDID: (state, action: PayloadAction<string>) => {
-            state.userDid = action.payload
-        },
         setProfileConnected: (state) => {
             state.profileConnected = true
         },
@@ -83,7 +79,6 @@ export const UserDataSlice = createSlice({
 export const {
     globalSessionSigs,
     setLoadingState,
-    setUserDID,
     setProfileConnected,
     setWalletTab,
     setSignatureMessage,

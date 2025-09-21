@@ -8,6 +8,7 @@ import { selectSPDataId } from '../../selectors/userDataSelector';
 import { setProfileDataID } from '../../Slice/userDataSlice';
 import { updatePublicSmartProfileAction } from '../../utils/SmartProfile';
 import { useState } from 'react';
+import { useLogoutUser } from '../../hooks/useLogoutUser';
 
 const ConsentFooterWrapper = styled.div`
     display: flex;
@@ -22,6 +23,7 @@ const ConsentFooter = () => {
     const [isAcceptLoading, setIsAcceptLoading] = useState(false)
     const [isRejectLoading, setIsRejectLoading] = useState(false)
     const dispatch = useDispatch()
+    const handleLogoutUser = useLogoutUser()
     const id = useSelector(selectSPDataId)
 
     let event = ''
@@ -48,7 +50,7 @@ const ConsentFooter = () => {
                 consent: 'accepted',
             };
     
-            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile);
+            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
             sendProfileConnectedEvent();
             sendUserConsentEvent();
             sendUserDataEvent(id, event, resetSPId);
@@ -74,7 +76,7 @@ const ConsentFooter = () => {
                 consent: 'rejected',
             };
     
-            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile);
+            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
             sendProfileConnectedEvent();
             sendUserConsentEvent();
             sendUserDataEvent(id, event, resetSPId);
