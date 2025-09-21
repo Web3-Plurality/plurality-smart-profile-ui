@@ -3,7 +3,7 @@ import { getLocalStorageValueofClient, getParentUrl, handleLocalStorageOnLogout,
 import { CLIENT_ID } from '../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
-import { updatePublicSmartProfileAction } from '../utils/SmartProfile';
+import { updatePublicSmartProfileAction, updateSmartProfileAction } from '../utils/SmartProfile';
 import { useDispatch } from 'react-redux';
 import { setContractData, setProfileDataID, setSignatureMessage, setSocialConnectPath, setTransactionData } from '../Slice/userDataSlice';
 import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
@@ -210,7 +210,7 @@ const EventListener: React.FC = () => {
                     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                     const smartProfile = smartProfileData.data.smartProfile
                     smartProfile.privateData.extendedPrivateData[data?.key] = data?.value;
-                    await updateSmsartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser)
                     window.parent.postMessage({ id: data.id, eventName: 'setPrivateData', data: "recieved" }, parentUrl);
                 }
                 catch (error) {

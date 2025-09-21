@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectProfileSetupData, selectSurprised } from "../../../selectors/userDataSelector";
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
-import { useNavigate } from "react-router-dom";
 import { updateSmartProfileAction } from "../../../utils/SmartProfile";
 import { useLogoutUser } from "../../../hooks/useLogoutUser";
 import { useNavigate } from "react-router-dom";
@@ -145,8 +144,6 @@ const ProfileSetup = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const handleLogout= useLogoutUser()
-
-  const isIframe = isInIframe()
 
   const queryParams = new URLSearchParams(location.search);
   const clientId = queryParams.get('client_id') || CLIENT_ID;
