@@ -6,7 +6,7 @@ import { setLoadingState, setProfileConnected } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
-import { updateSmartProfileAction } from '../utils/SmartProfile'
+import { updatePublicSmartProfileAction } from '../utils/SmartProfile'
 import { useLogoutUser } from './useLogoutUser'
 
 export const useRegisterEvent = () => {
@@ -28,8 +28,7 @@ export const useRegisterEvent = () => {
         try {
             const evtSource = new EventSource(`${API_BASE_URL}/register-event`, { withCredentials: true });
             evtSource.onmessage = function (event) {
-                console.log(JSON.parse(event?.data))
-                const { message, app, id, auth, googleJwtToken, token, emailId } = JSON.parse(event?.data);
+                const { message, app, id, auth, googleJwtToken, token, emailId, userId } = JSON.parse(event?.data);
                 setMessage(message);
                 setApp(app);
                 if (message === "received" && app === 'google' && emailId) {
@@ -46,7 +45,8 @@ export const useRegisterEvent = () => {
                     existingData = {
                         ...existingData,
                         token,
-                        googleJwtToken
+                        googleJwtToken,
+                        userId
                     }
                     setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
                     goToStep('verification');
@@ -120,7 +120,7 @@ export const useRegisterEvent = () => {
                 if (smartProfileResponse.success) {
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
+                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                         dispatch(setProfileConnected())
                 }
                 
