@@ -6,7 +6,7 @@ import { setLoadingState, setProfileConnected } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
-import { updatePublicSmartProfileAction } from '../utils/SmartProfile'
+import { updateSmartProfileAction } from '../utils/SmartProfile'
 import { useLogoutUser } from './useLogoutUser'
 
 export const useRegisterEvent = () => {
@@ -120,7 +120,7 @@ export const useRegisterEvent = () => {
                 if (smartProfileResponse.success) {
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
+                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                         dispatch(setProfileConnected())
                 }
                 

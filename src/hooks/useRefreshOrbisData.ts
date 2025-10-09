@@ -126,7 +126,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           dispatch(updateHeader());
           setLoading(false);
           goToStep("profileSetup");
-        } else {
+      } else {
         await deserializeSmartProfile(response)
         const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
           `clientID-${clientId}`
@@ -165,28 +165,6 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           rpcProvider: EAS_BLOCKCHAIN_RPC || "",
         });
 
-
-        const { id, ...rest } = response;
-        const objData = {
-          streamId: id,
-          data: { smartProfile: rest },
-        };
-        const existingDataString = localStorage.getItem(
-          `streamID-${profileTypeStreamId}`
-        );
-        let existingData = existingDataString
-          ? JSON.parse(existingDataString)
-          : {};
-
-        existingData = {
-          ...existingData,
-          smartProfileData: objData,
-        };
-        localStorage.setItem(
-          `streamID-${profileTypeStreamId}`,
-          JSON.stringify(existingData)
-        );
-
         const parsedExtendedPublicData =  orbisSmartProfile.extendedPublicData
         const consent = parsedExtendedPublicData?.[clientId]?.consent;
         if (
@@ -208,93 +186,23 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           return;
         }
 
-        if (smartprofileData) {
-          const { data } = smartprofileData;
-          if (
-            JSON.stringify(data.smartProfile.attestation) ===
-            orbisSmartProfile.attestation
-          ) {
-            // same profile is already present in localstorage
-            setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
-          } else {
-            // the profile in localstorage and orbis are different so we take the orbis profile
-            let privataDataObj;
-            if (!orbisSmartProfile.privateData) {
-              // the privata data is empty it means we need to initialize the object
-              privataDataObj = new ProfilePrivateData();
-            } else {
-              // the privata data is not empty it means we need to decrypt the data
-              const privataDataObj = await decryptData(
-                JSON.stringify(orbisSmartProfile.privateData)
-              );
-              if (privataDataObj.code === -32603) {
-                goToStep("success");
-                return;
-              }
-            }
-            await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
-
-            // verify attestation
-            const smartProfile = normalizeSmartProfile(orbisSmartProfile);
-            const isVerifiedSmartProfileAttestaion =
-              await pluralityAttestation.verifySmartProfileAttestation(
-                smartProfile,
-                pkpKey.ethAddress
-              );
-
-            if (isVerifiedSmartProfileAttestaion) {
-              console.log("Attestation Verified");
-              const { id, ...rest } = response;
-              const objData = {
-                streamId: id,
-                data: { smartProfile: rest },
-              };
-              const existingDataString = localStorage.getItem(
-                `streamID-${profileTypeStreamId}`
-              );
-              let existingData = existingDataString
-                ? JSON.parse(existingDataString)
-                : {};
-
-              existingData = {
-                ...existingData,
-                smartProfileData: objData,
-              };
-              localStorage.setItem(
-                `streamID-${profileTypeStreamId}`,
-                JSON.stringify(existingData)
-              );
-              dispatch(updateHeader());
-              setLoading(false);
-              handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
-            } else {
-              message.info(
-                "Could not validate your profile, Let's reset your profile"
-              );
-              await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
-              dispatch(updateHeader());
-              setLoading(false);
-              goToStep(step);
-            }
-          }
+        const { id, ...rest } = response;
+        let orbisPrivataDataDecrypted
+        if (!rest.privateData) {
+          // the privata data is empty it means we need to initialize the object
+          orbisPrivataDataDecrypted = new ProfilePrivateData();
         } else {
-          // the profile is not present in localstorage so we take the orbis profile
-          let privateDataObj;
-          if (!orbisSmartProfile.privateData) {
-            // the privata data is empty it means we need to initialize the object
-            privateDataObj = new ProfilePrivateData();
-          } else {
-            // the privata data is not empty it means we need to decrypt the data
-            privateDataObj = await decryptData( JSON.stringify(orbisSmartProfile.privateData));
-            if (privateDataObj.code === -32603) {
+          // the privata data is not empty it means we need to decrypt the data
+            orbisPrivataDataDecrypted = await decryptData(
+            JSON.stringify(rest.privateData)
+          );
+          if (orbisPrivataDataDecrypted.code === -32603) {
               goToStep("success");
               return;
             }
-          }
-          await deserializeSmartProfile(orbisSmartProfile, privateDataObj);
-
-          // verify attestation
+        }
+        rest.privateData = orbisPrivataDataDecrypted;
+        // verify attestation
           const smartProfile = normalizeSmartProfile(orbisSmartProfile);
           const isVerifiedSmartProfileAttestaion =
             await pluralityAttestation.verifySmartProfileAttestation(
@@ -303,7 +211,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             );
           if (isVerifiedSmartProfileAttestaion) {
             console.log("Attestation Verified");
-            const { id, ...rest } = response;
+            const { id } = response;
             const objData = {
               streamId: id,
               data: { smartProfile: rest },
@@ -335,7 +243,158 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             setLoading(false);
             goToStep(step);
           }
-        }
+
+          // const objData = {
+          //   streamId: id,
+          //   //data: { smartProfile: orbisSmartProfile },
+          //   data: { smartProfile: rest },
+          // };
+          // const existingDataString = localStorage.getItem(
+          //   `streamID-${profileTypeStreamId}`
+          // );
+          // let existingData = existingDataString
+          //   ? JSON.parse(existingDataString)
+          //   : {};
+
+          // existingData = {
+          //   ...existingData,
+          //   smartProfileData: objData,
+          // };
+          // localStorage.setItem(
+          //   `streamID-${profileTypeStreamId}`,
+          //   JSON.stringify(existingData)
+          // );
+
+
+          // //localstorage check
+          // if (smartprofileData) {
+          //   const { data } = smartprofileData;
+          //   if (
+          //     JSON.stringify(data.smartProfile.attestation) ===
+          //     orbisSmartProfile.attestation
+          //   ) {
+          //     // same profile is already present in localstorage
+          //     setLoading(false);
+          //     handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
+          //   } else {
+          //     // the profile in localstorage and orbis are different so we take the orbis profile
+          //     let privataDataObj;
+          //     if (!orbisSmartProfile.privateData) {
+          //       // the privata data is empty it means we need to initialize the object
+          //       privataDataObj = new ProfilePrivateData();
+          //     } else {
+          //       // the privata data is not empty it means we need to decrypt the data
+          //       const privataDataObj = await decryptData(
+          //         JSON.stringify(orbisSmartProfile.privateData)
+          //       );
+          //       if (privataDataObj.code === -32603) {
+          //         goToStep("success");
+          //         return;
+          //       }
+          //     }
+          //     await deserializeSmartProfile(orbisSmartProfile, privataDataObj);
+
+          //     // verify attestation
+          //     const smartProfile = normalizeSmartProfile(orbisSmartProfile);
+          //     const isVerifiedSmartProfileAttestaion =
+          //       await pluralityAttestation.verifySmartProfileAttestation(
+          //         smartProfile,
+          //         pkpKey.ethAddress
+          //       );
+
+          //     if (isVerifiedSmartProfileAttestaion) {
+          //       console.log("Attestation Verified");
+          //       const { id } = response;
+          //       const objData = {
+          //         streamId: id,
+          //         data: { smartProfile: orbisSmartProfile },
+          //       };
+          //       const existingDataString = localStorage.getItem(
+          //         `streamID-${profileTypeStreamId}`
+          //       );
+          //       let existingData = existingDataString
+          //         ? JSON.parse(existingDataString)
+          //         : {};
+
+          //       existingData = {
+          //         ...existingData,
+          //         smartProfileData: objData,
+          //       };
+          //       localStorage.setItem(
+          //         `streamID-${profileTypeStreamId}`,
+          //         JSON.stringify(existingData)
+          //       );
+          //       dispatch(updateHeader());
+          //       setLoading(false);
+          //       handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
+          //     } else {
+          //       message.info(
+          //         "Could not validate your profile, Let's reset your profile"
+          //       );
+          //       await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
+          //       dispatch(updateHeader());
+          //       setLoading(false);
+          //       goToStep(step);
+          //     }
+          //   }
+          // } else {
+          //   // the profile is not present in localstorage so we take the orbis profile
+          //   let privateDataObj;
+          //   if (!orbisSmartProfile.privateData) {
+          //     // the privata data is empty it means we need to initialize the object
+          //     privateDataObj = new ProfilePrivateData();
+          //   } else {
+          //     // the privata data is not empty it means we need to decrypt the data
+          //     privateDataObj = await decryptData( JSON.stringify(orbisSmartProfile.privateData));
+          //     if (privateDataObj.code === -32603) {
+          //       goToStep("success");
+          //       return;
+          //     }
+          //   }
+          //   await deserializeSmartProfile(orbisSmartProfile, privateDataObj);
+
+          //   // verify attestation
+          //   const smartProfile = normalizeSmartProfile(orbisSmartProfile);
+          //   const isVerifiedSmartProfileAttestaion =
+          //     await pluralityAttestation.verifySmartProfileAttestation(
+          //       smartProfile,
+          //       pkpKey.ethAddress
+          //     );
+          //   if (isVerifiedSmartProfileAttestaion) {
+          //     console.log("Attestation Verified");
+          //     const { id } = response;
+          //     const objData = {
+          //       streamId: id,
+          //       data: { smartProfile: orbisSmartProfile },
+          //     };
+          //     const existingDataString = localStorage.getItem(
+          //       `streamID-${profileTypeStreamId}`
+          //     );
+          //     let existingData = existingDataString
+          //       ? JSON.parse(existingDataString)
+          //       : {};
+
+          //     existingData = {
+          //       ...existingData,
+          //       smartProfileData: objData,
+          //     };
+          //     localStorage.setItem(
+          //       `streamID-${profileTypeStreamId}`,
+          //       JSON.stringify(existingData)
+          //     );
+          //     dispatch(updateHeader());
+          //     setLoading(false);
+          //     handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
+          //   } else {
+          //     message.info(
+          //       "Could not validate your profile, Let's reset your profile"
+          //     );
+          //     await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
+          //     dispatch(updateHeader());
+          //     setLoading(false);
+          //     goToStep(step);
+          //   }
+          // }
       }
     }
   };

@@ -12,7 +12,7 @@ import CustomButtom from "../customButton"
 import { getLocalStorageValueofClient } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
 import { sendUserDataEvent } from "../../utils/sendEventToParent"
-import { updatePublicSmartProfileAction } from "../../utils/SmartProfile"
+import { updateSmartProfileAction } from "../../utils/SmartProfile"
 import styled from "styled-components"
 import { useSelector } from "react-redux"
 import { selectIframeToProfile } from "../../selectors/userDataSelector"
@@ -230,7 +230,7 @@ const ProfileSettings = () => {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-                await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
+                await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
                 message.success("Profile updated successfully!")
                 setLoading(false)
                 if (isIframe && (consent && consent === 'accepted')) {
