@@ -131,8 +131,8 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
         const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
-        const { smartProfileData: smartprofileData } =
-          getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
+        // const { smartProfileData: smartprofileData } =
+        //   getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
         const orbisSmartProfile = (({
           username,
           avatar,
