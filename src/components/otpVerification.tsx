@@ -139,14 +139,15 @@ const OTPVerification = ({ emailId, handleFinalPayload }: OTPVerificationProps) 
             }
 
             if (response.data?.success && response.data?.stytchToken) {
-                handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.userId, method: 'email' });
+                handleFinalPayload({ session: response.data?.stytchToken, userId: response.data?.user?.id, method: 'email' });
 
                 let existingData = getLocalStorageValueofClient(`clientID-${clientId}`)
 
                 existingData = {
                     ...existingData,
                     tool: 'lit',
-                    token: response.data?.token
+                    token: response.data?.token,
+                    userId: response.data?.user?.id
                 }
                 setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData))
             }

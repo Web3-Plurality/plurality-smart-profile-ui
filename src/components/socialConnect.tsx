@@ -26,7 +26,7 @@ const SocialConnect = ({ activeStates, handleIconClick }: SocialConnectProps) =>
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { profileTypeStreamId, userId } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const { profileTypeStreamId, userId} = getLocalStorageValueofClient(`clientID-${clientId}`);
 
     useEffect(() => {
         if (profileTypeStreamId && userId) {

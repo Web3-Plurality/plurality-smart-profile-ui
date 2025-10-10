@@ -6,7 +6,7 @@ import { sendProfileConnectedEvent, sendUserConsentEvent, sendUserDataEvent } fr
 import { useDispatch, useSelector } from 'react-redux';
 import { selectSPDataId } from '../../selectors/userDataSelector';
 import { setProfileDataID } from '../../Slice/userDataSlice';
-import { updatePublicSmartProfileAction } from '../../utils/SmartProfile';
+import { updateSmartProfileAction } from '../../utils/SmartProfile';
 import { useState } from 'react';
 import { useLogoutUser } from '../../hooks/useLogoutUser';
 
@@ -50,7 +50,7 @@ const ConsentFooter = () => {
                 consent: 'accepted',
             };
     
-            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
+            await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
             sendProfileConnectedEvent();
             sendUserConsentEvent();
             sendUserDataEvent(id, event, resetSPId);
@@ -76,7 +76,7 @@ const ConsentFooter = () => {
                 consent: 'rejected',
             };
     
-            await updatePublicSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
+            await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
             sendProfileConnectedEvent();
             sendUserConsentEvent();
             sendUserDataEvent(id, event, resetSPId);

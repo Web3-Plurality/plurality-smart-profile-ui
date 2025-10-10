@@ -42,7 +42,7 @@ export function CircularLayout({
     }, [circleRef.current?.offsetWidth, isMobileScreen, isTabScreen, isIframe, isExtraSmallScreen])
 
     const angle = (360 / platforms.length) * (Math.PI / 180)
-    const rotationAdjustment = -20 * (Math.PI / 180)
+    const rotationAdjustment = -18 * (Math.PI / 180)
 
     return (
         <ProfileIconsWrapper ref={circleRef} imageUrl={CircleImg} className="circle">

@@ -94,7 +94,7 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
         await deserializeSmartProfile(updationResult, privateDataObj);
         const objData = {
             streamId: updationResult?.id,
-            data: { smartProfile: smartProfile }
+            data: { smartProfile: updationResult }
         }
         const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
         let existingData = existingDataString ? JSON.parse(existingDataString) : {}
@@ -107,28 +107,28 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
     }
 }
 
-export const updatePublicSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any, logoutUser: () => void) => {
-    const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
-    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId, token, logoutUser)
-    console.log("Updation result", updationResult)
-    // save smart profile in local storage along with the returned stream id
-    if (updationResult) {
-        await deserializeSmartProfile(updationResult);
-        const { id, ...rest } = updationResult;
-        const objData = {
-            streamId: id,
-            data: { smartProfile: rest }
-        }
-        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+// export const updatePublicSmartProfileAction = async (profileTypeStreamId: string, smartProfile: any, logoutUser: () => void) => {
+//     const queryParams = new URLSearchParams(location.search);
+//     const clientId = queryParams.get('client_id') || CLIENT_ID;
+//     const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+//     const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+//     const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId, token, logoutUser)
+//     console.log("Updation result", updationResult)
+//     // save smart profile in local storage along with the returned stream id
+//     if (updationResult) {
+//         await deserializeSmartProfile(updationResult);
+//         const { id, ...rest } = updationResult;
+//         const objData = {
+//             streamId: id,
+//             data: { smartProfile: rest }
+//         }
+//         const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+//         let existingData = existingDataString ? JSON.parse(existingDataString) : {}
 
-        existingData = {
-            ...existingData,
-            smartProfileData: objData,
-        }
-        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
-    }
-}
+//         existingData = {
+//             ...existingData,
+//             smartProfileData: objData,
+//         }
+//         localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+//     }
+// }
