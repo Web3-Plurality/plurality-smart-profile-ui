@@ -24,6 +24,7 @@ import { useRegisterEvent } from "../hooks/useEventListner"
 import { useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
+import ViewAttestation from "../components/ViewAttestation"
 import LogoutModal from "../components/LogoutModal"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
@@ -336,6 +337,8 @@ const Login = () => {
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'profileSettings':
                 return <ProfileSettings />
+            case 'viewAttestation':
+                return <ViewAttestation />
             case 'consent':
                 return <Consent />
             case 'profile':

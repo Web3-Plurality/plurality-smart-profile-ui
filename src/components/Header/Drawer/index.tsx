@@ -43,6 +43,11 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
             }
             goToStep('profileSettings');
         } else if (key === '4') {
+            if (route === '/dashboard') {
+                navigate(`/?client_id=${clientId}`);
+            }
+            goToStep('viewAttestation');
+        } else if (key === '5') {
             handleLogout();
         }
     };
@@ -63,7 +68,8 @@ const Drawer = ({ handleLogout, address, isSmallScreen }: DrawerProps) => {
             {/* <Menu.Item key="2">Digital Wardrobe</Menu.Item> */}
 
             <Menu.Item key="3">Profile Settings</Menu.Item>
-            <Menu.Item key="4">Logout</Menu.Item>
+            <Menu.Item key="4">View Attestation</Menu.Item>
+            <Menu.Item key="5">Logout</Menu.Item>
         </Menu>
     );
 

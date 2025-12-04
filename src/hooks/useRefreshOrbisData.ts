@@ -6,13 +6,13 @@ import {
   OWNER_WALLET_ADDRESS,
 } from "../utils/EnvConfig";
 import { ProfileData } from "../types";
-import { decryptData } from "../services/EncryptionDecryption/decryption";
 import { useDispatch } from "react-redux";
 import { updateHeader } from "../Slice/headerSlice";
 import {
   deserializeSmartProfile,
   getLocalStorageValueofClient,
   handleUserConsentFlow,
+  safeParseLocalStorage,
 } from "../utils/Helpers";
 import { useStepper } from "./useStepper";
 import {
@@ -62,20 +62,14 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
 
   useEffect(() => {
     if (socialIcons && profileTypeStreamId) {
-      const existingDataString = localStorage.getItem(
-        `streamID-${profileTypeStreamId}`
-      );
-      let existingData = existingDataString
-        ? JSON.parse(existingDataString)
-        : {};
-
-      existingData = {
+      const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`);
+      const updatedData = {
         ...existingData,
         platforms: socialIcons,
       };
       localStorage.setItem(
         `streamID-${profileTypeStreamId}`,
-        JSON.stringify(existingData)
+        JSON.stringify(updatedData)
       );
     } else {
       localStorage.removeItem("platforms");
@@ -187,21 +181,13 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
         }
 
         const { id, ...rest } = response;
+        // privateData is already decrypted by selectSmartProfiles - no need to decrypt again
         let orbisPrivataDataDecrypted
         if (!rest.privateData) {
           // the privata data is empty it means we need to initialize the object
           orbisPrivataDataDecrypted = new ProfilePrivateData();
-        } else {
-          // the privata data is not empty it means we need to decrypt the data
-            orbisPrivataDataDecrypted = await decryptData(
-            JSON.stringify(rest.privateData)
-          );
-          if (orbisPrivataDataDecrypted.code === -32603) {
-              goToStep("success");
-              return;
-            }
+          rest.privateData = orbisPrivataDataDecrypted;
         }
-        rest.privateData = orbisPrivataDataDecrypted;
         // verify attestation
           const smartProfile = normalizeSmartProfile(orbisSmartProfile);
           const isVerifiedSmartProfileAttestaion =
@@ -216,24 +202,24 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
               streamId: id,
               data: { smartProfile: rest },
             };
-            const existingDataString = localStorage.getItem(
-              `streamID-${profileTypeStreamId}`
-            );
-            let existingData = existingDataString
-              ? JSON.parse(existingDataString)
-              : {};
-
-            existingData = {
+            const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`);
+            const updatedData = {
               ...existingData,
               smartProfileData: objData,
             };
             localStorage.setItem(
               `streamID-${profileTypeStreamId}`,
-              JSON.stringify(existingData)
+              JSON.stringify(updatedData)
             );
             dispatch(updateHeader());
             setLoading(false);
-            handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
+            // Don't call handleUserConsentFlow if we're already on the current step
+            // This prevents infinite navigation loops when fetching profile on page mount
+            if (step !== prevStep) {
+              handleUserConsentFlow(consent, step, prevStep, prevStep2, goToStep, showRoulette, handleNavigation, handleShouldProfilesRender);
+            } else {
+              handleShouldProfilesRender();  // Still need to allow rendering in iframe!
+            }
           } else {
             message.info(
               "Could not validate your profile, Let's reset your profile"

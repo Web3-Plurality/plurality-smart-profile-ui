@@ -21,6 +21,7 @@ import {
   sendUserConsentEvent,
   sendUserDataEvent,
 } from "./sendEventToParent";
+import { ProfilePrivateData } from "@plurality-network/smart-profile-utils";
 
 const setLocalStorageValue = (key: string, value: string) =>
   localStorage.setItem(key, value);
@@ -316,12 +317,30 @@ const serializeSmartProfile = (smartProfile: any) => {
   }
 };
 
-const tryParseJSON = (str: string, fallback = {}) => {
+const tryParseJSON = (value: any, fallback: any = {}) => {
+  // If it's already an object (not a string), return it as-is
+  if (typeof value === 'object' && value !== null) {
+    return value;
+  }
+  // If it's a string, try to parse it
   try {
-      return str ? JSON.parse(str) : fallback;
+      return value ? JSON.parse(value) : fallback;
   } catch (e) {
-      console.warn("Failed to parse JSON:", str, e);
+      console.warn("Failed to parse JSON:", value, e);
       return fallback;
+  }
+};
+
+const safeParseLocalStorage = (key: string, fallback = {}) => {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item || item === "undefined" || item === "null") {
+      return fallback;
+    }
+    return tryParseJSON(item, fallback);
+  } catch (e) {
+    console.error(`Failed to parse localStorage key "${key}":`, e);
+    return fallback;
   }
 };
 
@@ -330,14 +349,21 @@ const deserializeSmartProfile = (
   unecryptedPrivateDataObj?: any
 ) => {
   smartProfile.scores = tryParseJSON(smartProfile.scores, {});
-  smartProfile.connectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, {});
+
+  // connectedPlatforms should be an array
+  const parsedConnectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, []);
+  smartProfile.connectedPlatforms = Array.isArray(parsedConnectedPlatforms) ? parsedConnectedPlatforms : [];
+
   smartProfile.extendedPublicData = tryParseJSON(smartProfile.extendedPublicData, {});
   smartProfile.attestation = tryParseJSON(smartProfile.attestation, {});
 
   if (unecryptedPrivateDataObj) {
     smartProfile.privateData = unecryptedPrivateDataObj;
   } else {
-    smartProfile.privateData = tryParseJSON(smartProfile.privateData, {});
+    // Initialize with proper ProfilePrivateData structure instead of empty object
+    // This ensures the structure is always valid for encryption
+    const parsedPrivateData = tryParseJSON(smartProfile.privateData, null);
+    smartProfile.privateData = parsedPrivateData || new ProfilePrivateData();
   }
 };
 
@@ -365,8 +391,9 @@ const handleUserConsentFlow = (
   const ignoreConsent = overRideConsentComponents.includes(prevStep);
   const stepDetails = step == 'socialConnect' && prevStep2 == 'success'
   const isIframe = isInIframe();
+  const firstCondition = (consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails;
 
-  if ((consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails) {
+  if (firstCondition) {
     sendUserConsentEvent();
     sendProfileConnectedEvent();
   } else {
@@ -426,4 +453,6 @@ export {
   handleUserConsentFlow,
   isInIframe,
   platformCount,
+  tryParseJSON,
+  safeParseLocalStorage,
 };

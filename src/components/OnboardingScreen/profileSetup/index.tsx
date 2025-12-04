@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Tag } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
-import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers";
+import { getLocalStorageValueofClient, isInIframe, deserializeSmartProfile, safeParseLocalStorage } from "../../../utils/Helpers";
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig";
 import axios from "axios";
 import { useStepper } from "../../../hooks/useStepper";
@@ -11,9 +11,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectProfileSetupData, selectSurprised } from "../../../selectors/userDataSelector";
 import { setProfileSetupData, setSurprisedData } from "../../../Slice/userDataSlice";
 import { ProfileSetupData } from "../../../types";
-import { updateSmartProfileAction } from "../../../utils/SmartProfile";
 import { useLogoutUser } from "../../../hooks/useLogoutUser";
 import { useNavigate } from "react-router-dom";
+import { encryptData } from "../../../services/EncryptionDecryption/encryption";
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -202,11 +202,12 @@ const ProfileSetup = () => {
         bio: userBio
       }
       // const {id, ...rest}= smartProfileData.data.smartProfile
-      
+      const smartProfile = smartProfileData.data.smartProfile
+
       const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`,
         {
           data: payLoaddata,
-          smartProfile: smartProfileData.data.smartProfile
+          smartProfile: smartProfile
         }, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -215,9 +216,41 @@ const ProfileSetup = () => {
         }
       })
 
-      const { success, smartProfile } = data
+      const { success, smartProfile: returnedData } = data
       if (success) {
-        await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
+        const objData = {
+          attestationUID: returnedData.onchainAttestationUID,
+          data: { smartProfile: returnedData }
+        };
+
+        const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`);
+        existingData.smartProfileData = objData;
+
+        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData));
+        console.log("localStorage updated with profile - username:", returnedData.username, "bio:", returnedData.bio);
+
+        // NOW encrypt privateData and store to backend database
+        const privateDataObj = returnedData.privateData;
+        if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+          try {
+            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj));
+            if (encryptedPrivateData) {
+              await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+                encryptedPrivateData: encryptedPrivateData
+              }, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'x-profile-type-stream-id': profileTypeStreamId,
+                }
+              });
+              console.log("=== Encrypted privateData stored to backend ===");
+            }
+          } catch (encryptError) {
+            console.error("Failed to store encrypted privateData:", encryptError);
+            // Don't fail the whole operation - attestation already succeeded
+          }
+        }
+
         setLoading(false)
         goToNextRoute()
       }
