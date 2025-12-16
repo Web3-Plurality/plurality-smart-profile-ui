@@ -10,9 +10,7 @@ import {
     showHeader,
     isInIframe
 } from "../utils/Helpers"
-import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useState } from "react"
-import OTPVerification from "../components/otpVerification"
 import { PayloadDataType, ProfileData } from "../types"
 import EmailVerification from "../components/emailVerification"
 import Dashboard from "../components/dashboard"
@@ -55,7 +53,7 @@ const Login = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
-    const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
+    const [metamaskAuthError, setMetamaskAuthError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
     const [currentStep1, setCurrentStep1] = useState(0)
 
@@ -69,8 +67,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const { connectAsync, connectors } = useConnect();
 
-    const { token, litWalletSig: storedLitAccount, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
+    const { token, walletAddress: storedWalletAddress, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
@@ -175,7 +172,7 @@ const Login = () => {
 
     useEffect(() => {
         if (clientId === id) {
-            if (storedLitAccount || walletAddress) {
+            if (storedWalletAddress || walletAddress) {
                 goToStep(currentStep!)
             } else {
                 if (showHeader(currentStep)) {
@@ -184,7 +181,7 @@ const Login = () => {
             }
         }
 
-    }, [walletAddress, currentStep, storedLitAccount, previousStep])
+    }, [walletAddress, currentStep, storedWalletAddress, previousStep])
 
 
     useEffect(() => {
@@ -206,17 +203,18 @@ const Login = () => {
     }, [])
 
 
-    const handlePkpWithMetamaskError = (val: boolean) => {
-        setPkpWithMetamaskError(val)
+    const handleMetamaskAuthError = (val: boolean) => {
+        setMetamaskAuthError(val)
     }
 
+    // Legacy handlers - no longer used but kept for backwards compatibility
     const handleLitConnect = () => {
-        checkPreviousLoginMode('lit')
-        goToStep('litLogin')
+        // No longer supported - redirect to MetaMask
+        handleMetamaskConnect();
     }
     const handleGoogleConnect = () => {
-        registerEvent('')
-
+        // No longer supported - redirect to MetaMask
+        handleMetamaskConnect();
     }
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
@@ -319,18 +317,21 @@ const Login = () => {
                     handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
                 />
+            // Email/OTP login no longer supported - these cases are kept for compatibility
+            // but will just show the home screen
             case 'litLogin':
-                return <LitLogin setEmailId={setEmailId} />
             case 'otp':
-                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
+                return <Home
+                    handleMetamaskConnect={handleMetamaskConnect}
+                />
             case 'verification':
                 return <EmailVerification
                     finalPayload={finalPayload}
-                    pkpWithMetamakError={pkpWithMetamakError}
+                    metamaskAuthError={metamaskAuthError}
                     walletAddress={walletAddress}
-                    handlePkpWithMetamaskError={handlePkpWithMetamaskError} />
+                    handleMetamaskAuthError={handleMetamaskAuthError} />
             case 'dashboard':
-                return <Dashboard currentAccount={litAddress} />
+                return <Dashboard currentAccount={storedWalletAddress || walletAddress} />
             case 'success':
                 return <AuthSuccess />
             case 'socialConnect':
@@ -371,8 +372,8 @@ const Login = () => {
     const handleOk = async () => {
         if (ceramicError) {
             setCeramicError(true)
-        } else if (pkpWithMetamakError) {
-            setPkpWithMetamaskError(false)
+        } else if (metamaskAuthError) {
+            setMetamaskAuthError(false)
             goToStep('verification')
         } else {
             generateMetamaskToken()
@@ -389,7 +390,7 @@ const Login = () => {
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError || ceramicError || pkpWithMetamakError}
+                isVisible={metmaskLoginError || ceramicError || metamaskAuthError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />

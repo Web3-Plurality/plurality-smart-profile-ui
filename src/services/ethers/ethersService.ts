@@ -1,9 +1,10 @@
 import { message } from "antd";
-import { getParentUrl } from "../../utils/Helpers";
-import { generatePkpWalletInstance } from "../orbis/generatePkpWallet"
+import { getLocalStorageValueofClient, getParentUrl } from "../../utils/Helpers";
+import { ethers } from "ethers";
 import * as ethersV5 from 'ethers-v5';
 import { sendUserConsentEvent } from "../../utils/sendEventToParent";
 import { ContractData } from "../../types";
+import { CLIENT_ID } from "../../utils/EnvConfig";
 
 const parentUrl = getParentUrl()
 
@@ -39,28 +40,53 @@ interface TransactionCountData {
     chain_id: string;
 }
 
+// Helper function to get MetaMask signer
+const getMetaMaskSigner = async () => {
+    if (!window.ethereum) {
+        throw new Error('MetaMask not installed');
+    }
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    return signer;
+}
+
+// Helper function to get stored wallet address
+const getStoredWalletAddress = () => {
+    const queryParams = new URLSearchParams(location.search);
+    const clientId = queryParams.get('client_id') || CLIENT_ID;
+    const { walletAddress } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    return walletAddress;
+}
 
 export const getAccount = async () => {
-    const pkpWallet = await generatePkpWalletInstance();
-    const account = await pkpWallet!.getAddress();
+    const signer = await getMetaMaskSigner();
+    const account = await signer.getAddress();
     return account;
 }
 
 export const getBalance = async (rpc: string) => {
-    const pkpWallet = await generatePkpWalletInstance();
-    if (rpc) {
-        await pkpWallet!.setRpc(rpc);
+    if (!window.ethereum) {
+        throw new Error('MetaMask not installed');
     }
-    const balance = await pkpWallet?.getBalance();
+
+    let provider;
+    if (rpc) {
+        provider = new ethers.JsonRpcProvider(rpc);
+    } else {
+        provider = new ethers.BrowserProvider(window.ethereum);
+    }
+
+    const address = getStoredWalletAddress() || await (await getMetaMaskSigner()).getAddress();
+    const balance = await provider.getBalance(address);
     return balance;
 }
 
 export const sendTransaction = async (data: SendTransactionData) => {
-    const pkpWallet = await generatePkpWalletInstance();
+    const signer = await getMetaMaskSigner();
+
     if (!data.rpc) {
         throw new Error("rpc is empty");
     }
-    await pkpWallet!.setRpc(data.rpc);
     if (!data.chain_id) {
         throw new Error("chain id is empty");
     }
@@ -81,13 +107,11 @@ export const sendTransaction = async (data: SendTransactionData) => {
         }
 
         const rawTransaction = {
-            from: await pkpWallet!.getAddress(),
             ...raw,
             chainId: +data.chain_id
         };
 
-        const signedTransaction = await pkpWallet!.signTransaction(rawTransaction);
-        const sentTransaction = await pkpWallet!.sendTransaction(signedTransaction);
+        const sentTransaction = await signer.sendTransaction(rawTransaction);
         const receipt = await sentTransaction.wait();
 
         return receipt;
@@ -95,11 +119,7 @@ export const sendTransaction = async (data: SendTransactionData) => {
     } catch (error) {
         const customError = error as CustomError;
         if (customError.code === "INSUFFICIENT_FUNDS" || customError.code === "SERVER_ERROR" || customError.code === "REPLACEMENT_UNDERPRICED") {
-            // if (data.isWallet) {
-            // message.error("Insufficient funds");
-            // hmmm are we expecting the dapp to have a event listener to show the error msg?
             window.parent.postMessage({ id: data.id, eventName: !data.id ? 'walletSendTransaction' : 'errorMessage', data: customError.code }, parentUrl);
-            // }
         } else {
             message.error("Something went wrong, please try again");
             window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: customError.code }, parentUrl);
@@ -112,41 +132,41 @@ export const sendTransaction = async (data: SendTransactionData) => {
 
 
 export const verifyMessageSignature = async (data: VerifyMessageSignatureData) => {
-    const pkpWallet = await generatePkpWalletInstance()
+    const signer = await getMetaMaskSigner();
     const signerAddress = ethersV5.utils.verifyMessage(data.message, data.signature);
-    return signerAddress == await pkpWallet!.getAddress()
+    return signerAddress.toLowerCase() === (await signer.getAddress()).toLowerCase();
 }
 
 
 export const getTransactionCount = async (data: TransactionCountData) => {
-    const pkpWallet = await generatePkpWalletInstance()
     if (!data.rpc) {
         throw new Error("rpc is empty")
     }
-    await pkpWallet!.setRpc(data.rpc)
     if (!data.chain_id) {
         throw new Error("chain id is empty")
     }
-    await pkpWallet!.setChainId(+data.chain_id);
-    const transactionCount = await pkpWallet?.getTransactionCount();
-    return transactionCount
+
+    const provider = new ethers.JsonRpcProvider(data.rpc);
+    const address = getStoredWalletAddress() || await (await getMetaMaskSigner()).getAddress();
+    const transactionCount = await provider.getTransactionCount(address);
+    return transactionCount;
 }
 
 export const readFromContract = async (data: WriteToContractData) => {
-    const pkpWallet = await generatePkpWalletInstance()
     if (!data.rpc) {
         throw new Error("rpc is empty")
     }
-    await pkpWallet!.setRpc(data.rpc)
     if (!data.chain_id) {
         throw new Error("chain id is empty")
     }
-    await pkpWallet!.setChainId(+data.chain_id);
-    // contract initialization           
+
+    const provider = new ethersV5.providers.JsonRpcProvider(data.rpc);
+
+    // contract initialization
     const contract = new ethersV5.Contract(
         data.address,
         data.abi,
-        pkpWallet
+        provider
     );
     const response = await contract[data.method_name]({
         blockTag: "latest",
@@ -156,21 +176,26 @@ export const readFromContract = async (data: WriteToContractData) => {
 
 
 export const writeToContract = async (data: ContractData | null) => {
-    const pkpWallet = await generatePkpWalletInstance()
     if (!data?.rpc) {
         throw new Error("rpc is empty")
     }
-    await pkpWallet!.setRpc(data.rpc)
     if (!data.chain_id) {
         throw new Error("chain id is empty")
     }
 
     try {
-        await pkpWallet!.setChainId(+data.chain_id);
+        // Use MetaMask signer with ethers v5 for contract interactions
+        if (!window.ethereum) {
+            throw new Error('MetaMask not installed');
+        }
+
+        const provider = new ethersV5.providers.Web3Provider(window.ethereum as ethersV5.providers.ExternalProvider);
+        const signer = provider.getSigner();
+
         const contract = new ethersV5.Contract(
             data.address,
             data.abi,
-            pkpWallet
+            signer
         );
         const methodParams = JSON.parse(data.method_params)
         const txOptions = JSON.parse(data.options)

@@ -277,17 +277,13 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
   });
 };
 
-const addGlobalLitData = (currentClientId: string) => {
-  const { litWalletSig, litSessionKey } = getLocalStorageValueofClient(
-    `clientID-${currentClientId}`
-  );
-  setLocalStorageValue("lit-wallet-sig", litWalletSig);
-  setLocalStorageValue("lit-session-key", litSessionKey);
+// Legacy Lit functions - kept for backwards compatibility but no longer used
+const addGlobalLitData = (_currentClientId: string) => {
+  // No longer used - Lit Protocol removed
 };
 
 const removeGlobalLitData = () => {
-  localStorage.removeItem("lit-wallet-sig");
-  localStorage.removeItem("lit-session-key");
+  // No longer used - Lit Protocol removed
 };
 
 const redirectUserOnLogout = (
@@ -401,7 +397,15 @@ const handleUserConsentFlow = (
       cb(step);
       handleShouldProfilesRender();
     }else if(!showRoulette && isIframe) {
-      cb('consent');
+      // Only show consent page if consent hasn't been given yet
+      if (consent === 'accepted' || consent === 'rejected') {
+        // Consent already given, send events and allow closing
+        sendUserConsentEvent();
+        sendProfileConnectedEvent();
+      } else {
+        // No consent yet, show consent page
+        cb('consent');
+      }
     }else{
       handleNavigation()
     }

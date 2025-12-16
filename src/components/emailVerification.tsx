@@ -1,145 +1,108 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { message } from "antd"
-import { AuthMethodType } from "@lit-protocol/constants"
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
-import useAuthenticate from "../hooks/useAuthenticate"
-import useAccounts from "../hooks/useAccount"
-import useSession from "../hooks/useSession"
-import { useStepper } from "../hooks/useStepper"
+import useAuthenticate, { AuthResult } from '../hooks/useAuthenticate';
+import { useStepper } from '../hooks/useStepper';
 
-import Loader from "./Loader"
-import { PayloadDataType } from "../types"
-import { ErrorMessages } from "../utils/Constants"
+import Loader from './Loader';
+import { PayloadDataType } from '../types';
+import { ErrorMessages } from '../utils/Constants';
 import {
-    getLocalStorageValueofClient,
-    redirectUserOnLogout,
-} from "../utils/Helpers"
-import { CLIENT_ID } from "../utils/EnvConfig"
+  redirectUserOnLogout,
+  setLocalStorageValue,
+} from '../utils/Helpers';
+import { CLIENT_ID } from '../utils/EnvConfig';
+import { storeAuth } from '../services/auth';
 
 interface EmailLoginProps {
-    finalPayload: PayloadDataType
-    pkpWithMetamakError: boolean
-    walletAddress: string
-    handlePkpWithMetamaskError: (val: boolean) => void
+  finalPayload: PayloadDataType;
+  metamaskAuthError: boolean;
+  walletAddress: string;
+  handleMetamaskAuthError: (val: boolean) => void;
 }
 
-const EmailVerification = ({ finalPayload, pkpWithMetamakError, walletAddress, handlePkpWithMetamaskError }: EmailLoginProps) => {
-    const navigate = useNavigate();
-    const { goToStep } = useStepper()
+const EmailVerification = ({
+  metamaskAuthError,
+  walletAddress,
+  handleMetamaskAuthError,
+}: EmailLoginProps) => {
+  const navigate = useNavigate();
+  const { goToStep } = useStepper();
 
-    const queryParams = new URLSearchParams(location.search);
-    const appClientId = queryParams.get('client_id')
-    const clientId = appClientId || CLIENT_ID;
+  const queryParams = new URLSearchParams(location.search);
+  const appClientId = queryParams.get('client_id');
+  const clientId = appClientId || CLIENT_ID;
 
-    const { googleJwtToken: googleToken } = getLocalStorageValueofClient(`clientID-${clientId}`)
+  const handleNavigation = () => {
+    const redirectPath = redirectUserOnLogout(clientId, appClientId);
+    navigate(redirectPath, { replace: true });
+  };
 
-    const handleNavigation = () => {
-        const redirectPath = redirectUserOnLogout(clientId, appClientId)
-        navigate(redirectPath, { replace: true });
-    }
+  const {
+    authResult,
+    authWithMetaMask,
+    loading: authLoading,
+    error: authError,
+  } = useAuthenticate();
 
+  const handleAuthSuccess = (result: AuthResult) => {
+    handleNavigation();
 
-    const {
-        authMethod,
-        setAuthMethod,
-        authWithStytch,
-        authWithEthWallet,
-        loading: authLoading,
-        error: authError,
-    } = useAuthenticate();
+    // Store auth data
+    storeAuth(clientId, result.address, result.token);
 
-    const {
-        createAccount,
-        fetchAccounts,
-        isFetchTriggered,
-        accounts,
-        loading: accountsLoading,
-        error: accountsError,
-    } = useAccounts();
+    // Update localStorage with auth info
+    const existingDataString = localStorage.getItem(`clientID-${clientId}`);
+    let existingData = existingDataString ? JSON.parse(existingDataString) : {};
 
-    const {
-        initSession,
-        sessionSigs,
-        loading: sessionLoading,
-        error: sessionError,
-    } = useSession();
+    existingData = {
+      ...existingData,
+      token: result.token,
+      walletAddress: result.address,
+      userId: result.user?.id,
+    };
 
-    const error = authError || accountsError || sessionError;
+    setLocalStorageValue(`clientID-${clientId}`, JSON.stringify(existingData));
 
-    const goToSignUp = () => {
-        handleNavigation()
-        createAccount(authMethod!);
-    }
+    // Navigate to success
+    goToStep('success');
+  };
 
-    useEffect(() => {
-        const authenticate = async () => {
-            if (googleToken) {
-                setAuthMethod({
-                    authMethodType: AuthMethodType.GoogleJwt,
-                    accessToken: googleToken,
-                });
-            } else if (walletAddress) {
-                if (pkpWithMetamakError) return
-                await authWithEthWallet(handlePkpWithMetamaskError);
-            } else {
-                await authWithStytch(finalPayload.session, finalPayload.userId, finalPayload.method);
-            }
-        };
-
-        authenticate();
-    }, [googleToken, pkpWithMetamakError, walletAddress])
-
-    useEffect(() => {
-        // If user is authenticated, fetch accounts
-        if (authMethod) {
-            handleNavigation()
-            fetchAccounts(authMethod);
+  useEffect(() => {
+    const authenticate = async () => {
+      // Only MetaMask authentication is supported
+      if (walletAddress) {
+        if (metamaskAuthError) return;
+        const result = await authWithMetaMask(handleMetamaskAuthError);
+        if (result) {
+          handleAuthSuccess(result);
         }
-    }, [authMethod, fetchAccounts, navigate])
+      }
+    };
 
-    useEffect(() => {
-        // If user is authenticated and has selected an account, initialize session
-        if (authMethod && accounts.length) {
-            initSession(authMethod, accounts[0]);
-            const existingDataString = localStorage.getItem(`clientID-${clientId}`)
-            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+    authenticate();
+  }, [metamaskAuthError, walletAddress]);
 
-            existingData = {
-                ...existingData,
-                pkpKey: accounts[0]
-            }
-            localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-        } else if (authMethod && !accounts.length && isFetchTriggered) {
-            goToSignUp();
-        }
-    }, [JSON.stringify(accounts), initSession, isFetchTriggered])
-
-    if (authLoading) {
-        return (
-            <Loader message={'Authenticating your credentials...'} />
-        );
+  // Handle successful authentication from authResult state
+  useEffect(() => {
+    if (authResult && !authLoading) {
+      handleAuthSuccess(authResult);
     }
+  }, [authResult, authLoading]);
 
-    if (accountsLoading) {
-        return <Loader message={'Looking up your accounts...'} />;
-    }
+  if (authLoading) {
+    return <Loader message={'Authenticating with MetaMask...'} />;
+  }
 
-    if (sessionLoading) {
-        return <Loader message={'Securing your session...'} />;
-    }
-    if (accounts.length && sessionSigs) {
-        goToStep("success")
-    }
+  if (authError) {
+    goToStep('home');
+    message.error(ErrorMessages.GENERAL_ERROR);
+    return null;
+  }
 
-    if (error) {
-        goToStep("home")
-        message.error(ErrorMessages.GENERAL_ERROR);
-        return null
-    }
+  return null;
+};
 
-    return
-}
-
-export default EmailVerification
+export default EmailVerification;

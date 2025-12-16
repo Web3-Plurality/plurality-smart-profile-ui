@@ -122,7 +122,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           goToStep("profileSetup");
       } else {
         await deserializeSmartProfile(response)
-        const { profileTypeStreamId, pkpKey } = getLocalStorageValueofClient(
+        const { profileTypeStreamId, walletAddress } = getLocalStorageValueofClient(
           `clientID-${clientId}`
         );
         // const { smartProfileData: smartprofileData } =
@@ -193,7 +193,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           const isVerifiedSmartProfileAttestaion =
             await pluralityAttestation.verifySmartProfileAttestation(
               smartProfile,
-              pkpKey.ethAddress
+              walletAddress
             );
           if (isVerifiedSmartProfileAttestaion) {
             console.log("Attestation Verified");

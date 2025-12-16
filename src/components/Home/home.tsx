@@ -1,43 +1,29 @@
-import SocialButton from "./socialButton"
-import mailIcon from './../../assets/svgIcons/mailIcon.svg'
-import metamaskIcon from './../../assets/svgIcons/metamask-icon.svg'
-import google from './../../assets/svgIcons/google.svg'
+import SocialButton from './socialButton';
+import metamaskIcon from './../../assets/svgIcons/metamask-icon.svg';
 
 interface HomeProps {
-    handleLitConnect: () => void
-    handleMetamaskConnect: () => void
-    handleGoogleConnect: () => void
-    authentication: {
-        email: boolean
-        gmail: boolean
-        wallet: boolean
-    }
+  handleMetamaskConnect: () => void;
+  // Keep these for backwards compatibility but they won't be used
+  handleLitConnect?: () => void;
+  handleGoogleConnect?: () => void;
+  authentication?: {
+    email: boolean;
+    gmail: boolean;
+    wallet: boolean;
+  };
 }
 
-const Home = ({ handleLitConnect, handleMetamaskConnect, handleGoogleConnect, authentication }: HomeProps) => {
-    return (
-        <>
-            {authentication?.gmail && <SocialButton
-                text={'Continue with Google'}
-                icon={google}
-                handleClick={handleGoogleConnect}
-                style={"translateY(2px)"}
-            />}
+const Home = ({ handleMetamaskConnect }: HomeProps) => {
+  return (
+    <>
+      {/* Only MetaMask authentication is supported */}
+      <SocialButton
+        text={'Continue with Metamask'}
+        icon={metamaskIcon}
+        handleClick={handleMetamaskConnect}
+      />
+    </>
+  );
+};
 
-            {authentication?.email && <SocialButton
-                text={'Continue with Email'}
-                icon={mailIcon}
-                handleClick={handleLitConnect}
-                style={"translateY(2px)"}
-            />}
-
-            {authentication?.wallet && <SocialButton
-                text={'Continue with Metamask'}
-                icon={metamaskIcon}
-                handleClick={handleMetamaskConnect}
-            />}
-        </>
-    )
-}
-
-export default Home
+export default Home;

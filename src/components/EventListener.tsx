@@ -258,7 +258,9 @@ const EventListener: React.FC = () => {
             // }
             else if (event.data.type === 'goToStep') {
                 const { step, action } = event.data
-                if(step == 'profileSettings' && action == 'profile'){
+                // Set iframeToProfiles to true for socialConnect and profileSettings with 'profile' action
+                // This allows these components to render properly in iframe context
+                if(step === 'socialConnect' || (step === 'profileSettings' && action === 'profile')){
                     dispatch(setSocialConnectPath(true))
                 }else{
                     dispatch(setSocialConnectPath(false))

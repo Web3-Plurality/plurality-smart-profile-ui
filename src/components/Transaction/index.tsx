@@ -59,7 +59,7 @@ const Transaction = () => {
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { pkpKey, walletData: SupportedNetwork } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { walletAddress, walletData: SupportedNetwork } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const chain = SupportedNetwork.find((item: SelectedNetworkType) => item.chainId === chain_id)
 
@@ -75,8 +75,8 @@ const Transaction = () => {
     return (
         <TransactionWrapper>
             {!showDetails ?
-                <TsxBodySection handleClick={handleShowDetails} from={pkpKey?.ethAddress} tsxData={tsxData} chainToken={chain?.token || ''} /> :
-                <TsxDetailsBodySection handleClick={handleHideDetails} from={pkpKey?.ethAddress} tsxData={tsxData} chainToken={chain?.token || ''} chainName={chain?.chainName || ''} />}
+                <TsxBodySection handleClick={handleShowDetails} from={walletAddress} tsxData={tsxData} chainToken={chain?.token || ''} /> :
+                <TsxDetailsBodySection handleClick={handleHideDetails} from={walletAddress} tsxData={tsxData} chainToken={chain?.token || ''} chainName={chain?.chainName || ''} />}
             <TsxFooterSection showDetails={showDetails} />
         </TransactionWrapper>
     )

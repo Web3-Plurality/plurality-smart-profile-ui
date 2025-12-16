@@ -1,90 +1,82 @@
 import { useCallback, useState } from 'react';
-import { ethers } from 'ethers';
-import { AuthMethod } from '@lit-protocol/types';
-import { authenticateWithEthWallet, authenticateWithStytch } from '../services/Lit';
+import { connectMetaMask, signInWithEthereum } from '../services/auth';
 import { useLogoutUser } from './useLogoutUser';
+import { CLIENT_ID } from '../utils/EnvConfig';
+
+// Auth result type (replaces Lit's AuthMethod)
+export interface AuthResult {
+  address: string;
+  token: string;
+  user: any;
+}
 
 export default function useAuthenticate() {
-  const [authMethod, setAuthMethod] = useState<AuthMethod>();
+  const [authResult, setAuthResult] = useState<AuthResult>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-  const handleLogoutUser = useLogoutUser()
+  const handleLogoutUser = useLogoutUser();
 
   function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
     return typeof err === 'object' && err !== null && 'code' in err;
   }
 
-
   /**
-   * Authenticate with Stytch
+   * Authenticate with MetaMask using SIWE (Sign-In with Ethereum)
    */
-  const authWithStytch = useCallback(
-    async (accessToken: string, userId?: string, method?: string): Promise<void> => {
+  const authWithMetaMask = useCallback(
+    async (handleMetaMaskError?: (val: boolean) => void): Promise<AuthResult | undefined> => {
       setLoading(true);
       setError(false);
-      setAuthMethod(undefined);
+      handleMetaMaskError?.(false);
+      setAuthResult(undefined);
 
       try {
-        const result: AuthMethod = await authenticateWithStytch(
-          accessToken,
-          userId,
-          method
-        );
-        setAuthMethod(result);
-      } catch (err) {
-        setError(true);
-        console.log("Error", err)
-        handleLogoutUser("Authentication failed, please contact the team", true)
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+        // Get client ID from URL or default
+        const queryParams = new URLSearchParams(location.search);
+        const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-  /**
- * Authenticate with Ethereum wallet
- */
-  const authWithEthWallet = useCallback(
-    async (handlePkpWithMetamaskError: (val: boolean) => void): Promise<void> => {
-      setLoading(true);
-      setError(false);
-      handlePkpWithMetamaskError(false);
-      setAuthMethod(undefined);
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        const userAddress = await signer.getAddress();
-        const signMessage = async (message: string) => {
-          const sig = await signer.signMessage(message);
-          return sig;
-        };
-        const result: AuthMethod | undefined = await authenticateWithEthWallet(
-          userAddress,
-          signMessage
-        );
-        setAuthMethod(result);
+        // Connect to MetaMask and get address
+        const address = await connectMetaMask();
+
+        // Sign in with Ethereum (SIWE)
+        const { token, user } = await signInWithEthereum(address, clientId);
+
+        const result: AuthResult = { address, token, user };
+        setAuthResult(result);
+        return result;
       } catch (err: unknown) {
+        console.error('MetaMask authentication error:', err);
         if (isEthereumError(err)) {
+          // User rejected the request
           if (err.code === 4001 || err.info?.error?.code === 4001) {
-            handlePkpWithMetamaskError(true);
+            handleMetaMaskError?.(true);
+          } else {
+            setError(true);
+            handleLogoutUser('Authentication failed, please try again', true);
           }
         } else {
-          setError(true)
+          setError(true);
+          handleLogoutUser('Authentication failed, please contact the team', true);
         }
+        return undefined;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [handleLogoutUser]
   );
 
   return {
-    authWithStytch,
-    authWithEthWallet,
-    setAuthMethod,
-    authMethod,
+    authWithMetaMask,
+    // Legacy alias for compatibility during migration
+    authWithEthWallet: authWithMetaMask,
+    setAuthResult,
+    // Legacy alias
+    setAuthMethod: setAuthResult,
+    authResult,
+    // Legacy alias
+    authMethod: authResult,
     loading,
     error,
   };

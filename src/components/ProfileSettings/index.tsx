@@ -155,7 +155,7 @@ const ProfileSettings = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { profileTypeStreamId, litAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     const name = parsedUserOrbisData?.data?.smartProfile?.username
@@ -166,7 +166,6 @@ const ProfileSettings = () => {
     const [profilePic, setProfilePic] = useState<string>(userAvatar || '')
     const [userBio, setUserBio] = useState(bio || '')
 
-    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
 
     const isIframe = window.self !== window.top;
@@ -340,7 +339,7 @@ const ProfileSettings = () => {
                     {profilePic ? (
                         <Avatar src={profilePic} />
                     ) : (
-                        <UserAvatar address={litAddress || metamaskAddress} size={100} />
+                        <UserAvatar address={metamaskAddress || ''} size={100} />
                     )}
                     <FileInput type="file" id="fileUpload" name="profilePic" onChange={handleInputChange} accept="image/*" disabled={isEventProfile} />
                     <UploadLabel htmlFor="fileUpload" disabled={isEventProfile}>Choose file</UploadLabel>

@@ -6,6 +6,7 @@ import { message } from "antd";
 import { useStepper } from "./useStepper";
 import { setSurprisedData } from "../Slice/userDataSlice";
 import { useDispatch } from "react-redux";
+import { clearEncryptionKey } from "../services/EncryptionDecryption/crypto";
 
 export const useLogoutUser = () => {
     const navigate = useNavigate()
@@ -28,9 +29,11 @@ export const useLogoutUser = () => {
         }
     }
 
-    async function handleLogout(errorMessage = '', litRedirect = false) {
-        // Check if user is cinnected via Metamask
+    async function handleLogout(errorMessage = '', _legacyParam = false) {
+        // Check if user is connected via Metamask
         if (metamaskAddress) {
+            // Clear encryption key from sessionStorage
+            clearEncryptionKey(metamaskAddress)
             await disconnectMetamask()
         }
 
@@ -46,16 +49,12 @@ export const useLogoutUser = () => {
         }
 
         // Reset Stepper on logout
-        // Set Current Step to Email field in case of lit login
         resetSteps()
         dispatch(setSurprisedData(false))
         navigate(redirectPath, { replace: true });
-        if (!litRedirect) {
-            // Relaod the page to get Fresh States and Data
-            window.location.reload()
-            return
-        }
-        goToStep("litLogin")
+
+        // Reload the page to get Fresh States and Data
+        window.location.reload()
     }
 
     return handleLogout

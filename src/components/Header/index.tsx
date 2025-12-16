@@ -34,10 +34,8 @@ const Header = () => {
     const shouldUpdate = useSelector(selectShouldUpdate);
     const isHeaderVisible = showHeader(currentStep);
 
-    const { profileTypeStreamId, litWalletSig: litAccount, incentives: incentiveType } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const { profileTypeStreamId, incentives: incentiveType } = getLocalStorageValueofClient(`clientID-${clientId}`);
     const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
-
-    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const name = parsedUserOrbisData?.data?.smartProfile?.username;
     const score = parsedUserOrbisData?.data?.smartProfile?.scores?.[0]?.scoreValue + 
                  parsedUserOrbisData?.data?.smartProfile?.scores?.[1]?.scoreValue;
@@ -91,7 +89,7 @@ const Header = () => {
                         </div>
                         <Drawer
                             handleLogout={handleLogoutUser}
-                            address={metamaskAddress || litAddress}
+                            address={metamaskAddress || ''}
                         />
                     </div>
                 </>
@@ -140,7 +138,7 @@ const Header = () => {
                 <div className='mobile-user-detail'>
                     <Drawer
                         handleLogout={handleLogoutUser}
-                        address={metamaskAddress || litAddress}
+                        address={metamaskAddress || ''}
                         isSmallScreen={true}
                     />
                 </div>

@@ -8,8 +8,9 @@ import defaultQRCode from './../../../assets/images/qr-code.png'
 import InfoIcon from './../../../assets/svgIcons/info-icon.svg'
 import QRCode from "qrcode";
 import { useEffect, useState } from 'react';
-import { generatePkpWalletInstance } from '../../../services/orbis/generatePkpWallet';
 import { SelectedNetworkType } from '../../../types';
+import { getLocalStorageValueofClient } from '../../../utils/Helpers';
+import { CLIENT_ID } from '../../../utils/EnvConfig';
 
 const ReceiveTabWrapper = styled.div`
     max-width: 400px;
@@ -27,7 +28,7 @@ const ReceiveTabWrapper = styled.div`
         max-width: 80%;
         text-align: center;
     }
-   
+
 `
 
 const InfoWrapper = styled.div`
@@ -45,26 +46,34 @@ const InfoWrapper = styled.div`
         font-size: 12px;
         text-align: center;
     }
-   
+
 `
 
 const ReceiveTab = ({ tab, selectedNetwork, handleSelectedNetworkChange }: { tab: string, selectedNetwork: SelectedNetworkType, handleSelectedNetworkChange: (val: SelectedNetworkType) => void }) => {
     const [currentQRCode, setCurrentQRCode] = useState(defaultQRCode);
+
     useEffect(() => {
-        // by default we generate sepolia QR code
-        const generateSepoliaQRCode = async () => {
-            const pkpWallet = await generatePkpWalletInstance();
-            const address = await pkpWallet!.getAddress();
-            const uri = `ethereum:${address}@${selectedNetwork.chainId}`;
+        // Generate QR code using stored wallet address
+        const generateQRCode = async () => {
+            const queryParams = new URLSearchParams(location.search);
+            const clientId = queryParams.get('client_id') || CLIENT_ID;
+            const { walletAddress } = getLocalStorageValueofClient(`clientID-${clientId}`);
+
+            if (!walletAddress) {
+                console.error('No wallet address found');
+                return;
+            }
+
+            const uri = `ethereum:${walletAddress}@${selectedNetwork.chainId}`;
             try {
                 const qrCode = await QRCode.toDataURL(uri);
                 setCurrentQRCode(qrCode)
             } catch (err) {
-                console.error("Error generating Sepolia QR code:", err);
+                console.error("Error generating QR code:", err);
                 throw err;
             }
         }
-        generateSepoliaQRCode();
+        generateQRCode();
     }, [selectedNetwork]);
 
     return (
