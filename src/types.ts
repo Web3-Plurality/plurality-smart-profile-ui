@@ -58,46 +58,15 @@ export interface MesssageSignatureData {
     id: number | null
 }
 
-export interface SendTransactionData {
-    id: string
-    from: string
-    to: string
-    gasFee: number
-    amount: number
-    nativeCoin: string
-    chainAmount: number
-    raw_transaction?: string
-    chain_id?: string
-}
-
 export interface StepState {
     litSigs: string
     isLoading: LoaderData
     profileConnected: boolean
-    currentWalletTab: string
     messageToBeSigned: MesssageSignatureData
-    transactionData: SendTransactionData,
-    contractData: ContractData | null
     profileDataID: string
     profileSetupData: ProfileSetupData
     surprised: boolean
     iframeToProfiles: boolean
-}
-
-export interface ContractData {
-    id: string
-    type: string
-    method: string
-    isWidgetOpen: string
-    message: string
-    signature: string
-    address: string
-    abi: string
-    method_name: string
-    method_params: string
-    rpc: string
-    chain_id: string
-    options: string
 }
 export type TagsRoot = Tags[]
 

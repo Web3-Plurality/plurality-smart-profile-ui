@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStepper } from '../hooks/useStepper';
 import { updateSmartProfileAction } from '../utils/SmartProfile';
 import { useDispatch } from 'react-redux';
-import { setContractData, setProfileDataID, setSignatureMessage, setSocialConnectPath, setTransactionData } from '../Slice/userDataSlice';
-import { getAccount, getBalance, getTransactionCount, readFromContract, verifyMessageSignature } from '../services/ethers/ethersService';
+import { setProfileDataID, setSignatureMessage, setSocialConnectPath } from '../Slice/userDataSlice';
 import { sendExtentedPublicData, sendProfileConnectedEvent, sendUserDataEvent } from '../utils/sendEventToParent';
 import { useLogoutUser } from '../hooks/useLogoutUser';
 
@@ -31,12 +30,6 @@ const EventListener: React.FC = () => {
                 }
                 dispatch(setSignatureMessage(signatureData))
                 goToStep('signing')
-            } else if (data.method === 'sendTransaction') {
-                dispatch(setTransactionData(data))
-                goToStep('transaction')
-            } else if (data.method === 'writeToContract') {
-                dispatch(setContractData(data))
-                goToStep('contract')
             } else if (data.method === 'updateConsentData') {
                 dispatch(setProfileDataID(data.id))
                 goToStep('consent')
@@ -76,103 +69,6 @@ const EventListener: React.FC = () => {
                     window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
                 }
             }
-            else if (data.method === 'getAllAccounts') {
-                try {
-                    const account = await getAccount();
-                    window.parent.postMessage({ id: data.id, eventName: 'getAllAccounts', data: [account] }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            else if (data.method === 'getConnectedAccount') {
-                try {
-                    const account = await getAccount();
-                    window.parent.postMessage({ id: data.id, eventName: 'getConnectedAccount', data: account }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            else if (data.method === 'verifyMessageSignature' && data.signature && data.message) {
-                try {
-                    const result = await verifyMessageSignature(data)
-                    if (result) {
-                        window.parent.postMessage({ id: data.id, eventName: 'verifyMessageSignature', data: "true" }, parentUrl);
-                    }
-                    else {
-                        window.parent.postMessage({ id: data.id, eventName: 'verifyMessageSignature', data: "false" }, parentUrl);
-                    }
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            else if (data.method === 'getBalance') {
-                try {
-                    const balance = await getBalance('https://eth-sepolia.public.blastapi.io');
-                    window.parent.postMessage({ id: data.id, eventName: 'getBalance', data: balance!.toString() + 'n' }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            else if (data.method === 'getBlockNumber') {
-                try {
-                    //This method doesnt exist
-                    window.parent.postMessage({ id: data.id, eventName: 'getBlockNumber', data: "not available yet" }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            else if (data.method === 'getTransactionCount' && data.address) {
-                try {
-                    const transactionCount = await getTransactionCount(data);
-                    window.parent.postMessage({ id: data.id, eventName: 'getTransactionCount', data: transactionCount }, parentUrl);
-                }
-                catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'errorMessage', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            // else if (data.method === 'switchNetwork' && data.rpc && data.chain_id) {
-            //     try {
-            //         localStorage.setItem(`rpc`, data.rpc)
-            //         localStorage.setItem(`chainId`, data.chain_id)
-            //         const returnMsg = "successfully switched rpc to: " + data.rpc + ", and chainId to: " + data.chain_id
-            //         window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: returnMsg }, parentUrl);
-            //     }
-            //     catch (error) {
-            //         console.error(error);
-            //         window.parent.postMessage({ id: data.id, eventName: 'switchNetwork', data: (error as Error).toString() }, parentUrl);
-            //     }
-            // }
-            else if (data.method === 'readFromContract' && data.address && data.abi && data.method_name) {
-                try {
-                    const response = await readFromContract(data);
-                    console.log("contract read response: ", response)
-                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: response!.toString() }, parentUrl);
-                } catch (error) {
-                    console.error(error);
-                    window.parent.postMessage({ id: data.id, eventName: 'readFromContract', data: (error as Error).toString() }, parentUrl);
-                }
-            }
-            // else if (data.method === 'writeToContract' && data.address && data.abi && data.method_name && data.method_params) {
-            //     try {
-            //         const response = await writeToContract(data);
-            //         console.log("contract write response: ", response)
-            //         window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: response!.toString() }, parentUrl);
-            //     } catch (error) {
-            //         console.error(error);
-            //         window.parent.postMessage({ id: data.id, eventName: 'writeToContract', data: (error as Error).toString() }, parentUrl);
-            //     }
-            // }
             // EAS Event
             else if (data.method === 'setPublicData') {
                 try {

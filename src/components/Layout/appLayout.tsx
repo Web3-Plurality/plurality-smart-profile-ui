@@ -6,7 +6,7 @@ import WidgetContent from './widgetContent';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getBtntext, getLocalStorageValueofClient, isBackBtnVisible } from '../../utils/Helpers';
-import { selectCurrentWalletTab, selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
+import { selectLoader, selectProfileConnected } from '../../selectors/userDataSelector';
 import { useStepper } from '../../hooks/useStepper';
 import { CLIENT_ID } from '../../utils/EnvConfig';
 import { useNavigate } from 'react-router-dom';
@@ -62,7 +62,6 @@ const WidgetLayout = ({
     const dispatch = useDispatch()
     const showLoader = useSelector(selectLoader)
     const profileConnected = useSelector(selectProfileConnected)
-    const activeWalletTab = useSelector(selectCurrentWalletTab)
 
     const text = getBtntext(currentStep)
     const isVisible = isBackBtnVisible(currentStep, showLoader.loadingState)
@@ -92,10 +91,8 @@ const WidgetLayout = ({
                 {isIframe &&
                     currentStep !== 'consent' &&
                     currentStep !== 'signing' &&
-                    currentStep !== 'contract' &&
                     currentStep !== 'profile' &&
-                    (currentStep !== 'onboardingForm' || currentQuestionType !== 'CATEGORY_QUESTION') &&
-                    (currentStep !== 'wallet' || (activeWalletTab !== 'receive' && activeWalletTab !== 'send')) && (
+                    (currentStep !== 'onboardingForm' || currentQuestionType !== 'CATEGORY_QUESTION') && (
                         <PoweredByFooter />
                     )
                 }

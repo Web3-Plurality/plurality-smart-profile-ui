@@ -98,12 +98,8 @@ const getTitleText = (currentStep: string) => {
       return `${isIframe ? "Update Profile" : ""}`;
     case "consent":
       return "Confirm your choices";
-    case "transaction":
-      return "Confirm your action";
     case "signing":
       return "Your sign is requested";
-    case "contract":
-      return "Contract Details";
     case "profileSetup":
       return "Let's Setup Your Profile!";
     default:

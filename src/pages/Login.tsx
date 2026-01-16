@@ -33,10 +33,7 @@ import { useStepper } from "../hooks/useStepper"
 import Consent from "../components/Consent"
 import Profile from "../components/Profile"
 import { sendProfileConnectedEvent, sendUserDataEvent } from "../utils/sendEventToParent"
-import Transaction from "../components/Transaction"
-import Wallet from "../components/Wallet"
 import Signing from "../components/Signing"
-import Contract from "../components/Contract"
 import ProfileSetup from "../components/OnboardingScreen/profileSetup"
 import OnboardingForm from "../components/OnboardingScreen/questionaire"
 import { selectProfileType } from "../services/orbisMap/selectQueries"
@@ -344,14 +341,8 @@ const Login = () => {
                 return <Consent />
             case 'profile':
                 return <Profile />
-            case 'transaction':
-                return <Transaction />
-            case 'wallet':
-                return <Wallet />
             case 'signing':
                 return <Signing />
-            case 'contract':
-                return <Contract />
             case 'profileSetup':
                 return <ProfileSetup />
             case 'onboardingForm':
