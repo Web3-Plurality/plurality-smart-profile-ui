@@ -59,7 +59,6 @@ export interface MesssageSignatureData {
 }
 
 export interface StepState {
-    litSigs: string
     isLoading: LoaderData
     profileConnected: boolean
     messageToBeSigned: MesssageSignatureData

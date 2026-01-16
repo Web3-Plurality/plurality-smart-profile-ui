@@ -5,11 +5,6 @@ import { RootState } from '../services/store';
 // First select the relevant part from the state
 const selectDomain = (state: RootState) => state?.userSession || initialState;
 
-export const selectLitSigs = createSelector(
-    [selectDomain],
-    (state) => state.litSigs,
-);
-
 export const selectLoader = createSelector(
     [selectDomain],
     (state) => state.isLoading,

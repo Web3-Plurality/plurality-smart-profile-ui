@@ -42,6 +42,8 @@ const Header = () => {
     const ratingValue = parsedUserOrbisData?.data?.smartProfile?.connectedPlatforms?.length;
 
     const { address: metamaskAddress } = useAccount();
+    const { walletAddress: storedWalletAddress } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const displayAddress = storedWalletAddress || metamaskAddress || '';
     const route = window.location.pathname;
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
@@ -89,7 +91,7 @@ const Header = () => {
                         </div>
                         <Drawer
                             handleLogout={handleLogoutUser}
-                            address={metamaskAddress || ''}
+                            address={displayAddress}
                         />
                     </div>
                 </>
@@ -138,7 +140,7 @@ const Header = () => {
                 <div className='mobile-user-detail'>
                     <Drawer
                         handleLogout={handleLogoutUser}
-                        address={metamaskAddress || ''}
+                        address={displayAddress}
                         isSmallScreen={true}
                     />
                 </div>

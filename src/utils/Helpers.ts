@@ -148,11 +148,6 @@ const getParentHost = () => {
   return parentHost;
 };
 
-const isLitLogin = (val: string) => {
-  if (val.length) return true;
-  return false;
-};
-
 const checkPreviousLoginMode = (account: string) => {
   const queryParams = new URLSearchParams(location.search);
   const allKeys = Object.keys(localStorage);
@@ -191,15 +186,17 @@ const getBtntext = (currStep: string) => {
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
   const isIframe =
     window.self !== window.top && currStep !== "litLogin" && currStep !== "otp";
+
+  // Steps that should never show back button
+  const alwaysHideBackButton = ["home", "success", "dashboard", "socialConnect", "profileSetup", "onboardingForm"];
+
+  // Steps that hide back button only in iframe context
+  const hideInIframeOnly = ["profile"];
+
   if (
     isIframe ||
-    currStep === "home" ||
-    currStep === "success" ||
-    currStep === "dashboard" ||
-    currStep === "socialConnect" ||
-    currStep === "profile" ||
-    currStep === "profileSetup" ||
-    currStep === "onboardingForm" ||
+    alwaysHideBackButton.includes(currStep) ||
+    (isIframe && hideInIframeOnly.includes(currStep)) ||
     loader
   )
     return false;
@@ -271,15 +268,6 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
   Object.keys(keysAndValues).forEach((key) => {
     setLocalStorageValue(key, keysAndValues[key]);
   });
-};
-
-// Legacy Lit functions - kept for backwards compatibility but no longer used
-const addGlobalLitData = (_currentClientId: string) => {
-  // No longer used - Lit Protocol removed
-};
-
-const removeGlobalLitData = () => {
-  // No longer used - Lit Protocol removed
 };
 
 const redirectUserOnLogout = (
@@ -436,15 +424,12 @@ export {
   getDescription,
   getParentUrl,
   getParentHost,
-  isLitLogin,
   checkPreviousLoginMode,
   getBtntext,
   isBackBtnVisible,
   getPlatformImage,
   getLocalStorageValueofClient,
   handleLocalStorageOnLogout,
-  addGlobalLitData,
-  removeGlobalLitData,
   redirectUserOnLogout,
   serializeSmartProfile,
   deserializeSmartProfile,

@@ -6,6 +6,7 @@ import combinedReducers from './combinedReducers';
 const persistConfig = {
     key: 'root',
     storage,
+    blacklist: ['userSession'], // Don't persist userSession state (includes iframeToProfiles)
 };
 
 // Persisted reducer

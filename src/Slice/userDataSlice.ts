@@ -3,7 +3,6 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { LoaderData, MesssageSignatureData, ProfileSetupData, StepState } from '../types';
 
 export const initialState: StepState = {
-    litSigs: '',
     isLoading: {
         loadingState: false,
         text: ''
@@ -27,9 +26,6 @@ export const UserDataSlice = createSlice({
     name: 'userInfo',
     initialState,
     reducers: {
-        globalSessionSigs: (state, action: PayloadAction<string>) => {
-            state.litSigs = action.payload
-        },
         setLoadingState: (state, action: PayloadAction<LoaderData>) => {
             const { loadingState, text } = action.payload
             state.isLoading.loadingState = loadingState
@@ -57,7 +53,6 @@ export const UserDataSlice = createSlice({
 })
 
 export const {
-    globalSessionSigs,
     setLoadingState,
     setProfileConnected,
     setSignatureMessage,
