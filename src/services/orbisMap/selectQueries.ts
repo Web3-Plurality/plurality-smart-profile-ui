@@ -6,7 +6,7 @@ import { decryptData } from "../EncryptionDecryption/decryption";
 
 // Add handleLogout as a parameter
 export async function selectProfileType(stream_id: string, handleLogout: () => void) {
-  const apiUrl = `${API_BASE_URL}/orbis-map/profile-types/${stream_id}`;
+  const apiUrl = `${API_BASE_URL}/profile-map/profile-types/${stream_id}`;
 
   try {
     const result = await axios.get(apiUrl);
@@ -45,7 +45,7 @@ export async function selectSmartProfiles(
   userId: string,
   handleLogout: () => void
 ) {
-  const apiUrl = `${API_BASE_URL}/orbis-map/smart-profiles/by-mapping/${stream_id}/${userId}`;
+  const apiUrl = `${API_BASE_URL}/profile-map/smart-profiles/by-mapping/${stream_id}/${userId}`;
 
   try {
     const result = await axios.get(apiUrl);
