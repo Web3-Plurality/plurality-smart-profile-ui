@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { Input, Select, Tag } from "antd"
+import { Input, Select, Tag, message } from "antd"
 import styled from "styled-components"
 import CustomButton from "../../customButton"
 import { useStepper } from "../../../hooks/useStepper"
@@ -377,41 +377,44 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
           'x-profile-type-stream-id': profileTypeStreamId,
           'x-client-app-id': clientId,
         },
-        validateStatus: () => true,
       })
-      if (response.status === 200) {
-        const { smartProfile: returnedData } = response.data
 
-        // NOW encrypt privateData and store to backend database
-        const privateDataObj = returnedData?.privateData;
-        if (privateDataObj && Object.keys(privateDataObj).length > 0) {
-          try {
-            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj));
-            if (encryptedPrivateData) {
-              await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
-                encryptedPrivateData: encryptedPrivateData
-              }, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'x-profile-type-stream-id': profileTypeStreamId,
-                }
-              });
-              console.log("8. Encrypted privateData stored to backend");
-            }
-          } catch (encryptError) {
-            console.error("Failed to store encrypted privateData:", encryptError);
-            // Don't fail the whole operation - attestation already succeeded
+      // Success handling (only reaches here on 2xx responses)
+      const { smartProfile: returnedData } = response.data
+
+      // NOW encrypt privateData and store to backend database
+      const privateDataObj = returnedData?.privateData;
+      if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+        try {
+          const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj));
+          if (encryptedPrivateData) {
+            await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+              encryptedPrivateData: encryptedPrivateData
+            }, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'x-profile-type-stream-id': profileTypeStreamId,
+              }
+            });
+            console.log("8. Encrypted privateData stored to backend");
           }
+        } catch (encryptError) {
+          console.error("Failed to store encrypted privateData:", encryptError);
+          // Don't fail the whole operation - attestation already succeeded
         }
-        postResponse()  // Navigate to next step - let that component fetch the profile
-      } else {
-        postResponse()
       }
-    } catch (err) {
-      console.log("Some Error:", err)
-      postResponse()
-    } finally {
+      postResponse()  // Navigate to next step - let that component fetch the profile
+
+    } catch (err: any) {
+      console.log("Error:", err)
       setLoading(false)
+
+      if (err?.response?.status === 402) {
+        message.error("Insufficient credits. Please deposit ROSE to continue.");
+        return;  // Don't navigate!
+      }
+
+      message.error("Failed to save answers. Please try again.");
     }
   }
 

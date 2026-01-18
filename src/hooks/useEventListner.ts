@@ -175,7 +175,11 @@ export const useRegisterEvent = () => {
 
             }
         } catch (err: any) {
-            setError('Error')
+            if (err?.response?.status === 402) {
+                setError('Insufficient credits to connect platform. Please deposit ROSE.');
+            } else {
+                setError('Failed to connect platform. Please try again.');
+            }
         } finally {
             dispatch(setLoadingState({ loadingState: false, text: "" }));
             dispatch(updateHeader())

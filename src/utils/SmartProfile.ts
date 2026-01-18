@@ -3,28 +3,41 @@ import { encryptData } from "../services/EncryptionDecryption/encryption"
 import { API_BASE_URL, CLIENT_ID } from "./EnvConfig";
 import { deserializeSmartProfile, getLocalStorageValueofClient, safeParseLocalStorage } from "./Helpers"
 
-export const createSmartProfileAction = async (profileTypeStreamId: string, logoutUser: () => void) =>{
+export const createSmartProfileAction = async (
+    profileTypeStreamId: string,
+    logoutUser: () => void
+): Promise<{ success: boolean; error?: string }> => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'x-profile-type-stream-id': profileTypeStreamId,
-            'x-client-app-id': clientId,
+
+    try {
+        const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'x-profile-type-stream-id': profileTypeStreamId,
+                'x-client-app-id': clientId,
+            }
+        })
+        if (data.success) {
+            const privateDataObj = data.smartProfile.privateData
+            // Save smart profile in local storage with attestation UID as identifier
+            await deserializeSmartProfile(data.smartProfile, privateDataObj);
+            const objData = {
+                attestationUID: data.smartProfile.onchainAttestationUID,
+                data: { smartProfile: data.smartProfile }
+            }
+            const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
+            existingData.smartProfileData = objData
+            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+            return { success: true };
         }
-    })
-    if (data.success) {
-        const privateDataObj = data.smartProfile.privateData
-        // Save smart profile in local storage with attestation UID as identifier
-        await deserializeSmartProfile(data.smartProfile, privateDataObj);
-        const objData = {
-            attestationUID: data.smartProfile.onchainAttestationUID,
-            data: { smartProfile: data.smartProfile }
+        return { success: false, error: 'Profile creation failed' };
+    } catch (err: any) {
+        if (err?.response?.status === 402) {
+            return { success: false, error: 'insufficient_credits' };
         }
-        const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
-        existingData.smartProfileData = objData
-        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+        return { success: false, error: err?.message || 'Unknown error' };
     }
 }  
 

@@ -116,7 +116,20 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           `clientID-${clientId}`
         );
           // no profile found in orbis for this user
-          await createSmartProfileAction(profileTypeStreamId, handleLogout);
+          const result = await createSmartProfileAction(profileTypeStreamId, handleLogout);
+
+          if (!result.success) {
+            setLoading(false);
+            if (result.error === 'insufficient_credits') {
+              message.error("Insufficient credits to create profile. Please contact app developer.");
+            } else {
+              message.error("Failed to create profile. Please try again.");
+            }
+            // Log out to clear session and prevent showing stale data from previous user
+            handleLogout();
+            return;  // Don't navigate to profileSetup
+          }
+
           dispatch(updateHeader());
           setLoading(false);
           goToStep("profileSetup");
@@ -159,6 +172,30 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           rpcProvider: EAS_BLOCKCHAIN_RPC || "",
         });
 
+        // Extract profile data and handle privateData initialization FIRST
+        const { id, ...rest } = response;
+        // privateData is already decrypted by selectSmartProfiles - no need to decrypt again
+        if (!rest.privateData) {
+          // the privata data is empty it means we need to initialize the object
+          rest.privateData = new ProfilePrivateData();
+        }
+
+        // Save to localStorage BEFORE any early returns
+        // This ensures questionnaire page can access the profile data
+        const objData = {
+          streamId: id,
+          data: { smartProfile: rest },
+        };
+        const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`);
+        const updatedData = {
+          ...existingData,
+          smartProfileData: objData,
+        };
+        localStorage.setItem(
+          `streamID-${profileTypeStreamId}`,
+          JSON.stringify(updatedData)
+        );
+
         const parsedExtendedPublicData =  orbisSmartProfile.extendedPublicData
         const consent = parsedExtendedPublicData?.[clientId]?.consent;
         if (
@@ -180,14 +217,6 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           return;
         }
 
-        const { id, ...rest } = response;
-        // privateData is already decrypted by selectSmartProfiles - no need to decrypt again
-        let orbisPrivataDataDecrypted
-        if (!rest.privateData) {
-          // the privata data is empty it means we need to initialize the object
-          orbisPrivataDataDecrypted = new ProfilePrivateData();
-          rest.privateData = orbisPrivataDataDecrypted;
-        }
         // verify attestation
           const smartProfile = normalizeSmartProfile(orbisSmartProfile);
           const isVerifiedSmartProfileAttestaion =
@@ -197,20 +226,6 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             );
           if (isVerifiedSmartProfileAttestaion) {
             console.log("Attestation Verified");
-            const { id } = response;
-            const objData = {
-              streamId: id,
-              data: { smartProfile: rest },
-            };
-            const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`);
-            const updatedData = {
-              ...existingData,
-              smartProfileData: objData,
-            };
-            localStorage.setItem(
-              `streamID-${profileTypeStreamId}`,
-              JSON.stringify(updatedData)
-            );
             dispatch(updateHeader());
             setLoading(false);
             // Don't call handleUserConsentFlow if we're already on the current step

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Tag } from "antd";
+import { Tag, message } from "antd";
 import CustomButtom from "../../customButton";
 import AvatarImage from './../../../assets/images/avatarImage.jpg'
 import { getLocalStorageValueofClient, isInIframe, deserializeSmartProfile, safeParseLocalStorage } from "../../../utils/Helpers";
@@ -254,8 +254,15 @@ const ProfileSetup = () => {
         setLoading(false)
         goToNextRoute()
       }
-    } catch (err) {
-      console.log("Some Error:", err)
+    } catch (err: any) {
+      console.log("Error:", err);
+      setLoading(false);
+      // 402 is already shown by interceptor, but ensure we don't navigate
+      if (err?.response?.status === 402) {
+        // Stay on page, user sees the toast from interceptor
+        return;
+      }
+      message.error("Failed to update profile. Please try again.");
     }
   }
 
