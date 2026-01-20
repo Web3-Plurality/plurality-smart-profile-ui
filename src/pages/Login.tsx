@@ -10,9 +10,7 @@ import {
     showHeader,
     isInIframe
 } from "../utils/Helpers"
-import LitLogin from "../components/LitLogin/litLogin"
 import { useEffect, useState } from "react"
-import OTPVerification from "../components/otpVerification"
 import { PayloadDataType, ProfileData } from "../types"
 import EmailVerification from "../components/emailVerification"
 import Dashboard from "../components/dashboard"
@@ -24,6 +22,7 @@ import { useRegisterEvent } from "../hooks/useEventListner"
 import { useConnect, useDisconnect } from "wagmi"
 import { useMetamaskToken } from "../hooks/useMetamaskToken"
 import ProfileSettings from "../components/ProfileSettings"
+import ViewAttestation from "../components/ViewAttestation"
 import LogoutModal from "../components/LogoutModal"
 import { useNavigate } from "react-router-dom"
 import { API_BASE_URL, CLIENT_ID } from "../utils/EnvConfig"
@@ -34,10 +33,7 @@ import { useStepper } from "../hooks/useStepper"
 import Consent from "../components/Consent"
 import Profile from "../components/Profile"
 import { sendProfileConnectedEvent, sendUserDataEvent } from "../utils/sendEventToParent"
-import Transaction from "../components/Transaction"
-import Wallet from "../components/Wallet"
 import Signing from "../components/Signing"
-import Contract from "../components/Contract"
 import ProfileSetup from "../components/OnboardingScreen/profileSetup"
 import OnboardingForm from "../components/OnboardingScreen/questionaire"
 import { selectProfileType } from "../services/orbisMap/selectQueries"
@@ -54,7 +50,7 @@ const Login = () => {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
     const [activeStates, setActiveStates] = useState(socialConnectButtons.map(button => button.active));
     const [socialButtons, setSocialButtons] = useState<ProfileData[]>([])
-    const [pkpWithMetamakError, setPkpWithMetamaskError] = useState(false)
+    const [metamaskAuthError, setMetamaskAuthError] = useState(false)
     const [walletAddress, setWalletAddress] = useState('')
     const [currentStep1, setCurrentStep1] = useState(0)
 
@@ -68,8 +64,7 @@ const Login = () => {
     const { disconnectAsync } = useDisconnect();
     const { connectAsync, connectors } = useConnect();
 
-    const { token, litWalletSig: storedLitAccount, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const litAddress = storedLitAccount ? JSON.parse(storedLitAccount).address : ''
+    const { token, walletAddress: storedWalletAddress, clientId: id, authentication } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData: profileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
@@ -88,9 +83,7 @@ const Login = () => {
     const {
         generateMetamaskToken,
         error: metmaskLoginError,
-        setError,
-        ceramicError,
-        setCeramicError
+        setError
     } = useMetamaskToken(walletAddress)
 
     useEffect(() => {
@@ -174,7 +167,7 @@ const Login = () => {
 
     useEffect(() => {
         if (clientId === id) {
-            if (storedLitAccount || walletAddress) {
+            if (storedWalletAddress || walletAddress) {
                 goToStep(currentStep!)
             } else {
                 if (showHeader(currentStep)) {
@@ -183,7 +176,7 @@ const Login = () => {
             }
         }
 
-    }, [walletAddress, currentStep, storedLitAccount, previousStep])
+    }, [walletAddress, currentStep, storedWalletAddress, previousStep])
 
 
     useEffect(() => {
@@ -205,18 +198,10 @@ const Login = () => {
     }, [])
 
 
-    const handlePkpWithMetamaskError = (val: boolean) => {
-        setPkpWithMetamaskError(val)
+    const handleMetamaskAuthError = (val: boolean) => {
+        setMetamaskAuthError(val)
     }
 
-    const handleLitConnect = () => {
-        checkPreviousLoginMode('lit')
-        goToStep('litLogin')
-    }
-    const handleGoogleConnect = () => {
-        registerEvent('')
-
-    }
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
         const params = new URLSearchParams(window.location.search);
@@ -313,41 +298,31 @@ const Login = () => {
         switch (currentStep) {
             case 'home':
                 return <Home
-                    handleLitConnect={handleLitConnect}
                     handleMetamaskConnect={handleMetamaskConnect}
-                    handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
                 />
-            case 'litLogin':
-                return <LitLogin setEmailId={setEmailId} />
-            case 'otp':
-                return <OTPVerification emailId={emailId} handleFinalPayload={handleFinalPayload} />
             case 'verification':
                 return <EmailVerification
                     finalPayload={finalPayload}
-                    pkpWithMetamakError={pkpWithMetamakError}
+                    metamaskAuthError={metamaskAuthError}
                     walletAddress={walletAddress}
-                    handlePkpWithMetamaskError={handlePkpWithMetamaskError} />
+                    handleMetamaskAuthError={handleMetamaskAuthError} />
             case 'dashboard':
-                return <Dashboard currentAccount={litAddress} />
+                return <Dashboard currentAccount={storedWalletAddress || walletAddress} />
             case 'success':
                 return <AuthSuccess />
             case 'socialConnect':
                 return <SocialConnect handleIconClick={handleIconClick} activeStates={activeStates} />
             case 'profileSettings':
                 return <ProfileSettings />
+            case 'viewAttestation':
+                return <ViewAttestation />
             case 'consent':
                 return <Consent />
             case 'profile':
                 return <Profile />
-            case 'transaction':
-                return <Transaction />
-            case 'wallet':
-                return <Wallet />
             case 'signing':
                 return <Signing />
-            case 'contract':
-                return <Contract />
             case 'profileSetup':
                 return <ProfileSetup />
             case 'onboardingForm':
@@ -357,19 +332,15 @@ const Login = () => {
                 />
             default:
                 return <Home
-                    handleLitConnect={handleLitConnect}
                     handleMetamaskConnect={handleMetamaskConnect}
-                    handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
                 />
         }
     }
 
     const handleOk = async () => {
-        if (ceramicError) {
-            setCeramicError(true)
-        } else if (pkpWithMetamakError) {
-            setPkpWithMetamaskError(false)
+        if (metamaskAuthError) {
+            setMetamaskAuthError(false)
             goToStep('verification')
         } else {
             generateMetamaskToken()
@@ -380,13 +351,12 @@ const Login = () => {
     const handleCancel = async () => {
         await handleLogoutUser()
         setError(false)
-        setCeramicError(false)
     }
 
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError || ceramicError || pkpWithMetamakError}
+                isVisible={metmaskLoginError || metamaskAuthError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />

@@ -9,17 +9,14 @@ import { UserAvatar } from "../Avatar"
 // import CustomInputField from "../customInputField"
 import { API_BASE_URL, CLIENT_ID } from "../../utils/EnvConfig"
 import CustomButtom from "../customButton"
-import { getLocalStorageValueofClient } from "../../utils/Helpers"
+import { getLocalStorageValueofClient, deserializeSmartProfile } from "../../utils/Helpers"
 import { useStepper } from "../../hooks/useStepper"
 import { sendUserDataEvent } from "../../utils/sendEventToParent"
-import { updateSmartProfileAction } from "../../utils/SmartProfile"
 import styled from "styled-components"
 import { useSelector } from "react-redux"
 import { selectIframeToProfile } from "../../selectors/userDataSelector"
 import { useLogoutUser } from "../../hooks/useLogoutUser"
-// import { ProfileSetupData } from "../../types"
-// import { useSelector } from "react-redux"
-// import { selectProfileSetupData } from "../../selectors/userDataSelector"
+import { encryptData } from "../../services/EncryptionDecryption/encryption"
 
 const ProfileSetupWrapper = styled.div`
   padding: 30px;
@@ -158,7 +155,7 @@ const ProfileSettings = () => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { profileTypeStreamId, litAccount } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     const name = parsedUserOrbisData?.data?.smartProfile?.username
@@ -169,7 +166,6 @@ const ProfileSettings = () => {
     const [profilePic, setProfilePic] = useState<string>(userAvatar || '')
     const [userBio, setUserBio] = useState(bio || '')
 
-    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
 
     const isIframe = window.self !== window.top;
@@ -217,7 +213,12 @@ const ProfileSettings = () => {
                 profileImg: profilePic === userAvatar ? "" : profilePic,
                 bio: userBio
             }
-            const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { data: payLoaddata, smartProfile: parsedUserOrbisData.data.smartProfile }, {
+            const smartProfile = parsedUserOrbisData.data.smartProfile
+
+            const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, {
+                data: payLoaddata,
+                smartProfile: smartProfile
+            }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'x-profile-type-stream-id': profileTypeStreamId,
@@ -225,12 +226,50 @@ const ProfileSettings = () => {
                 }
             })
 
-            const { success, smartProfile } = data
+            const { success, smartProfile: returnedSmartProfile } = data
             if (success) {
                 const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
                 const { smartProfileData: smartprofileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
                 const consent = smartprofileData?.data?.smartProfile?.extendedPublicData?.[clientId]?.consent;
-                await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
+                const privateDataObj = returnedSmartProfile.privateData
+                if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+                    await deserializeSmartProfile(returnedSmartProfile, privateDataObj)
+                }
+
+                // Save to localStorage (with plain privateData for UI use)
+                const objData = {
+                    attestationUID: returnedSmartProfile.onchainAttestationUID,
+                    data: { smartProfile: returnedSmartProfile }
+                }
+                const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
+                let existingData = existingDataString ? JSON.parse(existingDataString) : {}
+                existingData = {
+                    ...existingData,
+                    smartProfileData: objData,
+                }
+                localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+
+                // NOW encrypt privateData and store to backend database
+                if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+                    try {
+                        const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
+                        if (encryptedPrivateData) {
+                            await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+                                encryptedPrivateData: encryptedPrivateData
+                            }, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'x-profile-type-stream-id': profileTypeStreamId,
+                                }
+                            })
+                            console.log("=== Encrypted privateData stored to backend ===")
+                        }
+                    } catch (encryptError) {
+                        console.error("Failed to store encrypted privateData:", encryptError)
+                        // Don't fail the whole operation - attestation already succeeded
+                    }
+                }
+
                 message.success("Profile updated successfully!")
                 setLoading(false)
                 if (isIframe && (consent && consent === 'accepted')) {
@@ -247,62 +286,15 @@ const ProfileSettings = () => {
     }
 
     return (
-        // <div className="settings-wrapper">
-        //     <CustomInputField
-        //         InputType='text'
-        //         name='username'
-        //         placeholderText="Username"
-        //         value={username}
-        //         handleChange={handleInputChnage}
-        //     />
-
-        //     <div className="upload-file">
-        //         <div className="profile-img">
-        //             {profilePic ? (
-        //                 <img src={profilePic} alt="Profile" />
-        //             ) : (
-        //                 <UserAvatar address={litAddress || metamaskAddress} size={100} />
-        //             )}
-        //         </div>
-        //         <label htmlFor="profilePic" className='neumorphic-label'>Choose file</label>
-        //         <CustomInputField
-        //             InputType='file'
-        //             id='profilePic'
-        //             name="profilePic"
-        //             handleChange={handleInputChnage}
-        //         />
-        //     </div>
-
-
-
-        //     <CustomInputField
-        //         InputType='textarea'
-        //         name="userBio"
-        //         placeholderText="Enter Your Bio"
-        //         value={userBio}
-        //         handleChange={handleInputChnage}
-        //     />
-
-        //     <div>
-        //         <CustomButtom
-        //             text={loading ? 'Updating Profile...' : "Update Profile"}
-        //             handleClick={handleDataSumbit}
-        //             isDisable={(!username && !profilePic && !userBio) || loading}
-        //         />
-        //     </div>
-
-
-        // </div>
-
         <ProfileSetupWrapper>
             <SectionContentWrapper>
                 <AvatarWrapper>
                     {profilePic ? (
                         <Avatar src={profilePic} />
                     ) : (
-                        <UserAvatar address={litAddress || metamaskAddress} size={100} />
+                        <UserAvatar address={metamaskAddress || ''} size={100} />
                     )}
-                    <FileInput type="file" id="fileUpload" onChange={handleInputChange} accept="image/*" disabled={isEventProfile} />
+                    <FileInput type="file" id="fileUpload" name="profilePic" onChange={handleInputChange} accept="image/*" disabled={isEventProfile} />
                     <UploadLabel htmlFor="fileUpload" disabled={isEventProfile}>Choose file</UploadLabel>
                 </AvatarWrapper>
 

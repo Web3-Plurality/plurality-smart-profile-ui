@@ -3,7 +3,7 @@ import { API_BASE_URL } from "../../utils/EnvConfig"
 
 export async function insertSmartProfile(smartProfile: any, token: string,logoutUser: () => void) {
   const payload = { ...smartProfile }
-  const apiUrl = `${API_BASE_URL}/orbis-map/smart-profiles`
+  const apiUrl = `${API_BASE_URL}/profile-map/smart-profiles`
 
   try {
     const result = await axios.post(apiUrl, payload, {

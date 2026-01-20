@@ -9,6 +9,8 @@ import { useLogoutUser } from './useLogoutUser';
 import { useStepper } from './useStepper';
 import { useDispatch } from 'react-redux';
 import { setLoadingState } from '../Slice/userDataSlice';
+import { deriveEncryptionKey } from '../services/EncryptionDecryption/crypto';
+import { getParentUrl } from '../utils/Helpers';
 
 function isEthereumError(err: unknown): err is { code: number; info?: { error?: { code?: number } } } {
     return typeof err === 'object' && err !== null && 'code' in err;
@@ -16,7 +18,6 @@ function isEthereumError(err: unknown): err is { code: number; info?: { error?: 
 
 export const useMetamaskToken = (walletAddress: string) => {
     const [error, setError] = useState(false);
-    const [ceramicError, setCeramicError] = useState(false);
 
     const dispatch = useDispatch()
 
@@ -110,11 +111,34 @@ export const useMetamaskToken = (walletAddress: string) => {
                 existingData = {
                     ...existingData,
                     token: data.token,
-                    userId: data.user.id
+                    userId: data.user.id,
+                    walletAddress: walletAddress,
                 }
                 localStorage.setItem(`clientID-${clientId}`, JSON.stringify(existingData))
-                 dispatch(setLoadingState({ loadingState: false, text: '' }))
-                goToStep("verification")
+
+                // Pre-derive encryption key during login so it's cached for later use
+                // This avoids a second MetaMask popup when connecting platforms
+                try {
+                    dispatch(setLoadingState({ loadingState: true, text: 'Setting up encryption...' }))
+                    await deriveEncryptionKey(walletAddress)
+                    console.log('Encryption key derived and cached successfully')
+                } catch (encryptionError) {
+                    console.error('Failed to derive encryption key:', encryptionError)
+                    // Don't fail login if encryption key derivation fails
+                    // User will be prompted again when they connect a platform
+                }
+
+                dispatch(setLoadingState({ loadingState: false, text: '' }))
+
+                // Notify parent window (wallet repo) that user is connected
+                const parentUrl = getParentUrl()
+                window.parent.postMessage({
+                    eventName: 'walletConnection',
+                    data: { isConnected: true, token: data.token }
+                }, parentUrl)
+
+                // Go directly to success - MetaMask authentication is complete
+                goToStep("success")
             } else {
                 handleLogoutUser("Authentication failed. Please try signing in again.");
             }
@@ -127,8 +151,6 @@ export const useMetamaskToken = (walletAddress: string) => {
     return {
         generateMetamaskToken,
         error,
-        ceramicError,
-        setError,
-        setCeramicError
+        setError
     };
 };

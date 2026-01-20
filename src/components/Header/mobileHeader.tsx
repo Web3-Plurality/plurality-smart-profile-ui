@@ -22,15 +22,14 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
 
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
-    const { profileTypeStreamId, litWalletSig: litAccount, incentives: incentiveType } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId, incentives: incentiveType, walletAddress: storedWalletAddress } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
     const { currentStep } = useStepper()
     const shouldUpdate = useSelector(selectShouldUpdate);
     const isHeaderVisible = showHeader(currentStep)
 
-
-    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const { address: metamaskAddress } = useAccount();
+    const displayAddress = storedWalletAddress || metamaskAddress || '';
 
     const {
         smartProfileData: parssedUserOrbisData,
@@ -51,14 +50,14 @@ const MobileHeader = ({ isSmallScreen }: { isSmallScreen: boolean }) => {
         <>
             {isIframe ? <Drawer
                 handleLogout={handleLogoutUser}
-                address={metamaskAddress || litAddress}
+                address={displayAddress}
                 isSmallScreen={isSmallScreen}
             /> : (
                 <div className={classNames('mobile-header-wrapper', { iframeHeader: isIframe })}>
                     <div className='user-detail-mobile'>
                         <Drawer
                             handleLogout={handleLogoutUser}
-                            address={metamaskAddress || litAddress}
+                            address={displayAddress}
                             isSmallScreen={isSmallScreen}
                         />
                     </div>

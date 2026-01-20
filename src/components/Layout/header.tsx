@@ -10,8 +10,11 @@ const WidgetHeaderWrapper = styled.div<{ isIframe: boolean, currentStep: string,
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: ${({ isIframe, currentStep, mobileHeaderText }) => (isIframe && (currentStep === 'litLogin' || currentStep === 'otp') ? '30%'
-    : isIframe && (currentStep === 'dashboard' || currentStep === 'home' || currentStep === 'wallet') ? '12%' : (mobileHeaderText && !isIframe && (currentStep === 'litLogin' || currentStep === 'otp')) ? '20%': mobileHeaderText && !isIframe && (currentStep === 'success')? '30%' : '')};
+  margin-top: ${({ isIframe, currentStep, mobileHeaderText }) => (
+    isIframe && (currentStep === 'dashboard' || currentStep === 'home' || currentStep === 'wallet') ? '12%'
+    : mobileHeaderText && !isIframe && (currentStep === 'success') ? '30%'
+    : ''
+  )};
 
   &.toggleShow {
     display: none;

@@ -21,6 +21,7 @@ import {
   sendUserConsentEvent,
   sendUserDataEvent,
 } from "./sendEventToParent";
+import { ProfilePrivateData } from "@plurality-network/smart-profile-utils";
 
 const setLocalStorageValue = (key: string, value: string) =>
   localStorage.setItem(key, value);
@@ -77,12 +78,6 @@ const getTitleText = (currentStep: string) => {
   switch (currentStep) {
     case "home":
       return "";
-    case "litLogin":
-      return "Enter Your Email";
-    case "register":
-      return "Login into Your Account";
-    case "otp":
-      return "Login into Your Account";
     case "success":
       return `Welcome to ${platformName || ""} Profile`;
     case "socialConnect":
@@ -97,12 +92,8 @@ const getTitleText = (currentStep: string) => {
       return `${isIframe ? "Update Profile" : ""}`;
     case "consent":
       return "Confirm your choices";
-    case "transaction":
-      return "Confirm your action";
     case "signing":
       return "Your sign is requested";
-    case "contract":
-      return "Contract Details";
     case "profileSetup":
       return "Let's Setup Your Profile!";
     default:
@@ -123,10 +114,6 @@ const getDescription = (currentStep: string) => {
   );
 
   switch (currentStep) {
-    case "litLogin":
-      return "A verification code will be sent to your email";
-    case "otp":
-      return "Enter the 6 digit code sent to your email";
     case "success":
       return platformDescription || "";
     case "digitalWardrobe":
@@ -149,11 +136,6 @@ const getParentHost = () => {
   const parentUrl = ancestorOrigins.length > 0 ? ancestorOrigins[0] : origin;
   const parentHost = new URL(parentUrl).hostname;
   return parentHost;
-};
-
-const isLitLogin = (val: string) => {
-  if (val.length) return true;
-  return false;
 };
 
 const checkPreviousLoginMode = (account: string) => {
@@ -192,17 +174,18 @@ const getBtntext = (currStep: string) => {
 };
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
-  const isIframe =
-    window.self !== window.top && currStep !== "litLogin" && currStep !== "otp";
+  const isIframe = window.self !== window.top;
+
+  // Steps that should never show back button
+  const alwaysHideBackButton = ["home", "success", "dashboard", "socialConnect", "profileSetup", "onboardingForm"];
+
+  // Steps that hide back button only in iframe context
+  const hideInIframeOnly = ["profile"];
+
   if (
     isIframe ||
-    currStep === "home" ||
-    currStep === "success" ||
-    currStep === "dashboard" ||
-    currStep === "socialConnect" ||
-    currStep === "profile" ||
-    currStep === "profileSetup" ||
-    currStep === "onboardingForm" ||
+    alwaysHideBackButton.includes(currStep) ||
+    (isIframe && hideInIframeOnly.includes(currStep)) ||
     loader
   )
     return false;
@@ -276,19 +259,6 @@ const handleLocalStorageOnLogout = (currentClientId: string) => {
   });
 };
 
-const addGlobalLitData = (currentClientId: string) => {
-  const { litWalletSig, litSessionKey } = getLocalStorageValueofClient(
-    `clientID-${currentClientId}`
-  );
-  setLocalStorageValue("lit-wallet-sig", litWalletSig);
-  setLocalStorageValue("lit-session-key", litSessionKey);
-};
-
-const removeGlobalLitData = () => {
-  localStorage.removeItem("lit-wallet-sig");
-  localStorage.removeItem("lit-session-key");
-};
-
 const redirectUserOnLogout = (
   currentClientId: string,
   appClientId: string | null
@@ -316,12 +286,30 @@ const serializeSmartProfile = (smartProfile: any) => {
   }
 };
 
-const tryParseJSON = (str: string, fallback = {}) => {
+const tryParseJSON = (value: any, fallback: any = {}) => {
+  // If it's already an object (not a string), return it as-is
+  if (typeof value === 'object' && value !== null) {
+    return value;
+  }
+  // If it's a string, try to parse it
   try {
-      return str ? JSON.parse(str) : fallback;
+      return value ? JSON.parse(value) : fallback;
   } catch (e) {
-      console.warn("Failed to parse JSON:", str, e);
+      console.warn("Failed to parse JSON:", value, e);
       return fallback;
+  }
+};
+
+const safeParseLocalStorage = (key: string, fallback = {}) => {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item || item === "undefined" || item === "null") {
+      return fallback;
+    }
+    return tryParseJSON(item, fallback);
+  } catch (e) {
+    console.error(`Failed to parse localStorage key "${key}":`, e);
+    return fallback;
   }
 };
 
@@ -330,14 +318,21 @@ const deserializeSmartProfile = (
   unecryptedPrivateDataObj?: any
 ) => {
   smartProfile.scores = tryParseJSON(smartProfile.scores, {});
-  smartProfile.connectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, {});
+
+  // connectedPlatforms should be an array
+  const parsedConnectedPlatforms = tryParseJSON(smartProfile.connectedPlatforms, []);
+  smartProfile.connectedPlatforms = Array.isArray(parsedConnectedPlatforms) ? parsedConnectedPlatforms : [];
+
   smartProfile.extendedPublicData = tryParseJSON(smartProfile.extendedPublicData, {});
   smartProfile.attestation = tryParseJSON(smartProfile.attestation, {});
 
   if (unecryptedPrivateDataObj) {
     smartProfile.privateData = unecryptedPrivateDataObj;
   } else {
-    smartProfile.privateData = tryParseJSON(smartProfile.privateData, {});
+    // Initialize with proper ProfilePrivateData structure instead of empty object
+    // This ensures the structure is always valid for encryption
+    const parsedPrivateData = tryParseJSON(smartProfile.privateData, null);
+    smartProfile.privateData = parsedPrivateData || new ProfilePrivateData();
   }
 };
 
@@ -365,8 +360,9 @@ const handleUserConsentFlow = (
   const ignoreConsent = overRideConsentComponents.includes(prevStep);
   const stepDetails = step == 'socialConnect' && prevStep2 == 'success'
   const isIframe = isInIframe();
+  const firstCondition = (consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails;
 
-  if ((consent == "accepted" || consent == "rejected") && !ignoreConsent && stepDetails) {
+  if (firstCondition) {
     sendUserConsentEvent();
     sendProfileConnectedEvent();
   } else {
@@ -374,7 +370,15 @@ const handleUserConsentFlow = (
       cb(step);
       handleShouldProfilesRender();
     }else if(!showRoulette && isIframe) {
-      cb('consent');
+      // Only show consent page if consent hasn't been given yet
+      if (consent === 'accepted' || consent === 'rejected') {
+        // Consent already given, send events and allow closing
+        sendUserConsentEvent();
+        sendProfileConnectedEvent();
+      } else {
+        // No consent yet, show consent page
+        cb('consent');
+      }
     }else{
       handleNavigation()
     }
@@ -409,15 +413,12 @@ export {
   getDescription,
   getParentUrl,
   getParentHost,
-  isLitLogin,
   checkPreviousLoginMode,
   getBtntext,
   isBackBtnVisible,
   getPlatformImage,
   getLocalStorageValueofClient,
   handleLocalStorageOnLogout,
-  addGlobalLitData,
-  removeGlobalLitData,
   redirectUserOnLogout,
   serializeSmartProfile,
   deserializeSmartProfile,
@@ -426,4 +427,6 @@ export {
   handleUserConsentFlow,
   isInIframe,
   platformCount,
+  tryParseJSON,
+  safeParseLocalStorage,
 };

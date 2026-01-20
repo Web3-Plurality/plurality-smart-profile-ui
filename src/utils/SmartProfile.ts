@@ -1,47 +1,47 @@
 import axios from "axios";
 import { encryptData } from "../services/EncryptionDecryption/encryption"
 import { API_BASE_URL, CLIENT_ID } from "./EnvConfig";
-import { deserializeSmartProfile, getLocalStorageValueofClient } from "./Helpers"
-import { updateSmartProfile} from "../services/orbisMap/updateQuery";
-import { insertSmartProfile} from "../services/orbisMap/insertQueries";
+import { deserializeSmartProfile, getLocalStorageValueofClient, safeParseLocalStorage } from "./Helpers"
 
-export const createSmartProfileAction = async (profileTypeStreamId: string, logoutUser: () => void) =>{
+export const createSmartProfileAction = async (
+    profileTypeStreamId: string,
+    logoutUser: () => void
+): Promise<{ success: boolean; error?: string }> => {
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-            'x-profile-type-stream-id': profileTypeStreamId,
-            'x-client-app-id': clientId,
-        }
-    })
-    if (data.success) {
-        const privateDataObj = data.smartProfile.privateData
-        // data.smartProfile.privateData=''
-        const insertionResult = await insertSmartProfile(data.smartProfile, token, logoutUser)
 
-        // save smart profile in local storage along with the returned stream id
-        await deserializeSmartProfile(insertionResult, privateDataObj);
-        const {id, ...rest} = insertionResult
-        if (insertionResult) {
+    try {
+        const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile`, { smartProfile: {}}, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'x-profile-type-stream-id': profileTypeStreamId,
+                'x-client-app-id': clientId,
+            }
+        })
+        if (data.success) {
+            const privateDataObj = data.smartProfile.privateData
+            // Save smart profile in local storage with attestation UID as identifier
+            await deserializeSmartProfile(data.smartProfile, privateDataObj);
             const objData = {
-                streamId: id,
-                data: { smartProfile: rest }
+                attestationUID: data.smartProfile.onchainAttestationUID,
+                data: { smartProfile: data.smartProfile }
             }
-            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-            existingData = {
-                ...existingData,
-                smartProfileData: objData,
-            }
+            const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
+            existingData.smartProfileData = objData
             localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+            return { success: true };
         }
+        return { success: false, error: 'Profile creation failed' };
+    } catch (err: any) {
+        if (err?.response?.status === 402) {
+            return { success: false, error: 'insufficient_credits' };
+        }
+        return { success: false, error: err?.message || 'Unknown error' };
     }
 }  
 
-export const resetSmartProfileAction = async (profileTypeStreamId: string, streamId: string, logoutUser: () => void) =>{
+export const resetSmartProfileAction = async (profileTypeStreamId: string, attestationUID: string, logoutUser: () => void) =>{
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
     const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
@@ -54,24 +54,15 @@ export const resetSmartProfileAction = async (profileTypeStreamId: string, strea
     })
     if (data.success) {
         const privateDataObj = data.smartProfile.privateData
-        data.smartProfile.privateData=''
-        const updationResult = await updateSmartProfile(data.smartProfile, streamId, token, logoutUser)
-        // save smart profile in local storage along with the returned stream id
-        if (updationResult) {
-            await deserializeSmartProfile(data.smartProfile, privateDataObj);
-            const objData = {
-                streamId: updationResult?.id,
-                data: { smartProfile: data.smartProfile }
-            }
-            const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-            let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-            existingData = {
-                ...existingData,
-                smartProfileData: objData,
-            }
-            localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+        // Save smart profile in local storage with attestation UID as identifier
+        await deserializeSmartProfile(data.smartProfile, privateDataObj);
+        const objData = {
+            attestationUID: data.smartProfile.onchainAttestationUID,
+            data: { smartProfile: data.smartProfile }
         }
+        const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
+        existingData.smartProfileData = objData
+        localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
     }
 }
 
@@ -79,31 +70,49 @@ export const updateSmartProfileAction = async (profileTypeStreamId: string, smar
     const queryParams = new URLSearchParams(location.search);
     const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { signature: litSignature, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
+    const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
 
-    if (!litSignature) {
-        console.log("Lit signatures not found")
-    }
-    const privateDataObj = smartProfile.privateData
-    const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
-    smartProfile.privateData = encryptedPrivateData
-    const updationResult = await updateSmartProfile(smartProfile, streamData.smartProfileData.streamId, token, handleLogoutUser)
-    // save smart profile in local storage along with the returned stream id
-    if (updationResult) {
-        await deserializeSmartProfile(updationResult, privateDataObj);
+    // Call backend to update profile and create new attestation (with plain privateData)
+    const { data } = await axios.put(`${API_BASE_URL}/user/smart-profile`, { smartProfile: smartProfile }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'x-profile-type-stream-id': profileTypeStreamId,
+            'x-client-app-id': clientId,
+        }
+    })
+
+    // Save smart profile in local storage with attestation UID as identifier
+    if (data.success) {
+        const privateDataObj = data.smartProfile.privateData
+        await deserializeSmartProfile(data.smartProfile, privateDataObj);
         const objData = {
-            streamId: updationResult?.id,
-            data: { smartProfile: updationResult }
+            attestationUID: data.smartProfile.onchainAttestationUID,
+            data: { smartProfile: data.smartProfile }
         }
-        const existingDataString = localStorage.getItem(`streamID-${profileTypeStreamId}`)
-        let existingData = existingDataString ? JSON.parse(existingDataString) : {}
-
-        existingData = {
-            ...existingData,
-            smartProfileData: objData,
-        }
+        const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
+        existingData.smartProfileData = objData
         localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+
+        // NOW encrypt privateData and store to backend database
+        if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+            try {
+                const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
+                if (encryptedPrivateData) {
+                    await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+                        encryptedPrivateData: encryptedPrivateData
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'x-profile-type-stream-id': profileTypeStreamId,
+                        }
+                    })
+                    console.log("=== Encrypted privateData stored to backend ===")
+                }
+            } catch (encryptError) {
+                console.error("Failed to store encrypted privateData:", encryptError)
+                // Don't fail the whole operation - attestation already succeeded
+            }
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-import { generatePkpWalletInstance } from "../services/orbis/generatePkpWallet";
+import { ethers } from "ethers";
 import { DAppData } from "../types";
 import { CLIENT_ID } from "./EnvConfig";
 import { getLocalStorageValueofClient } from "./Helpers";
@@ -13,17 +13,17 @@ const getParentUrl = () => {
 }
 
 export const sendUserConsentEvent = () => {
-    const connection =  localStorage.getItem("connectSocail") ?? 'false';
+    const connection = localStorage.getItem("connectSocial") ?? 'false';
     localStorage.removeItem("connectSocial")
     window.parent.postMessage({ eventName: 'consentData', data: { consent: true, socialConnection: JSON.parse(connection) } }, getParentUrl());
 }
 
 export const sendProfileConnectedEvent = (id?: string) => {
-    const { profileTypeStreamId, litWalletSig, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+    const { profileTypeStreamId, walletAddress, token } = getLocalStorageValueofClient(`clientID-${clientId}`)
     const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`)
 
     const username = smartProfileData?.data?.smartProfile?.username || '';
-    const avatar = smartProfileData?.data?.smartProfile?.avatar || ''; 
+    const avatar = smartProfileData?.data?.smartProfile?.avatar || '';
 
     let event;
     if (id) {
@@ -31,15 +31,15 @@ export const sendProfileConnectedEvent = (id?: string) => {
             id,
             eventName: 'getLoginInfo',
             data: {
-                status: !!litWalletSig,
+                status: !!walletAddress,
                 pluralityToken: token
             }
         }
     } else {
         event = {
-            eventName: 'litConnection',
+            eventName: 'walletConnection',
             data: {
-                isConnected: !!litWalletSig,
+                isConnected: !!walletAddress,
                 token,
                 username,
                 avatar,
@@ -109,8 +109,14 @@ export const sendMessageSignedEvent = async (
     onComplete?: () => void
 ) => {
     try {
-        const pkpWallet = await generatePkpWalletInstance()
-        const signature = await pkpWallet!.signMessage(message);
+        // Use MetaMask for message signing instead of PKP wallet
+        if (!window.ethereum) {
+            throw new Error('MetaMask not installed');
+        }
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const signature = await signer.signMessage(message);
         window.parent.postMessage({ id, eventName: 'getMessageSignature', data: signature }, getParentUrl());
     }
     catch (error) {

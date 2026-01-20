@@ -7,7 +7,7 @@ export async function updateSmartProfile(
   token: string,
   handleLogout: () => void
 ) {
-  const apiUrl = `${API_BASE_URL}/orbis-map/smart-profiles/${stream_id}`
+  const apiUrl = `${API_BASE_URL}/profile-map/smart-profiles/${stream_id}`
 
   try {
     const result = await axios.put(apiUrl, { ...smartProfile }, {

@@ -1,24 +1,42 @@
-import { CLIENT_ID } from "../../utils/EnvConfig";
-import { getLocalStorageValueofClient } from "../../utils/Helpers";
-import { litDecryptData } from "./litDecryption";
+// MetaMask-based decryption (replaces Lit Protocol decryption)
+import { CLIENT_ID } from '../../utils/EnvConfig';
+import { deriveEncryptionKey, decryptAES } from './crypto';
+import { getCurrentAddress } from '../auth';
 
-export const decryptData = async (encryptedData: string) => {
-    const queryParams = new URLSearchParams(location.search);
-    const clientId = queryParams.get('client_id') || CLIENT_ID;
+/**
+ * Decrypts data using AES-256-GCM with a key derived from MetaMask signature
+ * @param encryptedData - Encrypted data (either stringified JSON or object with ciphertext and iv)
+ * @returns Decrypted and parsed data
+ */
+export const decryptData = async (
+  encryptedData: string | { ciphertext: string; iv: string }
+): Promise<any | undefined> => {
+  const queryParams = new URLSearchParams(location.search);
+  const clientId = queryParams.get('client_id') || CLIENT_ID;
 
-    const { signature: sessionSigs } = getLocalStorageValueofClient(`clientID-${clientId}`)
-    let decryptionResult;
-    if (sessionSigs) {
-        if (encryptedData) {
-            const result = await litDecryptData(sessionSigs, JSON.parse(encryptedData).ciphertext, JSON.parse(encryptedData).dataToEncryptHash);
-            if (result && typeof result === 'object') {
-                decryptionResult = JSON.parse(result.decryptedMessage);
-            } else {
-                throw new Error("Invalid result fom Lit decryption");
-            }
-        }
-    } else {
-        console.log('Lit signatures not found')
-    }
-    return decryptionResult
-}
+  // Get current wallet address
+  const address = await getCurrentAddress(clientId);
+
+  if (!address) {
+    console.error('No wallet address found for decryption');
+    return undefined;
+  }
+
+  try {
+    // Parse encrypted data if it's a string
+    const parsedData =
+      typeof encryptedData === 'string' ? JSON.parse(encryptedData) : encryptedData;
+
+    // Derive encryption key from MetaMask signature
+    const key = await deriveEncryptionKey(address);
+
+    // Decrypt the data
+    const decrypted = await decryptAES(parsedData, key);
+
+    // Parse the decrypted JSON string
+    return JSON.parse(decrypted);
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw error;
+  }
+};

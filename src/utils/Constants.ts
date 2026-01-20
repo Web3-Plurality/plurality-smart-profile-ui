@@ -356,9 +356,7 @@ export const interestsPillsColors = [
 export const overRideConsentComponents = [
     'profile',
     'profileSettings',
-    'wallet',
     'consent',
-    'contract',
     'signing',
     'profileSetup',
     'onboardingForm'

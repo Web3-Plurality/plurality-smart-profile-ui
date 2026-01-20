@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react"
-import { Input, Select, Tag } from "antd"
+import { Input, Select, Tag, message } from "antd"
 import styled from "styled-components"
 import CustomButton from "../../customButton"
 import { useStepper } from "../../../hooks/useStepper"
 import { API_BASE_URL, CLIENT_ID } from "../../../utils/EnvConfig"
-import { getLocalStorageValueofClient, isInIframe } from "../../../utils/Helpers"
+import { getLocalStorageValueofClient, isInIframe} from "../../../utils/Helpers"
 import { Tags } from "../../../types"
-import { updateSmartProfileAction } from "../../../utils/SmartProfile"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { useLogoutUser } from "../../../hooks/useLogoutUser"
+import { encryptData } from "../../../services/EncryptionDecryption/encryption"
 
 // Updated interfaces to match the new data structure
 interface TagGroup {
@@ -364,31 +364,57 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
     try {
       setLoading(true)
       const { token } = getLocalStorageValueofClient(`clientID-${clientId}`)
+
+      let smartProfile = parsedUserOrbisData?.data?.smartProfile
       const response = await axios.put(`${API_BASE_URL}/user/smart-profile`, {
         data: {
           onboardingData: answers,
-        }, smartProfile: parsedUserOrbisData?.data?.smartProfile
+        },
+        smartProfile: smartProfile
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
           'x-profile-type-stream-id': profileTypeStreamId,
           'x-client-app-id': clientId,
         },
-        validateStatus: () => true,
       })
-      console.log("Response", response)
-      if (response.status === 200) {
-        const { smartProfile } = response.data
-        await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
-        postResponse()
-      } else {
-        postResponse()
+
+      // Success handling (only reaches here on 2xx responses)
+      const { smartProfile: returnedData } = response.data
+
+      // NOW encrypt privateData and store to backend database
+      const privateDataObj = returnedData?.privateData;
+      if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+        try {
+          const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj));
+          if (encryptedPrivateData) {
+            await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+              encryptedPrivateData: encryptedPrivateData
+            }, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'x-profile-type-stream-id': profileTypeStreamId,
+              }
+            });
+            console.log("8. Encrypted privateData stored to backend");
+          }
+        } catch (encryptError) {
+          console.error("Failed to store encrypted privateData:", encryptError);
+          // Don't fail the whole operation - attestation already succeeded
+        }
       }
-    } catch (err) {
-      console.log("Some Error:", err)
-      postResponse()
-    } finally {
+      postResponse()  // Navigate to next step - let that component fetch the profile
+
+    } catch (err: any) {
+      console.log("Error:", err)
       setLoading(false)
+
+      if (err?.response?.status === 402) {
+        message.error("Insufficient credits. Please deposit ROSE to continue.");
+        return;  // Don't navigate!
+      }
+
+      message.error("Failed to save answers. Please try again.");
     }
   }
 

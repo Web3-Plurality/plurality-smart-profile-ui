@@ -7,8 +7,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { selectSPDataId } from '../../selectors/userDataSelector';
 import { setProfileDataID } from '../../Slice/userDataSlice';
 import { updateSmartProfileAction } from '../../utils/SmartProfile';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useLogoutUser } from '../../hooks/useLogoutUser';
+import { StepperContext } from '../../contexts/stepper';
 
 const ConsentFooterWrapper = styled.div`
     display: flex;
@@ -25,6 +26,8 @@ const ConsentFooter = () => {
     const dispatch = useDispatch()
     const handleLogoutUser = useLogoutUser()
     const id = useSelector(selectSPDataId)
+    const stepperContext = useContext(StepperContext)
+    const goToStep = stepperContext?.goToStep
 
     let event = ''
     if (id) {
@@ -36,28 +39,40 @@ const ConsentFooter = () => {
     }
 
     const acceptUserConsent = async () => {
-        setIsAcceptLoading(true); // Set loading state to true
-    
+        setIsAcceptLoading(true);
+
         try {
             const existingClientData = getLocalStorageValueofClient(`clientID-${clientId}`);
             const { profileTypeStreamId } = existingClientData;
-            const { smartProfileData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
+            const streamData = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
+            const { smartProfileData } = streamData;
+
+            if (!smartProfileData?.data?.smartProfile) {
+                return;
+            }
+
             const smartProfile = smartProfileData.data.smartProfile;
-            const extendedPublicData = smartProfile.extendedPublicData;
-    
+            const extendedPublicData = smartProfile.extendedPublicData || {};
+
             extendedPublicData[clientId] = {
                 ...extendedPublicData[clientId],
                 consent: 'accepted',
             };
-    
+            smartProfile.extendedPublicData = extendedPublicData;
+
             await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogoutUser);
             sendProfileConnectedEvent();
             sendUserConsentEvent();
             sendUserDataEvent(id, event, resetSPId);
+
+            // Navigate to platform connect page if there are platforms to connect
+            if (existingClientData.showRoulette && goToStep) {
+                goToStep('socialConnect');
+            }
         } catch (error) {
             console.error('Error during consent acceptance:', error);
         } finally {
-            setIsAcceptLoading(false); // Set loading state to false after the operation completes
+            setIsAcceptLoading(false);
         }
     };
     

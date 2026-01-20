@@ -1,4 +1,5 @@
 import axios from "axios";
+import { message } from "antd";
 import { API_BASE_URL, CLIENT_ID } from "./../utils/EnvConfig";
 import { getLocalStorageValueofClient, setLocalStorageValue } from "./../utils/Helpers";
 
@@ -24,11 +25,17 @@ axiosInstance.interceptors.request.use(function (config) {
     return Promise.reject(error);
 });
 
-
-axios.interceptors.response.use(function (response) {
+// Response interceptor for axiosInstance
+axiosInstance.interceptors.response.use(function (response) {
     return response
 }, function (error) {
-    if (error.response.status === 403) {
+    // Handle 402 Insufficient Credits
+    if (error.response?.status === 402) {
+        const { requiredCreditsROSE, error: errorMsg } = error.response.data || {};
+        message.error(`${errorMsg || 'Insufficient credits'}. Required: ${requiredCreditsROSE || 'unknown'} ROSE`);
+    }
+    // Handle 403 Forbidden
+    if (error.response?.status === 403) {
         const queryParams = new URLSearchParams(location.search);
         const clientId = queryParams.get('client_id') || CLIENT_ID;
 
@@ -40,8 +47,20 @@ axios.interceptors.response.use(function (response) {
         if (smartProfileData) {
             setLocalStorageValue(`streamID-${profileTypeStreamId}`, JSON.stringify({ smartProfileData }))
         }
-        return Promise.reject(error);
     }
+    return Promise.reject(error);
+});
+
+// Also add interceptor to base axios for direct axios calls (not through axiosInstance)
+axios.interceptors.response.use(function (response) {
+    return response
+}, function (error) {
+    // Handle 402 Insufficient Credits
+    if (error.response?.status === 402) {
+        const { requiredCreditsROSE, error: errorMsg } = error.response.data || {};
+        message.error(`${errorMsg || 'Insufficient credits'}. Required: ${requiredCreditsROSE || 'unknown'} ROSE`);
+    }
+    return Promise.reject(error);
 });
 
 export default axiosInstance;

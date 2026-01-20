@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { API_BASE_URL, CLIENT_ID } from '../utils/EnvConfig'
-import { RouteMapper, getLocalStorageValueofClient, setLocalStorageValue } from '../utils/Helpers'
+import { RouteMapper, getLocalStorageValueofClient, setLocalStorageValue, deserializeSmartProfile, safeParseLocalStorage } from '../utils/Helpers'
 import { setLoadingState, setProfileConnected } from '../Slice/userDataSlice'
 import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
-import { updateSmartProfileAction } from '../utils/SmartProfile'
 import { useLogoutUser } from './useLogoutUser'
+import { encryptData } from '../services/EncryptionDecryption/encryption'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')
@@ -109,25 +109,77 @@ export const useRegisterEvent = () => {
                     payload = localSmartProfile.data.smartProfile
                 }
 
-                const { data: smartProfileResponse } = await axios.post(`${API_BASE_URL}/user/smart-profile/exchange-profile`, { smartProfile: payload }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'x-profile-type-stream-id': profileTypeStreamId,
-                        'x-client-app-id': clientId,
-                    }
-                })
+                if (payload) {
+                    payload.profileTypeStreamId = profileTypeStreamId;
+                }
+
+                let smartProfileResponse;
+                try {
+                    const { data } = await axios.post(`${API_BASE_URL}/user/smart-profile/exchange-profile`, {
+                        smartProfile: payload
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'x-profile-type-stream-id': profileTypeStreamId,
+                            'x-client-app-id': clientId,
+                        }
+                    })
+                    smartProfileResponse = data;
+                } catch (exchangeError: any) {
+                   throw exchangeError; // Re-throw to be caught by outer catch
+                }
 
                 if (smartProfileResponse.success) {
                     const smartProfile = smartProfileResponse.smartProfile
                     const { profileTypeStreamId } = getLocalStorageValueofClient(`clientID-${clientId}`)
-                    await updateSmartProfileAction(profileTypeStreamId, smartProfile, handleLogout)
-                        dispatch(setProfileConnected())
+
+                    // Backend now returns plain privateData (not encrypted)
+                    // Deserialize if we have privateData
+                    const privateDataObj = smartProfile.privateData
+                    if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+                        await deserializeSmartProfile(smartProfile, privateDataObj)
+                    }
+
+                    // Save to localStorage (with plain privateData for UI use)
+                    const objData = {
+                        attestationUID: smartProfile.onchainAttestationUID,
+                        data: { smartProfile: smartProfile }
+                    }
+                    const existingData = safeParseLocalStorage(`streamID-${profileTypeStreamId}`)
+                    existingData.smartProfileData = objData
+                    localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
+
+                    // NOW encrypt privateData and store to backend database
+                    if (privateDataObj && Object.keys(privateDataObj).length > 0) {
+                        try {
+                            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
+                            if (encryptedPrivateData) {
+                                await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+                                    encryptedPrivateData: encryptedPrivateData
+                                }, {
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                        'x-profile-type-stream-id': profileTypeStreamId,
+                                    }
+                                })
+                                console.log("=== Encrypted privateData stored to backend ===")
+                            }
+                        } catch (encryptError) {
+                            console.error("Failed to store encrypted privateData:", encryptError)
+                            // Don't fail the whole operation - attestation already succeeded
+                        }
+                    }
+
+                    dispatch(setProfileConnected())
                 }
-                
+
             }
-        } catch (err) {
-            setError('Error')
-            console.log(err)
+        } catch (err: any) {
+            if (err?.response?.status === 402) {
+                setError('Insufficient credits to connect platform. Please deposit ROSE.');
+            } else {
+                setError('Failed to connect platform. Please try again.');
+            }
         } finally {
             dispatch(setLoadingState({ loadingState: false, text: "" }));
             dispatch(updateHeader())

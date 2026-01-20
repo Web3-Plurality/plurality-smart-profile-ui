@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { persistor, store } from './services/store'
 import { Provider } from 'react-redux'
-import { StytchProvider } from '@stytch/react';
 import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -11,7 +10,6 @@ import Login from './pages/Login'
 import CallBackUrl from './pages/CallBackUrl'
 import AuthStart from './pages/AuthStart'
 import PageNotFound from './pages/PageNotFound'
-import { stytch } from './services/Stytch';
 import { client, queryClient } from './services/WagmiConfig'
 
 import './globalStyles.css'
@@ -49,22 +47,20 @@ function App() {
       <PersistGate loading={null} persistor={persistor}>
         <WagmiProvider config={client}>
           <QueryClientProvider client={queryClient}>
-            <StytchProvider stytch={stytch}>
-              <StepperProvider>
-                <Router>
-                  {(!isMobileScreen && !isTabScreen) || pathname === '/dashboard' ? <Header /> : null}
-                  <EventListener />
-                  <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/auth-callback" element={<CallBackUrl />} />
-                    <Route path="/auth-start" element={<AuthStart />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/unauthorized" element={<Unauthorized />} />
-                    <Route path="*" element={<PageNotFound />} />
-                  </Routes>
-                </Router>
-              </StepperProvider>
-            </StytchProvider>
+            <StepperProvider>
+              <Router>
+                {(!isMobileScreen && !isTabScreen) || pathname === '/dashboard' ? <Header /> : null}
+                <EventListener />
+                <Routes>
+                  <Route path="/" element={<Login />} />
+                  <Route path="/auth-callback" element={<CallBackUrl />} />
+                  <Route path="/auth-start" element={<AuthStart />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="*" element={<PageNotFound />} />
+                </Routes>
+              </Router>
+            </StepperProvider>
           </QueryClientProvider>
         </WagmiProvider>
       </PersistGate>

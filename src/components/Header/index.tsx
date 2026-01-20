@@ -34,16 +34,16 @@ const Header = () => {
     const shouldUpdate = useSelector(selectShouldUpdate);
     const isHeaderVisible = showHeader(currentStep);
 
-    const { profileTypeStreamId, litWalletSig: litAccount, incentives: incentiveType } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const { profileTypeStreamId, incentives: incentiveType } = getLocalStorageValueofClient(`clientID-${clientId}`);
     const { smartProfileData: parsedUserOrbisData } = getLocalStorageValueofClient(`streamID-${profileTypeStreamId}`);
-
-    const litAddress = litAccount ? JSON.parse(litAccount).address : '';
     const name = parsedUserOrbisData?.data?.smartProfile?.username;
     const score = parsedUserOrbisData?.data?.smartProfile?.scores?.[0]?.scoreValue + 
                  parsedUserOrbisData?.data?.smartProfile?.scores?.[1]?.scoreValue;
     const ratingValue = parsedUserOrbisData?.data?.smartProfile?.connectedPlatforms?.length;
 
     const { address: metamaskAddress } = useAccount();
+    const { walletAddress: storedWalletAddress } = getLocalStorageValueofClient(`clientID-${clientId}`);
+    const displayAddress = storedWalletAddress || metamaskAddress || '';
     const route = window.location.pathname;
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
@@ -91,7 +91,7 @@ const Header = () => {
                         </div>
                         <Drawer
                             handleLogout={handleLogoutUser}
-                            address={metamaskAddress || litAddress}
+                            address={displayAddress}
                         />
                     </div>
                 </>
@@ -140,7 +140,7 @@ const Header = () => {
                 <div className='mobile-user-detail'>
                     <Drawer
                         handleLogout={handleLogoutUser}
-                        address={metamaskAddress || litAddress}
+                        address={displayAddress}
                         isSmallScreen={true}
                     />
                 </div>
