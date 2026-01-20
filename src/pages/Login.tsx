@@ -83,9 +83,7 @@ const Login = () => {
     const {
         generateMetamaskToken,
         error: metmaskLoginError,
-        setError,
-        ceramicError,
-        setCeramicError
+        setError
     } = useMetamaskToken(walletAddress)
 
     useEffect(() => {
@@ -204,15 +202,6 @@ const Login = () => {
         setMetamaskAuthError(val)
     }
 
-    // Legacy handlers - no longer used but kept for backwards compatibility
-    const handleLitConnect = () => {
-        // No longer supported - redirect to MetaMask
-        handleMetamaskConnect();
-    }
-    const handleGoogleConnect = () => {
-        // No longer supported - redirect to MetaMask
-        handleMetamaskConnect();
-    }
     const handleMetaMaskNotInstalled = () => {
         alert("MetaMask is not installed");
         const params = new URLSearchParams(window.location.search);
@@ -309,17 +298,8 @@ const Login = () => {
         switch (currentStep) {
             case 'home':
                 return <Home
-                    handleLitConnect={handleLitConnect}
                     handleMetamaskConnect={handleMetamaskConnect}
-                    handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
-                />
-            // Email/OTP login no longer supported - these cases are kept for compatibility
-            // but will just show the home screen
-            case 'litLogin':
-            case 'otp':
-                return <Home
-                    handleMetamaskConnect={handleMetamaskConnect}
                 />
             case 'verification':
                 return <EmailVerification
@@ -352,18 +332,14 @@ const Login = () => {
                 />
             default:
                 return <Home
-                    handleLitConnect={handleLitConnect}
                     handleMetamaskConnect={handleMetamaskConnect}
-                    handleGoogleConnect={handleGoogleConnect}
                     authentication={authentication}
                 />
         }
     }
 
     const handleOk = async () => {
-        if (ceramicError) {
-            setCeramicError(true)
-        } else if (metamaskAuthError) {
+        if (metamaskAuthError) {
             setMetamaskAuthError(false)
             goToStep('verification')
         } else {
@@ -375,13 +351,12 @@ const Login = () => {
     const handleCancel = async () => {
         await handleLogoutUser()
         setError(false)
-        setCeramicError(false)
     }
 
     return (
         <>
             <LogoutModal
-                isVisible={metmaskLoginError || ceramicError || metamaskAuthError}
+                isVisible={metmaskLoginError || metamaskAuthError}
                 handleOk={handleOk}
                 handleCancel={handleCancel}
             />

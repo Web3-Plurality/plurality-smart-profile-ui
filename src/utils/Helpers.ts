@@ -78,12 +78,6 @@ const getTitleText = (currentStep: string) => {
   switch (currentStep) {
     case "home":
       return "";
-    case "litLogin":
-      return "Enter Your Email";
-    case "register":
-      return "Login into Your Account";
-    case "otp":
-      return "Login into Your Account";
     case "success":
       return `Welcome to ${platformName || ""} Profile`;
     case "socialConnect":
@@ -120,10 +114,6 @@ const getDescription = (currentStep: string) => {
   );
 
   switch (currentStep) {
-    case "litLogin":
-      return "A verification code will be sent to your email";
-    case "otp":
-      return "Enter the 6 digit code sent to your email";
     case "success":
       return platformDescription || "";
     case "digitalWardrobe":
@@ -184,8 +174,7 @@ const getBtntext = (currStep: string) => {
 };
 
 const isBackBtnVisible = (currStep: string, loader: boolean) => {
-  const isIframe =
-    window.self !== window.top && currStep !== "litLogin" && currStep !== "otp";
+  const isIframe = window.self !== window.top;
 
   // Steps that should never show back button
   const alwaysHideBackButton = ["home", "success", "dashboard", "socialConnect", "profileSetup", "onboardingForm"];

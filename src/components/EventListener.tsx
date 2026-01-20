@@ -131,7 +131,7 @@ const EventListener: React.FC = () => {
                 }
             }
             else if (event.data.type === 'logoutRequest') {
-                window.parent.postMessage({ eventName: 'litConnection', data: { isConnected: false, logout: true } }, parentUrl);
+                window.parent.postMessage({ eventName: 'walletConnection', data: { isConnected: false, logout: true } }, parentUrl);
 
                 handleLocalStorageOnLogout(clientId)
 
@@ -141,17 +141,6 @@ const EventListener: React.FC = () => {
                 navigate(redirectPath, { replace: true });
                 window.location.reload()
             }
-            // else if (data.method === 'fetchNetwork') {
-            //     try {
-            //         const rpc = localStorage.getItem(`rpc`) ?? "https://chain-rpc.litprotocol.com/http"
-            //         const chain_id = localStorage.getItem(`chainId`) ?? "175177"
-            //         window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: {rpc, chain_id} }, parentUrl);
-            //     }
-            //     catch (error) {
-            //         console.error(error);
-            //         window.parent.postMessage({ id: data.id, eventName: 'fetchNetwork', data: (error as Error).toString() }, parentUrl);
-            //     }
-            // }
             else if (event.data.type === 'goToStep') {
                 const { step, action } = event.data
                 // Set iframeToProfiles to true for socialConnect and profileSettings with 'profile' action

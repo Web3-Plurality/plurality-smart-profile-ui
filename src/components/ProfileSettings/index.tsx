@@ -286,53 +286,6 @@ const ProfileSettings = () => {
     }
 
     return (
-        // <div className="settings-wrapper">
-        //     <CustomInputField
-        //         InputType='text'
-        //         name='username'
-        //         placeholderText="Username"
-        //         value={username}
-        //         handleChange={handleInputChnage}
-        //     />
-
-        //     <div className="upload-file">
-        //         <div className="profile-img">
-        //             {profilePic ? (
-        //                 <img src={profilePic} alt="Profile" />
-        //             ) : (
-        //                 <UserAvatar address={litAddress || metamaskAddress} size={100} />
-        //             )}
-        //         </div>
-        //         <label htmlFor="profilePic" className='neumorphic-label'>Choose file</label>
-        //         <CustomInputField
-        //             InputType='file'
-        //             id='profilePic'
-        //             name="profilePic"
-        //             handleChange={handleInputChnage}
-        //         />
-        //     </div>
-
-
-
-        //     <CustomInputField
-        //         InputType='textarea'
-        //         name="userBio"
-        //         placeholderText="Enter Your Bio"
-        //         value={userBio}
-        //         handleChange={handleInputChnage}
-        //     />
-
-        //     <div>
-        //         <CustomButtom
-        //             text={loading ? 'Updating Profile...' : "Update Profile"}
-        //             handleClick={handleDataSumbit}
-        //             isDisable={(!username && !profilePic && !userBio) || loading}
-        //         />
-        //     </div>
-
-
-        // </div>
-
         <ProfileSetupWrapper>
             <SectionContentWrapper>
                 <AvatarWrapper>

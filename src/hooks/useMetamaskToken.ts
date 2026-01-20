@@ -18,7 +18,6 @@ function isEthereumError(err: unknown): err is { code: number; info?: { error?: 
 
 export const useMetamaskToken = (walletAddress: string) => {
     const [error, setError] = useState(false);
-    const [ceramicError, setCeramicError] = useState(false);
 
     const dispatch = useDispatch()
 
@@ -132,10 +131,9 @@ export const useMetamaskToken = (walletAddress: string) => {
                 dispatch(setLoadingState({ loadingState: false, text: '' }))
 
                 // Notify parent window (wallet repo) that user is connected
-                // This sets localStorage 'lit' to true in the parent, enabling API functions
                 const parentUrl = getParentUrl()
                 window.parent.postMessage({
-                    eventName: 'litConnection',
+                    eventName: 'walletConnection',
                     data: { isConnected: true, token: data.token }
                 }, parentUrl)
 
@@ -153,8 +151,6 @@ export const useMetamaskToken = (walletAddress: string) => {
     return {
         generateMetamaskToken,
         error,
-        ceramicError,
-        setError,
-        setCeramicError
+        setError
     };
 };
