@@ -2,7 +2,6 @@ import axios from "axios";
 import { API_BASE_URL } from "../../utils/EnvConfig";
 import { ProfileData } from "../../types";
 import { socialConnectButtons } from "../../utils/Constants";
-import { decryptData } from "../EncryptionDecryption/decryption";
 
 // Add handleLogout as a parameter
 export async function selectProfileType(stream_id: string, handleLogout: () => void) {
@@ -52,40 +51,8 @@ export async function selectSmartProfiles(
 
     if (result.data.newUser) return null;
 
-    const profileData = result.data.data;
-
-    // Decrypt private data if encrypted data is present
-    if (profileData.encryptedPrivateData) {
-      try {
-        const decryptedPrivateData = await decryptData(
-          JSON.stringify(profileData.encryptedPrivateData)
-        );
-        if (decryptedPrivateData) {
-          // Clean up: Remove encryption metadata fields if they exist
-          const { ciphertext, dataToEncryptHash, ...cleanPrivateData } = decryptedPrivateData;
-          // Convert to plain object to avoid merging, then replace privateData with cleaned decrypted version
-          const plainProfileData = JSON.parse(JSON.stringify(profileData));
-          plainProfileData.privateData = cleanPrivateData;
-          // Remove the encrypted data from the profile object
-          delete plainProfileData.encryptedPrivateData;
-          // Return the plain object with clean decrypted data
-          return plainProfileData;
-        } else {
-          console.warn("Decryption returned null, keeping empty privateData");
-        }
-
-        // Remove the encrypted data from the profile object if decryption failed
-        delete profileData.encryptedPrivateData;
-      } catch (decryptError) {
-        console.error("Failed to decrypt private data:", decryptError);
-        console.error("Decryption error stack:", decryptError instanceof Error ? decryptError.stack : 'No stack trace');
-        // Keep the profile but without privateData if decryption fails
-      }
-    } else {
-      console.log("No encrypted private data found in response");
-    }
-
-    return profileData;
+    // Private data is now returned decrypted from backend (via Sapphire confidential contract)
+    return result.data.data;
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       handleLogout();

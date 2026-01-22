@@ -6,7 +6,6 @@ import { message } from "antd";
 import { useStepper } from "./useStepper";
 import { setSurprisedData } from "../Slice/userDataSlice";
 import { useDispatch } from "react-redux";
-import { clearEncryptionKey } from "../services/EncryptionDecryption/crypto";
 
 export const useLogoutUser = () => {
     const navigate = useNavigate()
@@ -32,8 +31,6 @@ export const useLogoutUser = () => {
     async function handleLogout(errorMessage = '', _legacyParam = false) {
         // Check if user is connected via Metamask
         if (metamaskAddress) {
-            // Clear encryption key from sessionStorage
-            clearEncryptionKey(metamaskAddress)
             await disconnectMetamask()
         }
 

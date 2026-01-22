@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux'
 import { updateHeader } from '../Slice/headerSlice'
 import { useStepper } from './useStepper'
 import { useLogoutUser } from './useLogoutUser'
-import { encryptData } from '../services/EncryptionDecryption/encryption'
 
 export const useRegisterEvent = () => {
     const [emailId, setEmailId] = useState<string>('')
@@ -149,23 +148,21 @@ export const useRegisterEvent = () => {
                     existingData.smartProfileData = objData
                     localStorage.setItem(`streamID-${profileTypeStreamId}`, JSON.stringify(existingData))
 
-                    // NOW encrypt privateData and store to backend database
+                    // Store privateData to backend (now stored in Sapphire confidential contract)
                     if (privateDataObj && Object.keys(privateDataObj).length > 0) {
                         try {
-                            const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj))
-                            if (encryptedPrivateData) {
-                                await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
-                                    encryptedPrivateData: encryptedPrivateData
-                                }, {
-                                    headers: {
-                                        Authorization: `Bearer ${token}`,
-                                        'x-profile-type-stream-id': profileTypeStreamId,
-                                    }
-                                })
-                                console.log("=== Encrypted privateData stored to backend ===")
-                            }
-                        } catch (encryptError) {
-                            console.error("Failed to store encrypted privateData:", encryptError)
+                            await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+                                privateData: privateDataObj
+                            }, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    'x-profile-type-stream-id': profileTypeStreamId,
+                                    'x-client-app-id': clientId,
+                                }
+                            })
+                            console.log("=== privateData stored to Sapphire ===")
+                        } catch (storeError) {
+                            console.error("Failed to store privateData:", storeError)
                             // Don't fail the whole operation - attestation already succeeded
                         }
                     }

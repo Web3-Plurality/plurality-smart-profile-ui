@@ -9,7 +9,6 @@ import { Tags } from "../../../types"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { useLogoutUser } from "../../../hooks/useLogoutUser"
-import { encryptData } from "../../../services/EncryptionDecryption/encryption"
 
 // Updated interfaces to match the new data structure
 interface TagGroup {
@@ -382,24 +381,22 @@ const OnboardingForm = ({ currentStep1, setCurrentStep1 }: { currentStep1: numbe
       // Success handling (only reaches here on 2xx responses)
       const { smartProfile: returnedData } = response.data
 
-      // NOW encrypt privateData and store to backend database
+      // Store privateData to backend (now stored in Sapphire confidential contract)
       const privateDataObj = returnedData?.privateData;
       if (privateDataObj && Object.keys(privateDataObj).length > 0) {
         try {
-          const encryptedPrivateData = await encryptData(JSON.stringify(privateDataObj));
-          if (encryptedPrivateData) {
-            await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
-              encryptedPrivateData: encryptedPrivateData
-            }, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'x-profile-type-stream-id': profileTypeStreamId,
-              }
-            });
-            console.log("8. Encrypted privateData stored to backend");
-          }
-        } catch (encryptError) {
-          console.error("Failed to store encrypted privateData:", encryptError);
+          await axios.post(`${API_BASE_URL}/user/smart-profile/store-private-data`, {
+            privateData: privateDataObj
+          }, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'x-profile-type-stream-id': profileTypeStreamId,
+              'x-client-app-id': clientId,
+            }
+          });
+          console.log("=== privateData stored to Sapphire ===");
+        } catch (storeError) {
+          console.error("Failed to store privateData:", storeError);
           // Don't fail the whole operation - attestation already succeeded
         }
       }
