@@ -81,6 +81,10 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
     userId: string
   ) => {
     setLoading(true);
+    // Set flag to indicate profile fetch in progress, then force Header to re-render
+    localStorage.setItem('profileFetchInProgress', 'true');
+    dispatch(updateHeader());
+
     const selectResult = await selectProfileType(profileTypeStreamId, handleLogout);
     if (!selectResult) {
       throw new Error("Failed to fetch data from selectProfileType()");
@@ -119,6 +123,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           const result = await createSmartProfileAction(profileTypeStreamId, handleLogout);
 
           if (!result.success) {
+            localStorage.setItem('profileFetchInProgress', 'false');
             setLoading(false);
             if (result.error === 'insufficient_credits') {
               message.error("Insufficient credits to create profile. Please contact app developer.");
@@ -131,6 +136,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           }
 
           dispatch(updateHeader());
+          localStorage.setItem('profileFetchInProgress', 'false');
           setLoading(false);
           goToStep("profileSetup");
       } else {
@@ -210,6 +216,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
               "onboardingData"
             ))
         ) {
+          localStorage.setItem('profileFetchInProgress', 'false');
           setLoading(false);
           goToStep("onboardingForm");
           sendUserDataEvent();
@@ -227,6 +234,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
           if (isVerifiedSmartProfileAttestaion) {
             console.log("Attestation Verified");
             dispatch(updateHeader());
+            localStorage.setItem('profileFetchInProgress', 'false');
             setLoading(false);
             // Don't call handleUserConsentFlow if we're already on the current step
             // This prevents infinite navigation loops when fetching profile on page mount
@@ -241,6 +249,7 @@ const useRefreshOrbisData = (step: string, handleShouldProfilesRender: () => voi
             );
             await resetSmartProfileAction(profileTypeStreamId, streamId, handleLogout);
             dispatch(updateHeader());
+            localStorage.setItem('profileFetchInProgress', 'false');
             setLoading(false);
             goToStep(step);
           }

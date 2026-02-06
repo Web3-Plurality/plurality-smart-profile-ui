@@ -47,6 +47,9 @@ const Header = () => {
     const route = window.location.pathname;
     const isMobile = useMediaQuery({ maxWidth: 768 });
 
+    // Check if profile fetch is in progress - hide user info during loading
+    const isProfileLoading = localStorage.getItem('profileFetchInProgress') === 'true';
+
     useEffect(() => {
         setToggle(!toggle);
     }, [shouldUpdate]);
@@ -74,26 +77,28 @@ const Header = () => {
                         <p className='link-1' onClick={() => navigate(`/?client_id=${clientId}`)}>Earn Points</p>
                         <p className='link-2'>Discover<span className='discover-coming-soon'>(Coming Soon)</span></p>
                     </div>}
-                    <div className={classNames('user-detail', { userDetailDashboard: route === '/dashboard' })}>
-                        <div className='user-info'>
-                            <span>{name || 'John Doe'}</span>
-                            {incentiveType && incentiveType === 'POINTS' && (
-                                <div className='icon-box'>
-                                    <span>{score || 0}</span>
-                                    <CustomIcon path={BadgeIcon} />
-                                </div>
-                            )}
-                            {incentiveType && incentiveType === 'STARS' && (
-                                <div>
-                                    <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
-                                </div>
-                            )}
+                    {!isProfileLoading && (
+                        <div className={classNames('user-detail', { userDetailDashboard: route === '/dashboard' })}>
+                            <div className='user-info'>
+                                <span>{name || 'John Doe'}</span>
+                                {incentiveType && incentiveType === 'POINTS' && (
+                                    <div className='icon-box'>
+                                        <span>{score || 0}</span>
+                                        <CustomIcon path={BadgeIcon} />
+                                    </div>
+                                )}
+                                {incentiveType && incentiveType === 'STARS' && (
+                                    <div>
+                                        <Rating initialValue={ratingValue} iconsCount={3} readonly={true} size={15} />
+                                    </div>
+                                )}
+                            </div>
+                            <Drawer
+                                handleLogout={handleLogoutUser}
+                                address={displayAddress}
+                            />
                         </div>
-                        <Drawer
-                            handleLogout={handleLogoutUser}
-                            address={displayAddress}
-                        />
-                    </div>
+                    )}
                 </>
             )}
 
@@ -136,7 +141,7 @@ const Header = () => {
             )}
 
             {/* Non-dashboard mobile view */}
-            {isMobile && route !== '/dashboard' && (
+            {isMobile && route !== '/dashboard' && !isProfileLoading && (
                 <div className='mobile-user-detail'>
                     <Drawer
                         handleLogout={handleLogoutUser}
